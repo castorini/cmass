@@ -1,0 +1,22 @@
+{
+  "release": "bcp-climbmix-v1",
+  "corpus": "climbmix-400b",
+  "stats": {
+    "questions": 65,
+    "required_hops": 320,
+    "redundant_hops": 80,
+    "hops": 400,
+    "question_qrel_pairs": 7270,
+    "hop_qrel_pairs": 9639,
+    "distinct_qrel_docs": 7242,
+    "evidence_excerpts": 721,
+    "distinct_displayed_docs": 662
+  },
+  "files": {
+    "questions": "questions.jsonl",
+    "question_qrels": "qrels.jsonl",
+    "hop_qrels": "qrels_hops.jsonl",
+    "trec_qrels": "qrels.trec",
+    "evidence_review": "evidence_review.md"
+  }
+}

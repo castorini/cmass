@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Explore the CMASS BrowseComp-Plus to ClimbMix dataset, hop grounding, evidence excerpts, and qrels.">
+    <meta name="theme-color" content="#f4f7f5">
+    <title>CMASS | BCP to ClimbMix</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#question-detail">Skip to evidence</a>
+
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="CMASS home">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>CMASS</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="https://github.com/castorini/cmass">Repository</a>
+        <a class="download-link" href="https://raw.githubusercontent.com/castorini/cmass/main/data/bcp/qrels.trec">Download qrels</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="release-band" aria-labelledby="release-title">
+        <div class="release-copy">
+          <p class="eyebrow">BrowseComp-Plus on ClimbMix-400B</p>
+          <h1 id="release-title">BCP -&gt; ClimbMix</h1>
+          <p>Corpus-grounded deep-research questions with complete hop coverage and verified evidence sets.</p>
+        </div>
+        <dl class="release-stats" aria-label="Release statistics">
+          <div><dt>Questions</dt><dd id="stat-questions">65</dd></div>
+          <div><dt>Grounded hops</dt><dd id="stat-hops">400</dd></div>
+          <div><dt>Qrel pairs</dt><dd id="stat-qrels">7,270</dd></div>
+          <div><dt>Evidence excerpts</dt><dd id="stat-excerpts">721</dd></div>
+        </dl>
+      </section>
+
+      <section class="explorer" aria-label="Dataset explorer">
+        <aside class="question-browser" aria-label="Questions">
+          <div class="browser-toolbar">
+            <label for="question-search">Search questions, clues, answers, or document IDs</label>
+            <div class="search-field">
+              <span aria-hidden="true"></span>
+              <input id="question-search" type="search" autocomplete="off" placeholder="Search 65 questions">
+            </div>
+            <div class="browser-meta"><strong id="match-count">65</strong><span>matches</span></div>
+          </div>
+          <ol id="question-list" class="question-list" aria-live="polite"></ol>
+        </aside>
+
+        <article id="question-detail" class="question-detail" tabindex="-1">
+          <div id="loading-state" class="loading-state" role="status">Loading release data...</div>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <span>CMASS BCP -&gt; ClimbMix v1</span>
+      <span><a href="https://github.com/castorini/cmass/blob/main/data/bcp/README.md">Data card</a> <a href="https://github.com/castorini/cmass/blob/main/pipelines/bcp/README.md">Pipeline</a></span>
+    </footer>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>

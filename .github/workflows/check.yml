@@ -1,0 +1,20 @@
+name: Validate release
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Validate data and generated assets
+        run: make check
+      - name: Check website JavaScript
+        run: node --check docs/app.js

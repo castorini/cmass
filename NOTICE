@@ -1,0 +1,13 @@
+CMASS
+Copyright 2026 University of Waterloo
+
+This distribution contains derived benchmark annotations based on
+BrowseComp-Plus, available from https://github.com/texttron/BrowseComp-Plus and
+https://huggingface.co/datasets/Tevatron/browsecomp-plus under the MIT License.
+
+It references document identifiers and short excerpts from the ClimbMix-400B
+corpus introduced by the CLIMB project:
+https://research.nvidia.com/labs/lpr/climb/
+
+The upstream datasets and corpus are not relicensed by this repository. Consult
+their source distributions for applicable license and attribution terms.
