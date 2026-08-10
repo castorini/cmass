@@ -1,5 +1,5 @@
 export const meta = {
-  name: 'stage2-hop-scrutiny-v2',
+  name: 'hop-grounding-pass2',
   description: 'Re-scrutinize each PROJECTABLE question with THREE checks: (STEP2) per-hop ClimbMix grounding, (STEP3) per-hop necessity, and NEW (STEP4) COMPREHENSIVENESS / no-missing-hop (do the necessary grounded hops JOINTLY & UNIQUELY determine the answer using only the corpus?). KEEP iff every necessary hop supported AND comprehensive. Writes runs_v2/ (canonical runs/ preserved).',
   phases: [ { title: 'Scrutinize+', detail: 'grounding + necessity + comprehensiveness; KEEP iff all-necessary-supported & comprehensive' } ],
 }

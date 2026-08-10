@@ -1,5 +1,5 @@
 export const meta = {
-  name: 'stage2-hop-scrutiny',
+  name: 'hop-grounding-pass1',
   description: 'For each PROJECTABLE question, independently scrutinize EVERY hop: (1) is it corpus-supported on ClimbMix (agentic search + query expansion), and (2) is it necessary (needed to uniquely pin the answer)? Keep only questions where all hops are supported AND all hops are necessary (no unsupported, no redundant).',
   phases: [ { title: 'Scrutinize', detail: 'per-hop support (ClimbMix) + necessity; KEEP iff all supported & all necessary' } ],
 }

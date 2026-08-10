@@ -3,11 +3,11 @@
   1. ALL HOPS GROUNDED - every hop of the original decomposition is grounded in ClimbMix (a verbatim
      document states its fact in EITHER scrutiny pass, runs/ or runs_v2/; union). No hop dropped to pass.
   2. COVERAGE - drop questions with a MISSING SUB-CLUE: a content phrase (especially a specific
-     number/count/interval) that no hop represents (from stage4 coverage-audit output, audit_coverage_result.json).
+     number/count/interval) that no hop represents (from step-4 coverage-audit output, audit_coverage_result.json).
 We do NOT additionally require each hop's evidence to match the exact wording (a stricter literal-grounding
 audit was found too aggressive).
 
-Reads : runs/*.json, runs_v2/*.json (stage3 pass1/pass2), inputs/*.json, audit_coverage_result.json (stage4)
+Reads : runs/*.json, runs_v2/*.json (step 3 pass1/pass2), inputs/*.json, audit_coverage_result.json (step 4)
 Writes: projected_questions_final.jsonl   the final set
         projected_questions_final.md        index
         coverage_rejected.md                the questions dropped for a missing sub-clue

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Stage 3 of the projection pipeline: collect per-record verdicts into one file.
 
-Reads every q_all/projections/bcp_<qid>.json (the output of stage1_project.js) and writes:
+Reads every q_all/projections/bcp_<qid>.json (the output of step1_project.js) and writes:
   - q_all/all_830_verdicts.jsonl
   - merged/verdicts.jsonl
 each row {record_id, verdict, method:"inference_allowed_1agent"}, sorted by record_id.

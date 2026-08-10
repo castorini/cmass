@@ -1,11 +1,11 @@
 export const meta = {
-  name: 'stage2-audit-coverage-v2',
+  name: 'coverage-audit',
   description: 'Coverage-only audit (sharpened): flag a question if any substantive CONTENT phrase has no hop, with special attention to SPECIFIC NUMBERS/COUNTS/INTERVALS embedded in a phrase (a count, an N-day/N-year interval, an attendance, exact times) - a hop covering the surrounding event but omitting the number does NOT cover that number. Ignore "as of <year>" timestamp qualifiers. Grounding not checked. Data read from inputs/<qid>.json.',
   phases: [ { title: 'Coverage2', detail: 'every content sub-clue incl. specific numbers has a hop' } ],
 }
 // Reads each question's {question, answer, hops} from INPUTS/<qid>.json (produced by
-// stage2_build_inputs.py). The released script embeds no question text.
-const INPUTS = "inputs";  // per-question {question, answer, hops} files from stage2_build_inputs.py
+// step2_build_inputs.py). The released script embeds no question text.
+const INPUTS = "inputs";  // per-question {question, answer, hops} files from step2_build_inputs.py
 const QIDS = ["25", "74", "156", "190", "205", "223", "234", "237", "275", "282", "333", "342", "362", "409", "436", "445", "500", "512", "569", "576", "610", "620", "638", "665", "688", "692", "724", "732", "749", "781", "788", "793", "798", "809", "830", "835", "840", "856", "899", "936", "947", "948", "968", "969", "1004", "1010", "1019", "1083", "1131", "1174", "1187", "1190", "1215", "1216", "1217", "1218", "1223", "1227", "1238", "1239", "1248", "1250", "1252"];
 const SCHEMA = { type:"object", additionalProperties:false, required:["qid","coverage_ok","keep"],
   properties:{ qid:{type:"string"}, coverage_ok:{type:"boolean"}, uncovered_phrases:{type:"array",items:{type:"string"}},

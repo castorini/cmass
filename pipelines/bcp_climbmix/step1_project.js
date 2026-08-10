@@ -1,5 +1,5 @@
 export const meta = {
-  name: 'bcp-all-project-chunk',
+  name: 'bcp-climbmix-projection',
   description: 'Resumable inference-allowed projection of a chunk of BCP records: 1 agent/record decomposes -> match-centered ClimbMix retrieval -> PROJECTABLE/PARTIAL/NOT, and WRITES its own projections/bcp_<qid>.json (so budget cut-offs lose no completed work).',
   phases: [ { title: 'Project', detail: '1 agent per record; self-contained inference-allowed projection; writes own output file' } ],
 }

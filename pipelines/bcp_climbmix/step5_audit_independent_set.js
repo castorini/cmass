@@ -1,5 +1,5 @@
 export const meta = {
-  name: 'sahel-allhop-audit',
+  name: 'independent-set-audit',
   description: 'Audit Sahel projections (65 candidates in the 326, not in our 50 final): (1) all hops present and lead question->answer; (2) each hop grounded by >=1 cited ClimbMix doc whose RETRIEVED CONTENT actually supports it (doc-id presence is not enough). KEEP iff both.',
   phases: [ { title: 'Audit', detail: 'coverage/chain + retrieval-verified grounding' } ],
 }
