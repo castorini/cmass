@@ -1,16 +1,24 @@
 # BrowseComp-plus -> ClimbMix projection pipeline
 
 End-to-end pipeline that projects the 830 BrowseComp-plus (BCP) test questions onto the ClimbMix
-corpus (`climbmix-400b`, Pyserini REST BM25) and keeps only questions whose full reasoning chain is
+corpus (`climbmix-400b`, BM25) and keeps only questions whose full reasoning chain is
 grounded in the corpus. Output: the 65-question all-hops-grounded set (54 from the BCP test split
 plus 11 independently projected questions verified by the same step 3). A manual review of every
 hop-document pair then produced the released 57-question benchmark.
 
 The `.js` steps are agentic (Claude Code Workflow scripts): one agent per question, one output file
-per question, so every step is resumable - a question whose output file exists is skipped. Retrieval
-goes through `cm.py`; set `PYSERINI_API_TOKEN` in the environment or a repo-local `.env.local`. Path
-constants at the top of each script must be pointed at your checkout; qids are passed to the `.js`
-steps as Workflow args.
+per question, so every step is resumable - a question whose output file exists is skipped.
+
+Retrieval is behind a two-command CLI you supply (the `CM` constant in each `.js` step): a thin
+client over a BM25 index of ClimbMix that prints JSON:
+
+```
+python3 cm.py search "<query>" [hits] [preview_chars]   # {results:[{rank, docid, score, preview}]}
+python3 cm.py doc <docid>                               # {docid, doc}  (full document text)
+```
+
+Path constants at the top of each script must be pointed at your checkout; qids are passed to the
+`.js` steps as Workflow args.
 
 ## Steps
 

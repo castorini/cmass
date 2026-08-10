@@ -10,4 +10,4 @@ corpus so that every question's full reasoning chain is supported by retrievable
   Hugging Face release (base64 + XOR with a keystream derived from each row's `canary`).
 
 The released dataset (queries + qrels) lives on Hugging Face; documents come from the ClimbMix corpus
-(`climbmix-400b`) served via the Pyserini REST API.
+(`climbmix-400b`).
