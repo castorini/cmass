@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Stage 4 (final) of the projection pipeline: the canonical list of projected questions.
 
-Reads every q_all/projections/bcp_<qid>.json (project_chunk.js output), keeps verdict==PROJECTABLE,
+Reads every q_all/projections/bcp_<qid>.json (stage1_project.js output), keeps verdict==PROJECTABLE,
 and writes:
   merged/projected_questions.jsonl : one row/question
     {record_id, question, answer, n_hops, hops:[{clue, corpus_evidence:[{doc_id, snippet}]}], support_doc_ids}

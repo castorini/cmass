@@ -3,11 +3,11 @@
   1. ALL HOPS GROUNDED - every hop of the original decomposition is grounded in ClimbMix (a verbatim
      document states its fact in EITHER scrutiny pass, runs/ or runs_v2/; union). No hop dropped to pass.
   2. COVERAGE - drop questions with a MISSING SUB-CLUE: a content phrase (especially a specific
-     number/count/interval) that no hop represents (from audit_coverage_result.json).
+     number/count/interval) that no hop represents (from stage4 coverage-audit output, audit_coverage_result.json).
 We do NOT additionally require each hop's evidence to match the exact wording (a stricter literal-grounding
 audit was found too aggressive).
 
-Reads : runs/*.json, runs_v2/*.json, inputs/*.json, audit_coverage_result.json, piika_correct.json
+Reads : runs/*.json, runs_v2/*.json (stage3 pass1/pass2), inputs/*.json, audit_coverage_result.json (stage4)
 Writes: projected_questions_final.jsonl   the final set
         projected_questions_final.md        index
         coverage_rejected.md                the questions dropped for a missing sub-clue
@@ -71,8 +71,3 @@ for q in dropped:
     rj.append("")
 open(f"{BASE}/coverage_rejected.md", "w").write("\n".join(rj) + "\n")
 
-cmap = load(f"{BASE}/piika_correct.json")
-ids = [r["record_id"] for r in kept if r["record_id"] in cmap]
-c = sum(1 for q in ids if cmap[q])
-print(f"dropped(missing sub-clue)={len(dropped)} {dropped}  final KEEP={len(kept)}")
-print(f"piika own-retrieval on the {len(kept)}: {c}/{len(ids)} = {100*c/len(ids):.1f}%")
