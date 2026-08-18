@@ -1,0 +1,269 @@
+{
+  "corpus_dir": "/store/collections/climbmix-400b-shuffle-official",
+  "shards": 6543,
+  "total_documents": 553240576,
+  "distinct_lengths": 209223,
+  "distinct_sha256": 542305160,
+  "duplicate_groups_confirmed": 5910028,
+  "duplicate_groups_failed_verification": 0,
+  "documents_in_duplicate_groups": 16845444,
+  "redundant_documents": 10935416,
+  "redundant_document_rate": 0.019766113467425787,
+  "redundant_characters": 20410641672,
+  "largest_groups": [
+    {
+      "count": 6377,
+      "length": 90,
+      "sha256": "09d28596d5be68aa2767fc4612a6c837ced55b8b4a9815d37f019c3a432bc23d",
+      "doc_ids_sample": [
+        "shard_00001_61001",
+        "shard_00003_48587",
+        "shard_00004_34496",
+        "shard_00006_08498",
+        "shard_00006_30153"
+      ]
+    },
+    {
+      "count": 4175,
+      "length": 215,
+      "sha256": "6127ef174f34b265c6ac860371332656edf77b460659a800a087645b48987b05",
+      "doc_ids_sample": [
+        "shard_00000_47921",
+        "shard_00000_56977",
+        "shard_00006_67925",
+        "shard_00010_76044",
+        "shard_00011_16314"
+      ]
+    },
+    {
+      "count": 4079,
+      "length": 38,
+      "sha256": "1d5d607e432c7d5109a2fc0e65714f32e00cf3470706729b7fbe2c1d9fcb8475",
+      "doc_ids_sample": [
+        "shard_00000_07066",
+        "shard_00000_70224",
+        "shard_00001_35166",
+        "shard_00001_42900",
+        "shard_00002_56424"
+      ]
+    },
+    {
+      "count": 3424,
+      "length": 4,
+      "sha256": "ec05d70c6f14f62ae7cdd7c32bd725fd9de394450416df0209965cc1ca314d83",
+      "doc_ids_sample": [
+        "shard_00002_34622",
+        "shard_00007_02168",
+        "shard_00007_32216",
+        "shard_00009_69155",
+        "shard_00009_77905"
+      ]
+    },
+    {
+      "count": 2840,
+      "length": 5,
+      "sha256": "74284d9dcbcc09928ca5d7d6187270a62ac1b58ccdc4a44b81e47257ffa53b9e",
+      "doc_ids_sample": [
+        "shard_00000_66664",
+        "shard_00003_13721",
+        "shard_00004_58054",
+        "shard_00007_71830",
+        "shard_00009_66184"
+      ]
+    },
+    {
+      "count": 2691,
+      "length": 18,
+      "sha256": "eee97688aa482a9391509b43b5f1a9a76385e030a401c6621874ed15913a11e7",
+      "doc_ids_sample": [
+        "shard_00000_79989",
+        "shard_00001_47283",
+        "shard_00002_48118",
+        "shard_00007_49204",
+        "shard_00008_50743"
+      ]
+    },
+    {
+      "count": 2151,
+      "length": 25,
+      "sha256": "694f3494a67db84460fc0e4f582402e2a099870651d976d5d2803b62966c7523",
+      "doc_ids_sample": [
+        "shard_00003_14905",
+        "shard_00003_15252",
+        "shard_00004_00524",
+        "shard_00009_43460",
+        "shard_00010_83007"
+      ]
+    },
+    {
+      "count": 1968,
+      "length": 17,
+      "sha256": "4829a753f741632ebe9b1c5694bd6efe20941f1447c0f04f01aeddb9368fac26",
+      "doc_ids_sample": [
+        "shard_00002_52312",
+        "shard_00003_72809",
+        "shard_00005_34699",
+        "shard_00007_28509",
+        "shard_00007_73875"
+      ]
+    },
+    {
+      "count": 1758,
+      "length": 16,
+      "sha256": "61aa2a5d804b91fa5ffa9e2de3ef1d93663a1a9938fc82b0caf2781bf718e404",
+      "doc_ids_sample": [
+        "shard_00002_48803",
+        "shard_00008_01672",
+        "shard_00008_06859",
+        "shard_00013_48595",
+        "shard_00015_84607"
+      ]
+    },
+    {
+      "count": 1624,
+      "length": 89,
+      "sha256": "d931c766ea6e08d0b07261a4182a40a0291008fd42270f2ffb6eabacaf93edb0",
+      "doc_ids_sample": [
+        "shard_00002_76321",
+        "shard_00004_30588",
+        "shard_00016_15386",
+        "shard_00026_41903",
+        "shard_00030_08641"
+      ]
+    },
+    {
+      "count": 1595,
+      "length": 12,
+      "sha256": "0957cca303b09edb074ffbe27cf80659079ebdb4e5438e0ddeac9dd7dac238e7",
+      "doc_ids_sample": [
+        "shard_00001_12894",
+        "shard_00005_67827",
+        "shard_00006_16496",
+        "shard_00015_17443",
+        "shard_00016_60400"
+      ]
+    },
+    {
+      "count": 1564,
+      "length": 6,
+      "sha256": "5f40adcebbde4df07cbe0c8c995d6a8a2b538edb838313103acedd7ac6e68b32",
+      "doc_ids_sample": [
+        "shard_00001_01958",
+        "shard_00004_05884",
+        "shard_00004_39802",
+        "shard_00004_51566",
+        "shard_00006_05463"
+      ]
+    },
+    {
+      "count": 1536,
+      "length": 10,
+      "sha256": "ee275d64dafcd283c25b00a66fb771834a2c2bfb1a7b472b67cf59fd6936254f",
+      "doc_ids_sample": [
+        "shard_00001_01055",
+        "shard_00005_06853",
+        "shard_00005_33584",
+        "shard_00005_64345",
+        "shard_00005_66210"
+      ]
+    },
+    {
+      "count": 1473,
+      "length": 13,
+      "sha256": "77abb08431bb3d2a3e202fa0671fecd6f1863197d4de0bec0f32c10e667ae586",
+      "doc_ids_sample": [
+        "shard_00005_44588",
+        "shard_00005_83656",
+        "shard_00010_25773",
+        "shard_00013_68439",
+        "shard_00022_53554"
+      ]
+    },
+    {
+      "count": 1461,
+      "length": 5,
+      "sha256": "019fe57b1bedaecc368ad249381721736eb245a83e930f85f5310e8e5ae09244",
+      "doc_ids_sample": [
+        "shard_00000_77901",
+        "shard_00006_18555",
+        "shard_00009_00374",
+        "shard_00009_43367",
+        "shard_00010_36948"
+      ]
+    },
+    {
+      "count": 1315,
+      "length": 227,
+      "sha256": "805880466d57916c8dc2bc00261548b6a70a6b632429ab9c500dc3231dd878a3",
+      "doc_ids_sample": [
+        "shard_00007_08710",
+        "shard_00011_21036",
+        "shard_00019_46685",
+        "shard_00021_55999",
+        "shard_00028_37652"
+      ]
+    },
+    {
+      "count": 1295,
+      "length": 5,
+      "sha256": "1f10711a285fd3cc3ade7cceccc0a5c1a9e96baad965e8e30dd4200646cac47c",
+      "doc_ids_sample": [
+        "shard_00002_81835",
+        "shard_00003_74402",
+        "shard_00010_22424",
+        "shard_00015_66090",
+        "shard_00021_34340"
+      ]
+    },
+    {
+      "count": 1185,
+      "length": 100,
+      "sha256": "d1de94da360433fe14c9db0239f91959556f6e51993f0dec608737ff5de8a360",
+      "doc_ids_sample": [
+        "shard_00000_17531",
+        "shard_00011_32295",
+        "shard_00018_68306",
+        "shard_00021_34161",
+        "shard_00024_49689"
+      ]
+    },
+    {
+      "count": 1156,
+      "length": 31,
+      "sha256": "90ffec908f4ffe9e912674cfefaa1723f3ce361cadbbbf5e2b3b0f746d540cf5",
+      "doc_ids_sample": [
+        "shard_00002_33943",
+        "shard_00016_53694",
+        "shard_00017_39453",
+        "shard_00018_11729",
+        "shard_00027_22490"
+      ]
+    },
+    {
+      "count": 1146,
+      "length": 4,
+      "sha256": "23bcd2d83d4c0f270640ec65cbeb61a1784856255c3c98dd25ec340453458348",
+      "doc_ids_sample": [
+        "shard_00007_43894",
+        "shard_00017_32762",
+        "shard_00032_16098",
+        "shard_00040_31154",
+        "shard_00044_21698"
+      ]
+    }
+  ],
+  "artifact_bytes": {
+    "length_to_doc_ids.json": 11067420629,
+    "hash_to_doc_ids.jsonl": 65295449002,
+    "duplicate_groups.jsonl": 1008231855,
+    "verification_failures.jsonl": 0
+  },
+  "checks": {
+    "length_json_ids_eq_total": true,
+    "hash_jsonl_ids_eq_total": true,
+    "hash_jsonl_lines_eq_distinct_sha256": true,
+    "verified_groups_eq_stage2b_dup_groups": true,
+    "verified_docs_eq_stage2b_dup_docs": true,
+    "no_verification_failures": true
+  }
+}

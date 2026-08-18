@@ -1,0 +1,90 @@
+{
+  "corpus_documents": 553240576,
+  "records_in_file": 219066180,
+  "note": "tiers are mutually exclusive by strongest relationship; J>=0.5 is not available -- the record floor is 0.7 because LSH candidate recall at 0.5 is only 43.6% under 73x7 banding",
+  "pie": [
+    {
+      "label": "no duplicates",
+      "documents": 334174396,
+      "share": 0.60403
+    },
+    {
+      "label": "exact",
+      "documents": 16845444,
+      "share": 0.03045
+    },
+    {
+      "label": "near_0.9",
+      "documents": 88671392,
+      "share": 0.16028
+    },
+    {
+      "label": "near_0.8",
+      "documents": 81912233,
+      "share": 0.14806
+    },
+    {
+      "label": "near_0.7",
+      "documents": 31637111,
+      "share": 0.05719
+    }
+  ],
+  "counts_per_category": {
+    "exact": {
+      "documents": 16845444,
+      "total_duplicates": 249577618,
+      "mean_duplicates": 14.816,
+      "distribution": {
+        "1-1": 8441906,
+        "2-2": 2596218,
+        "3-4": 2049711,
+        "5-9": 1839289,
+        "10-24": 1301486,
+        "25-99": 447991,
+        "100+": 168843
+      }
+    },
+    "near_0.9": {
+      "documents": 88671392,
+      "total_duplicates": 360127174,
+      "mean_duplicates": 4.061,
+      "distribution": {
+        "1-1": 52258360,
+        "2-2": 13647633,
+        "3-4": 10439996,
+        "5-9": 5495940,
+        "10-24": 3886061,
+        "25-99": 2790359,
+        "100+": 153043
+      }
+    },
+    "near_0.8": {
+      "documents": 81912233,
+      "total_duplicates": 180167204,
+      "mean_duplicates": 2.2,
+      "distribution": {
+        "1-1": 61506995,
+        "2-2": 9208355,
+        "3-4": 6091912,
+        "5-9": 2902158,
+        "10-24": 1572734,
+        "25-99": 597119,
+        "100+": 32960
+      }
+    },
+    "near_0.7": {
+      "documents": 31637111,
+      "total_duplicates": 55183985,
+      "mean_duplicates": 1.744,
+      "distribution": {
+        "1-1": 26820007,
+        "2-2": 3003955,
+        "3-4": 1129165,
+        "5-9": 451891,
+        "10-24": 178964,
+        "25-99": 41730,
+        "100+": 11399
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "tokenizer": "Qwen/Qwen3-Embedding-0.6B",
+  "add_special_tokens": false,
+  "shards": 6543,
+  "documents": 553240576,
+  "tokens": 349956306287
+}

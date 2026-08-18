@@ -1,0 +1,6 @@
+{
+  "tokenizer": "meta-llama/Llama-2 (via NousResearch mirror)",
+  "add_special_tokens": false,
+  "shards": 6543,
+  "tokens_counted": 410648354303
+}

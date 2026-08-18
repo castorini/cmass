@@ -1,0 +1,21 @@
+{
+  "documents_scattered": 0,
+  "documents_in_single_linkage_components": 252488302,
+  "oversized_components": 1,
+  "max_component": 40000,
+  "thresholds": [
+    0.7,
+    0.8,
+    0.9
+  ],
+  "clusters": {
+    "0.7": 85480490,
+    "0.8": 74447252,
+    "0.9": 40540126
+  },
+  "documents_in_clusters": {
+    "0.7": 200192665,
+    "0.8": 167581829,
+    "0.9": 86933136
+  }
+}
