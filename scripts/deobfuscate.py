@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """De-obfuscate the CMASS BrowseComp-plus -> ClimbMix release.
 
-Obfuscated fields (``question``, ``answer`` in the queries config; ``doc_id`` in the qrels config)
+Obfuscated fields (``id``, ``question``, ``answer`` in the queries config; ``query_id``, ``doc_id`` in the qrels config)
 are base64( plaintext XOR keystream ), where the keystream is the SHA-256 digest of the row's
 ``canary`` string repeated: key = sha256(canary.encode()).digest(); pt[i] = ct[i] ^ key[i % 32].
 This is the same scheme used by BrowseComp-style releases; it exists to keep the plain text out of
@@ -24,7 +24,7 @@ import hashlib
 import json
 import sys
 
-OBFUSCATED_FIELDS = ("question", "answer", "doc_id")
+OBFUSCATED_FIELDS = ("id", "question", "answer", "query_id", "doc_id")
 
 
 def decode_field(value: str, canary: str) -> str:
