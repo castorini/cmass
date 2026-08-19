@@ -29,9 +29,11 @@ import matplotlib.pyplot as plt
 
 import config
 from figures.palette import (C_80, C_90, C_BAR, C_EXACT, C_MEDIAN, C_NONE, C_P75,
-                             C_P90, C_70, GRID, INK, INK_2, INK_3, LEN_FIGSIZE,
-                             LEN_MARGINS, PIE_FIGSIZE, PIE_FONT, PIE_LABEL_X, PIE_R,
-                             PIE_XLIM, PIE_YLIM, RCPARAMS, TY_BANDS)
+                             C_P90, C_70, GRID, INK, INK_2, INK_3, LABEL_WEIGHT,
+                             LEN_ANNOT, LEN_FIGSIZE, LEN_LABEL, LEN_MARGINS, LEN_TICK,
+                             PIE_FIGSIZE, PIE_FONT, PIE_LABEL_X, PIE_R, PIE_XLIM,
+                             PIE_YLIM, QUART_ANNOT, QUART_LEGEND, QUART_TICK,
+                             RCPARAMS, TY_BANDS)
 
 matplotlib.rcParams.update(RCPARAMS)
 
@@ -145,7 +147,7 @@ def fig_quartiles(out_dir, fig_dir):
     rows = [(J70, "near_0.7"), (J80, "near_0.8"), (J90, "near_0.9"),
             ("Exact duplicate", "exact")]
     cols = [C_70, C_80, C_90, C_EXACT]
-    ANN = dict(fontsize=5.4, color=INK_3)
+    ANN = dict(fontsize=QUART_ANNOT, color=INK_3)
     DY, RULE = 0.02, 0.20
     BREAK_X, TICK_X, XHI = 12.4, 14.2, 17.8
     MINIMUM = 1
@@ -169,16 +171,17 @@ def fig_quartiles(out_dir, fig_dir):
         ax.plot([TICK_X, TICK_X], [yi - 0.13, yi + 0.13], color=INK_3, linewidth=0.9,
                 zorder=4)
         ax.text(med, yi - RULE - DY, f"{med}", ha="center", va="top",
-                fontsize=5.4, color=C_MEDIAN)
+                fontsize=QUART_ANNOT, color=C_MEDIAN)
         ax.text(p75, yi + RULE + DY, f"{p75}", ha="center", va="bottom",
-                fontsize=5.4, color=C_P75)
+                fontsize=QUART_ANNOT, color=C_P75)
         ax.text(hi, yi + RULE + DY, f"{hi}", ha="center", va="bottom",
-                fontsize=5.4, color=C_P90)
+                fontsize=QUART_ANNOT, color=C_P90)
         ax.text(TICK_X + 0.35, yi, f"{d['max']:,}", ha="left", va="center", **ANN)
 
     ax.set_yticks(ys)
-    ax.set_yticklabels([r[0] for r in rows], fontsize=8)
-    ax.set_xlabel("Duplicates per document")
+    ax.set_yticklabels([r[0] for r in rows], fontsize=QUART_TICK)
+    ax.set_xlabel("Duplicates per document", fontsize=QUART_TICK,
+                  fontweight=LABEL_WEIGHT)
     ax.set_xlim(0, XHI)
     ax.set_xticks([0, 5, 10])
     ax.set_ylim(-0.62, len(rows) - 0.38)
@@ -191,7 +194,7 @@ def fig_quartiles(out_dir, fig_dir):
                for cc, nm in ((C_MEDIAN, "median"), (C_P75, "p75"), (C_P90, "p90"))]
     handles.append(plt.Line2D([0], [0], color=INK_3, linewidth=0.9, label="max"))
     ax.legend(handles=handles, loc="center left", bbox_to_anchor=(1.005, 0.5), ncol=1,
-              frameon=False, fontsize=5.8, handlelength=1.4, labelspacing=0.75,
+              frameon=False, fontsize=QUART_LEGEND, handlelength=1.4, labelspacing=0.75,
               handletextpad=0.4, borderaxespad=0.0)
     fig.subplots_adjust(left=0.305, right=0.795, top=0.955, bottom=0.235)
     save(fig, fig_dir, "fig_quartiles_duplicates")
@@ -200,7 +203,9 @@ def fig_quartiles(out_dir, fig_dir):
 # ------------------------------------------------------------------ length
 
 def _len_axes(ax):
-    ax.set_ylabel("Documents (millions)")
+    ax.set_ylabel("Documents (millions)", fontsize=LEN_LABEL,
+                  fontweight=LABEL_WEIGHT)
+    ax.tick_params(axis="both", labelsize=LEN_TICK)
     ax.spines[["top", "right"]].set_visible(False)
     ax.yaxis.grid(True, color=GRID, linewidth=0.6, zorder=0)
     ax.set_axisbelow(True)
@@ -223,8 +228,9 @@ def fig_length_a(out_dir, fig_dir, tokenizer):
            color=C_BAR, linewidth=0, zorder=3)
     ax.axvline(med, color=INK_2, linewidth=0.9, linestyle=(0, (4, 2)), zorder=4)
     ax.annotate(f"median {med:.0f}", xy=(med, ax.get_ylim()[1] * 0.94),
-                xytext=(5, 0), textcoords="offset points", fontsize=7.5, color=INK_2)
-    ax.set_xlabel("Tokens")
+                xytext=(5, 0), textcoords="offset points", fontsize=LEN_ANNOT,
+                color=INK_2)
+    ax.set_xlabel("Tokens", fontsize=LEN_LABEL, fontweight=LABEL_WEIGHT)
     ax.set_xlim(0, h["hi"])
     step = 300 if h["hi"] > 1000 else 200
     ax.set_xticks(list(range(0, h["hi"] + 1, step)))
@@ -251,14 +257,15 @@ def fig_length_b(out_dir, fig_dir, tokenizer):
     fig, ax = plt.subplots(figsize=LEN_FIGSIZE)
     ax.bar(xs, vals, width=0.82, color=C_BAR, linewidth=0, zorder=3)
     ax.set_xticks(xs)
-    ax.set_xticklabels(lab, fontsize=7, rotation=45, ha="right")
-    ax.set_xlabel("Tokens (bucket lower bound)")
+    ax.set_xticklabels(lab, fontsize=LEN_TICK, rotation=45, ha="right")
+    ax.set_xlabel("Tokens (bucket lower bound)", fontsize=LEN_LABEL,
+                  fontweight=LABEL_WEIGHT)
     _len_axes(ax)
     top = max(vals)
     for x, v in zip(xs, vals):
         if v > top * 0.25:
             ax.text(x, v + top * 0.02, f"{v:.0f}", ha="center", va="bottom",
-                    fontsize=6.8, color=INK_2)
+                    fontsize=LEN_ANNOT, color=INK_2)
     fig.subplots_adjust(**LEN_MARGINS)
     save(fig, fig_dir, "fig_length_b_buckets")
     for x, lo in zip(b, lab):
