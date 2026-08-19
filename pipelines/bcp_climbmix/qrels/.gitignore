@@ -1,0 +1,11 @@
+# Derived data, never released: the qrels, the per-hop judgments, the reviewer
+# workbook and the cached document text.
+work/
+*.jsonl
+*.csv
+*.xlsm
+__pycache__/
+
+# Figures follow the corpus_analysis convention: the PNG is committed, the PDF
+# beside it is a build product.
+*.pdf
