@@ -18,7 +18,7 @@ ClimbMix, then requires every reasoning hop to be grounded. An independent agent
 verify the surviving questions before the supporting documents are pooled, filtered, and expanded
 over duplicates to form the final qrels.
 
-![Projection pipeline from the BrowseComp-PlusCM paper](assets/projection-pipeline.png)
+<img width="668" height="784" alt="Screenshot 2026-08-19 at 4 05 47 PM" src="https://github.com/user-attachments/assets/eeea1149-b197-41f8-8a83-22435b6727ee" />
 
 Of the 830 source questions, 326 are answerable from ClimbMix and 65 pass automatic all-hop
 verification. PIIKA answers all 65 correctly when given their supporting documents. Human review
