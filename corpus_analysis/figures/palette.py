@@ -64,3 +64,15 @@ LEN_FIGSIZE = (3.5, 2.6)
 LEN_MARGINS = dict(left=0.165, right=0.955, top=0.965, bottom=0.235)
 
 QUART_FIGSIZE = PIE_FIGSIZE             # pairs with the composition pie
+
+# Font sizes are named rather than inlined so paired figures cannot drift apart: the
+# quartile rows match the pie's label size, and both length panels take identical sizes for
+# equivalent elements (they previously used 7 / 6.8 / 7.5 for the same roles).
+QUART_TICK = PIE_FONT                   # row labels, matching the pie
+QUART_ANNOT = 6.6                       # percentile values and the maximum
+QUART_LEGEND = 7.0
+
+LEN_LABEL = 9.5                         # axis labels, drawn bold
+LEN_TICK = 8.5                          # tick labels on both axes
+LEN_ANNOT = 8.0                         # in-plot annotations and bar values
+LABEL_WEIGHT = "bold"
