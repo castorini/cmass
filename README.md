@@ -55,9 +55,10 @@ consume the release.
 
 ## Projection Pipeline
 
-The complete paper pipeline is shown below. **Stage 1: Projection** contains two agentic steps:
-**(1) Hop/Clue decomposition** and **(2) Grounding**. These are followed by two filtering gates,
-**Answerability check** and **All-hops verification**. **Stage 2: Independent agent validation with
+The complete paper pipeline is shown below. **Stage 1: Projection** contains four operations, in
+figure order: **Hop/Clue decomposition**, **Grounding**, **Answerability check**, and **All-hops
+verification**. The first two are agent-driven; the latter two retain only corpus-answerable
+questions whose full reasoning chains are grounded. **Stage 2: Independent agent validation with
 PIIKA**, **Stage 3: Human verification**, and **Stage 4: Qrels construction** complete the pipeline.
 
 <img width="668" height="784" alt="Projecting BrowseComp-Plus onto ClimbMix pipeline" src="https://github.com/user-attachments/assets/eeea1149-b197-41f8-8a83-22435b6727ee" />
@@ -87,10 +88,12 @@ only about five points.
 
 ## Repository
 
-- [`pipelines/bcp_climbmix/`](pipelines/bcp_climbmix/) implements **Stage 1 only** for the
-  BrowseComp-Plus-to-ClimbMix projection: Step 1 **Hop/Clue decomposition**, Step 2 **Grounding**,
-  and the **Answerability check** and **All-hops verification** filtering gates. Its automatic output
-  contains 65 fully grounded questions; later paper stages produce the human-verified release of 57.
+- [`pipelines/bcp_climbmix/`](pipelines/bcp_climbmix/) contains the BrowseComp-Plus-to-ClimbMix
+  implementation. Its top-level scripts implement **Stage 1: Projection**: **Hop/Clue
+  decomposition**, **Grounding**, **Answerability check**, and **All-hops verification**. The
+  [`qrels/`](pipelines/bcp_climbmix/qrels/) subdirectory implements **Stage 4: Qrels construction**.
+  Stage 1 produces 65 fully grounded questions; subsequent validation and human review yield the
+  released set of 57.
 - [`corpus_analysis/`](corpus_analysis/) measures the ClimbMix corpus: token-length distribution,
   exact and near-duplicate detection, and how much of the corpus survives deduplication. Its
   per-document duplicate records are released as the `corpus_duplicates` config of the Hugging Face

@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Final benchmark build (deterministic).
+"""Build the Stage 1 All-hops verification output (deterministic).
 
-Reads the per-question outputs of step 3 (runs/<qid>.json) and keeps a question iff both gates pass:
+Reads the per-question verification outputs (runs/<qid>.json) and keeps a question iff both checks
+pass:
   1. ALL HOPS GROUNDED - every hop of the original decomposition has a ClimbMix document whose full
      text states its fact. No hop is dropped to let a question pass.
   2. COVERAGE - every information-bearing content clue of the question is represented by a hop.
 
-Independently projected candidates verified by the same step-3 script land in the same runs/
-directory and are included automatically.
+Independently projected candidates verified by the same All-hops verification workflow land in the
+same runs/ directory and are included automatically.
 
-Reads : runs/*.json (step 3), inputs/*.json (step3_build_inputs.py)
+Reads : runs/*.json, inputs/*.json (prepared by stage1_all_hops_verification_build_inputs.py)
 Writes: projected_questions_final.jsonl   the final set
         projected_questions_final.md      index
 """

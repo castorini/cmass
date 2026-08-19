@@ -1,12 +1,13 @@
 export const meta = {
-  name: 'verify-all-hops',
-  description: 'All-hops verification, one agent per question, two gates in one pass: (a) GROUNDING - every hop is stated by the full text of a ClimbMix document, verified by retrieval, verbatim snippet kept; (b) COVERAGE - every information-bearing content clue of the question (including numbers, counts, and intervals embedded in a phrase) is represented by a hop. Also marks redundant hops (kept, never dropped). keep = all hops grounded AND coverage ok. One output file per question; resumable.',
-  phases: [ { title: 'Verify', detail: 'per-hop full-doc grounding + question coverage; keep iff both' } ],
+  name: 'stage1-all-hops-verification',
+  description: 'All-hops verification, one agent per question, two checks in one pass: (a) GROUNDING - every hop is stated by the full text of a ClimbMix document, verified by retrieval, verbatim snippet kept; (b) COVERAGE - every information-bearing content clue of the question (including numbers, counts, and intervals embedded in a phrase) is represented by a hop. Also marks redundant hops (kept, never dropped). keep = all hops grounded AND coverage ok. One output file per question; resumable.',
+  phases: [ { title: 'All-hops verification', detail: 'per-hop full-doc grounding + question coverage; keep iff both' } ],
 }
 
 // qids come from Workflow args (array or JSON string). Inputs are per-question
-// {qid, question, answer, hops:[clue strings]} files produced by step3_build_inputs.py -
-// from this pipeline's step 1 output or from any independent projection in the same schema.
+// {qid, question, answer, hops:[clue strings]} files produced by
+// stage1_all_hops_verification_build_inputs.py, from this pipeline's projection output or from any
+// independent projection in the same schema.
 const _A = (typeof args === "string" ? JSON.parse(args) : args);
 const QIDS = _A && _A.length ? _A : [];
 const ROOT = ".";                      // point at your working directory
@@ -28,13 +29,13 @@ const SCHEMA = { type:"object", additionalProperties:false,
 
 function prompt(q){ return [
 "You VERIFY one BrowseComp-plus question for a strict corpus-grounded benchmark. qid="+q+". Tools: Read, Bash, Write.",
-"A question QUALIFIES (keep=true) iff BOTH gates pass: (a) EVERY hop is grounded on ClimbMix, and (b) every information-bearing content clue of the question is represented by a hop. Hops are NEVER dropped to make a question pass.",
+"A question QUALIFIES (keep=true) iff BOTH checks pass: (a) EVERY hop is grounded on ClimbMix, and (b) every information-bearing content clue of the question is represented by a hop. Hops are NEVER dropped to make a question pass.",
 "",
-"STEP 0 - If "+OUT(q)+" already exists (Bash: test -f), READ it and return its exact JSON as StructuredOutput; do NOT redo the work.",
+"ACTION 0 - If "+OUT(q)+" already exists (Bash: test -f), READ it and return its exact JSON as StructuredOutput; do NOT redo the work.",
 "",
-"STEP 1 - Read "+INP(q)+" : question, answer, and `hops` (the full decomposition into atomic clues).",
+"ACTION 1 - Read "+INP(q)+" : question, answer, and `hops` (the full decomposition into atomic clues).",
 "",
-"STEP 2 - GROUNDING for EACH hop (the answer may NOT be assumed; ground the hop's own fact):",
+"ACTION 2 - GROUNDING for EACH hop (the answer may NOT be assumed; ground the hop's own fact):",
 "  python3 "+CM+" search \"<query naming the hop's entities + fact>\" [hits=30..200] [preview=600]",
 "  python3 "+CM+" doc <docid>",
 "  Issue several expanded queries (synonyms, aliases, paraphrases); escalate hits; read promising documents IN FULL.",
@@ -42,13 +43,13 @@ function prompt(q){ return [
 "  Temporal qualifiers: an exact 'as of <year>' is non-disqualifying when the entities and relations are grounded; only explicit in-text dates count as date evidence.",
 "  Also set redundant = true when the hop's fact is already implied by the other hops (recorded for analysis; redundant hops still require grounding and are never removed).",
 "",
-"STEP 3 - COVERAGE of the QUESTION (judge the hop list against the question text):",
+"ACTION 3 - COVERAGE of the QUESTION (judge the hop list against the question text):",
 "  Enumerate every information-bearing CONTENT phrase in the question: named entities, relations, specific events, superlatives, and quantities.",
 "  CRITICAL - SPECIFIC NUMBERS: when the question states a specific number, count, or interval - e.g. 'married three times', 'between 24 and 25 years later', 'an attendance of 61,700' - that NUMBER is itself a content sub-clue; a hop mentioning the surrounding event but omitting the number does NOT cover it.",
 "  IGNORE 'as of <year>' timestamp qualifiers - those are non-blocking.",
 "  Any content phrase with no corresponding hop goes into uncovered_phrases.",
 "",
-"STEP 4 - Aggregate and WRITE "+OUT(q)+" :",
+"ACTION 4 - Aggregate and WRITE "+OUT(q)+" :",
 "  all_supported = every hop supported; coverage_ok = uncovered_phrases empty; keep = all_supported AND coverage_ok.",
 "  File JSON = {qid, n_hops, all_supported, coverage_ok, keep, hops:[{clue, supported, redundant, doc_ids, note}], uncovered_phrases, reason}",
 "Return StructuredOutput with the same fields.",

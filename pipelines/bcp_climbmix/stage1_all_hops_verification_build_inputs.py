@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Build hop-scrutiny inputs for the 326 PROJECTABLE questions.
+"""Build Stage 1 All-hops verification inputs for the 326 PROJECTABLE questions.
 
-For each, emit stage2/inputs/<qid>.json = {qid, question, answer, hops:[clue strings]} where `hops`
-is the FULL decomposition (discriminating + redundant/unsupported for new-set; Traces for q100), so
-the scrutiny agent can independently check each hop for support + necessity. gold answers -> stage2/gold_map.json.
+For each question, emit {qid, question, answer, hops:[clue strings]}, where `hops` is the FULL
+decomposition (discriminating + redundant/unsupported for new-set; Traces for q100), so the
+verification agent can independently check each hop for support and necessity.
 """
 import json, os
 

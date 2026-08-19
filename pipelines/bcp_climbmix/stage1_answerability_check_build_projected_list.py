@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Stage 4 (final) of the projection pipeline: the canonical list of projected questions.
+"""Build the canonical projected-question list after the Stage 1 Answerability check.
 
-Reads every q_all/projections/bcp_<qid>.json (step1_project.js output), keeps verdict==PROJECTABLE,
-and writes:
+Reads every q_all/projections/bcp_<qid>.json
+(`stage1_hop_clue_decomposition_and_grounding.js` output), keeps verdict==PROJECTABLE, and writes:
   merged/projected_questions.jsonl : one row/question
     {record_id, question, answer, n_hops, hops:[{clue, corpus_evidence:[{doc_id, snippet}]}], support_doc_ids}
   merged/projected_questions.md    : human index (qid, question, answer, #support docs)
