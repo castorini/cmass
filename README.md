@@ -1,9 +1,9 @@
 # CMASS
 
-CMASS builds corpus-grounded agentic-search benchmarks by projecting existing question-answering
-benchmarks onto a fixed retrieval corpus. Each question is decomposed into atomic reasoning hops,
-and a question is retained only when every hop is supported by retrievable documents in the target
-corpus.
+CMASS stands for **ClimbMix Agentic Search Suite**. It builds corpus-grounded agentic-search
+benchmarks by projecting existing question-answering benchmarks onto a fixed retrieval corpus. Each
+question is decomposed into atomic reasoning hops, and a question is retained only when every hop is
+supported by retrievable documents in the target corpus.
 
 The first release, **BrowseComp-Plus<sup>CM</sup>**, projects BrowseComp-Plus onto the 553-million-
 document, 400-billion-token ClimbMix corpus. The released benchmark contains 57 human-verified
@@ -11,16 +11,58 @@ questions with question-level relevance judgments.
 
 **[Download the dataset and qrels from Hugging Face](https://huggingface.co/datasets/castorini/cmass)**
 
+## Quick Start
+
+CMASS requires Python 3.10 or newer. Create an environment and install the dataset dependency:
+
+```bash
+git clone https://github.com/castorini/cmass.git
+cd cmass
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
+Load and deobfuscate the BrowseComp-Plus<sup>CM</sup> queries and qrels:
+
+```python
+from datasets import load_dataset
+from scripts.deobfuscate import decode_row
+
+queries = load_dataset(
+    "json",
+    data_files="hf://datasets/castorini/cmass/bcp/queries.jsonl",
+    split="train",
+)
+qrels = load_dataset(
+    "json",
+    data_files="hf://datasets/castorini/cmass/bcp/qrels.jsonl",
+    split="train",
+)
+
+query = decode_row(queries[0])
+decoded_qrels = (decode_row(row) for row in qrels)
+query_qrels = [row for row in decoded_qrels if row["query_id"] == query["id"]]
+
+print(query["question"])
+print(query["answer"])
+print([row["doc_id"] for row in query_qrels])
+```
+
+If the Hugging Face release requires authentication, run `hf auth login` first. See
+[`pipelines/bcp_climbmix/`](pipelines/bcp_climbmix/) to reproduce the projection rather than only
+consume the release.
+
 ## Projection Pipeline
 
-The projection pipeline first determines which BrowseComp-Plus questions are answerable from
-ClimbMix, then requires every reasoning hop to be grounded. An independent agent and the authors
-verify the surviving questions before the supporting documents are pooled, filtered, and expanded
-over duplicates to form the final qrels.
+The complete paper pipeline is shown below. **Stage 1: Projection** contains two agentic steps:
+**(1) Hop/Clue decomposition** and **(2) Grounding**. These are followed by two filtering gates,
+**Answerability check** and **All-hops verification**. **Stage 2: Independent agent validation with
+PIIKA**, **Stage 3: Human verification**, and **Stage 4: Qrels construction** complete the pipeline.
 
-<img width="668" height="784" alt="Screenshot 2026-08-19 at 4 05 47 PM" src="https://github.com/user-attachments/assets/eeea1149-b197-41f8-8a83-22435b6727ee" />
+<img width="668" height="784" alt="Projecting BrowseComp-Plus onto ClimbMix pipeline" src="https://github.com/user-attachments/assets/eeea1149-b197-41f8-8a83-22435b6727ee" />
 
-Of the 830 source questions, 326 are answerable from ClimbMix and 65 pass automatic all-hop
+Of the 830 source questions, 326 are answerable from ClimbMix and 65 pass automatic all-hops
 verification. PIIKA answers all 65 correctly when given their supporting documents. Human review
 then retains 57 questions for the released benchmark.
 
@@ -45,10 +87,10 @@ only about five points.
 
 ## Repository
 
-- [`pipelines/bcp_climbmix/`](pipelines/bcp_climbmix/) contains the end-to-end
-  BrowseComp-Plus-to-ClimbMix pipeline: projection, answerability checks, all-hop grounding,
-  coverage audits, and independent-set audits. Its automatic output contains 65 fully grounded
-  questions; the released benchmark is the human-verified set of 57.
+- [`pipelines/bcp_climbmix/`](pipelines/bcp_climbmix/) implements **Stage 1 only** for the
+  BrowseComp-Plus-to-ClimbMix projection: Step 1 **Hop/Clue decomposition**, Step 2 **Grounding**,
+  and the **Answerability check** and **All-hops verification** filtering gates. Its automatic output
+  contains 65 fully grounded questions; later paper stages produce the human-verified release of 57.
 - [`corpus_analysis/`](corpus_analysis/) measures the ClimbMix corpus: token-length distribution,
   exact and near-duplicate detection, and how much of the corpus survives deduplication. Its
   per-document duplicate records are released as the `corpus_duplicates` config of the Hugging Face
