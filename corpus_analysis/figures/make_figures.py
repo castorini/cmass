@@ -28,7 +28,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 import config
-from figures.palette import (AXIS, C_80, C_90, C_BAR, C_EXACT, C_MEDIAN, C_NONE, C_P75,
+from figures.palette import (C_80, C_90, C_BAR, C_EXACT, C_MEDIAN, C_NONE, C_P75,
                              C_P90, C_70, GRID, INK, INK_2, INK_3, LEN_FIGSIZE,
                              LEN_MARGINS, PIE_FIGSIZE, PIE_FONT, PIE_LABEL_X, PIE_R,
                              PIE_XLIM, PIE_YLIM, RCPARAMS, TY_BANDS)

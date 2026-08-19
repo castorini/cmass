@@ -61,9 +61,17 @@ def main():
     total = int(man["offsets"][-1])
     P = lambda name: os.path.join(args.out_dir, name)
 
-    log("stage4: scanning length_to_doc_ids.json")
-    c = scan_counts(P("length_to_doc_ids.json"), [b'"shard_', b'": ['])
-    n_ids_len, n_lengths = c[b'"shard_'], c[b'": [']
+    # step2a is an optional cross-check: it costs ~11 GB to confirm independently that the
+    # scan saw every document. Absent, that one reconciliation is reported as skipped
+    # rather than failing the summary.
+    have_len = os.path.exists(P("length_to_doc_ids.json"))
+    if have_len:
+        log("step4: scanning length_to_doc_ids.json")
+        c = scan_counts(P("length_to_doc_ids.json"), [b'"shard_', b'": ['])
+        n_ids_len, n_lengths = c[b'"shard_'], c[b'": [']
+    else:
+        log("step4: no length_to_doc_ids.json (step2a not run); skipping that check")
+        n_ids_len = n_lengths = None
 
     log("stage4: scanning hash_to_doc_ids.jsonl")
     c = scan_counts(P("hash_to_doc_ids.jsonl"), [b'"shard_', b"\n"])
@@ -90,7 +98,7 @@ def main():
     verify_stats = json.load(open(P("verify_stats.json")))
 
     checks = {
-        "length_json_ids_eq_total": n_ids_len == total,
+        "length_json_ids_eq_total": (n_ids_len == total) if have_len else "skipped",
         "hash_jsonl_ids_eq_total": n_ids_hash == total,
         "hash_jsonl_lines_eq_distinct_sha256": n_hash_lines == dup_stats["distinct_sha256"],
         "verified_groups_eq_stage2b_dup_groups":
@@ -129,7 +137,8 @@ def main():
     print(f"\n{'='*68}\nClimbMix-400B exact-duplicate summary\n{'='*68}")
     print(f"  documents              {total:,}")
     print(f"  distinct sha256        {dup_stats['distinct_sha256']:,}")
-    print(f"  distinct lengths       {n_lengths:,}")
+    if n_lengths is not None:
+        print(f"  distinct lengths       {n_lengths:,}")
     print(f"  duplicate groups       {n_groups:,} confirmed, {n_failed:,} failed")
     print(f"  docs in those groups   {n_docs:,}")
     print(f"  redundant docs         {redundant_docs:,} "

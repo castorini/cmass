@@ -18,7 +18,7 @@ import time
 
 import numpy as np
 
-from common import OUT_DIR, human, log
+from common import OUT_DIR, log
 from near.nd_common import ND_DIR
 
 DEFAULT_THRESHOLDS = (0.7, 0.8, 0.9)
