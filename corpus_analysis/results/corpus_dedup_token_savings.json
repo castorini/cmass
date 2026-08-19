@@ -1,0 +1,80 @@
+{
+  "corpus_documents": 553240576,
+  "corpus_tokens": 410648354303,
+  "tokenizer": "meta-llama/Llama-2",
+  "tokenizer_key": "llama2",
+  "linkage": "complete (clique; all pairs >= J)",
+  "short_floor_tokens": 5,
+  "exact": {
+    "documents_removed": 10935416,
+    "tokens_removed": 4996097871
+  },
+  "thresholds": {
+    "0.7": {
+      "cliques": 85480490,
+      "min_jaccard_observed": 0.7,
+      "dedup": {
+        "documents_removed": 125647591,
+        "tokens_removed": 71332601672,
+        "document_share": 0.22711,
+        "token_share": 0.17371
+      },
+      "short_filter_additional": {
+        "documents_removed": 77048,
+        "tokens_removed": 260239
+      },
+      "combined": {
+        "documents_removed": 125724639,
+        "tokens_removed": 71332861911,
+        "document_share": 0.22725,
+        "token_share": 0.17371,
+        "documents_retained": 427515937,
+        "tokens_retained": 339315492392
+      }
+    },
+    "0.8": {
+      "cliques": 74447252,
+      "min_jaccard_observed": 0.8,
+      "dedup": {
+        "documents_removed": 104069993,
+        "tokens_removed": 57774347814,
+        "document_share": 0.18811,
+        "token_share": 0.14069
+      },
+      "short_filter_additional": {
+        "documents_removed": 77048,
+        "tokens_removed": 260239
+      },
+      "combined": {
+        "documents_removed": 104147041,
+        "tokens_removed": 57774608053,
+        "document_share": 0.18825,
+        "token_share": 0.14069,
+        "documents_retained": 449093535,
+        "tokens_retained": 352873746250
+      }
+    },
+    "0.9": {
+      "cliques": 40540126,
+      "min_jaccard_observed": 0.9,
+      "dedup": {
+        "documents_removed": 57328426,
+        "tokens_removed": 33334128222,
+        "document_share": 0.10362,
+        "token_share": 0.08117
+      },
+      "short_filter_additional": {
+        "documents_removed": 77048,
+        "tokens_removed": 260239
+      },
+      "combined": {
+        "documents_removed": 57405474,
+        "tokens_removed": 33334388461,
+        "document_share": 0.10376,
+        "token_share": 0.08118,
+        "documents_retained": 495835102,
+        "tokens_retained": 377313965842
+      }
+    }
+  }
+}

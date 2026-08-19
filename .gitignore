@@ -216,3 +216,25 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---------------------------------------------------------------------------
+# corpus_analysis
+# ---------------------------------------------------------------------------
+# Pipeline artifacts are hundreds of GB and live outside the repo by default
+# (see corpus_analysis/config.py). These patterns catch the case where someone
+# points --out-dir inside the checkout.
+corpus_analysis/**/token_lengths_*/
+corpus_analysis/**/doc_duplicates_t*/
+corpus_analysis/**/near_dup/
+corpus_analysis/**/stage1/
+corpus_analysis/**/buckets/
+corpus_analysis/**/cbuckets/
+corpus_analysis/**/cluster_parts/
+corpus_analysis/**/*.jsonl
+corpus_analysis/**/*.npy
+corpus_analysis/**/*.npz
+corpus_analysis/**/*.parquet
+corpus_analysis/**/*.log
+
+# Figure PDFs are build products; the PNGs beside them are committed.
+corpus_analysis/figures/out/*.pdf

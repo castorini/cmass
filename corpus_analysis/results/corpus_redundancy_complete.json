@@ -1,0 +1,32 @@
+{
+  "corpus_documents": 553240576,
+  "linkage": "complete (clique; all pairs >= J)",
+  "exact": {
+    "groups": 5910028,
+    "redundant_copies": 10935416
+  },
+  "J>=0.7": {
+    "cliques": 85480490,
+    "representatives_merged": 114712175,
+    "min_jaccard_observed": 0.7,
+    "redundant_copies": 125647591,
+    "redundant_share": 0.22711,
+    "retained": 427592985
+  },
+  "J>=0.8": {
+    "cliques": 74447252,
+    "representatives_merged": 93134577,
+    "min_jaccard_observed": 0.8,
+    "redundant_copies": 104069993,
+    "redundant_share": 0.18811,
+    "retained": 449170583
+  },
+  "J>=0.9": {
+    "cliques": 40540126,
+    "representatives_merged": 46393010,
+    "min_jaccard_observed": 0.9,
+    "redundant_copies": 57328426,
+    "redundant_share": 0.10362,
+    "retained": 495912150
+  }
+}

@@ -1,0 +1,16 @@
+# Core pipeline
+numpy>=1.24
+pyarrow>=12
+numba>=0.57          # union-find, exact Jaccard, clique partition kernels
+xxhash>=3.0          # shingle hashing
+
+# Tokenization (tokens/step0_tokenize.py)
+# Needs a modern tokenizers: older releases cannot load a Llama-2 or Qwen3
+# tokenizer.json and fail with "data did not match any variant of untagged enum
+# ModelWrapper". If your environment pins transformers<4.34 (which caps tokenizers
+# below 0.14), install this in a separate virtualenv -- nothing here imports
+# transformers.
+tokenizers>=0.21
+
+# Figures (figures/make_figures.py)
+matplotlib>=3.7
