@@ -1,0 +1,10 @@
+# Pipeline outputs: qrels, per-hop judgments, document caches and figures are
+# derived data and are not released with the code.
+work/
+out/
+*.jsonl
+*.pdf
+*.png
+*.csv
+*.xlsm
+__pycache__/
