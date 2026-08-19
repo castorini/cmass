@@ -49,10 +49,17 @@ only about five points.
   BrowseComp-Plus-to-ClimbMix pipeline: projection, answerability checks, all-hop grounding,
   coverage audits, and independent-set audits. Its automatic output contains 65 fully grounded
   questions; the released benchmark is the human-verified set of 57.
+- [`corpus_analysis/`](corpus_analysis/) measures the ClimbMix corpus: token-length distribution,
+  exact and near-duplicate detection, and how much of the corpus survives deduplication. Its
+  per-document duplicate records are released as the `corpus_duplicates` config of the Hugging Face
+  dataset; see [`corpus_analysis/release/`](corpus_analysis/release/) for how they are built and
+  verified.
 - [`scripts/deobfuscate.py`](scripts/deobfuscate.py) decodes the obfuscated `question`, `answer`, and
   `doc_id` fields in the Hugging Face release using each row's `canary`.
 - [The Hugging Face release](https://huggingface.co/datasets/castorini/cmass) contains the benchmark
-  queries and qrels. The corresponding documents come from the `climbmix-400b` corpus.
+  queries and qrels, plus the `corpus_duplicates` config: exact and near-duplicate relationships for
+  every duplicated ClimbMix document (219,066,180 rows). The corresponding documents come from the
+  `climbmix-400b` corpus.
 
 ## License
 

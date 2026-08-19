@@ -16,7 +16,8 @@ Runs over `corpus_analysis/` in this repository. Everything is CLI-driven; every
 | "how many duplicates" | `analysis/duplicate_stats.py` (needs the near pipeline) |
 | "what would dedup remove/retain" | `analysis/clique_retention.py` |
 | "give me the figures" | `figures/make_figures.py` |
-| "which documents duplicate this one" | query `near_dup/doc_duplicates_t70/` |
+| "which documents duplicate this one" | query `near_dup/doc_duplicates_t70/`, or the published `castorini/cmass` / `corpus_duplicates` |
+| "publish/update the duplicate dataset" | `release/` — see `release/README.md` |
 
 If the artifacts already exist, the analysis and figure steps are minutes. If they do not,
 the pipeline is ~23 hours and ~2.5 TB — say so before starting, and use `--dry-run` to show

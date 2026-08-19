@@ -89,6 +89,23 @@ the figures drawn from them. Together they let someone check every number withou
 | any duplicate at J ≥ 0.7 | 219,066,180 documents (39.60%) |
 | removable at J ≥ 0.7 (cliques) | 125,647,591 documents (22.71%), 71.3B tokens (17.37%) |
 
+## Released data
+
+The per-document duplicate records are published as the `corpus_duplicates` config of
+[castorini/cmass](https://huggingface.co/datasets/castorini/cmass) — 219,066,180 rows,
+32 parquet files, 9.1 GB, sorted by `doc_id`.
+
+```python
+from datasets import load_dataset
+ds = load_dataset("castorini/cmass", "corpus_duplicates")["corpus"]
+```
+
+`release/` holds the tooling that produced it: `repartition_for_hf.py` (sorts and
+repartitions), `verify_release.py` (row counts, order-independent content checksum,
+sortedness and range coverage — run this before any upload), and `DATASET_CARD.md`. See
+[`release/README.md`](release/) for why the released layout differs from the pipeline's, and
+what that costs.
+
 ## Cost
 
 Measured on 96 cores for ClimbMix's 553M documents / 600 GB of parquet.
