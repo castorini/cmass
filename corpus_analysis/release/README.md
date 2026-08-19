@@ -68,9 +68,19 @@ huggingface-cli upload castorini/cmass \
     --repo-type dataset
 ```
 
-Then merge the YAML block from `DATASET_CARD.md` into the **repository root** `README.md`
-frontmatter — HuggingFace reads configs from there, not from a subfolder — and append the
-card body.
+The config must also be declared in the **repository root** `README.md` frontmatter —
+HuggingFace reads configs from there, not from a subfolder:
+
+```yaml
+- config_name: corpus_duplicates
+  data_files:
+  - split: corpus
+    path: corpus_duplicates/corpus-*.parquet
+```
+
+The dataset card on the Hub describes what a row is and what each field holds;
+[`DUPLICATES.md`](DUPLICATES.md) is the detailed reference it links to, covering value semantics,
+method, exclusions and verification.
 
 ## Result
 

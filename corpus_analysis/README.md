@@ -102,7 +102,8 @@ ds = load_dataset("castorini/cmass", "corpus_duplicates")["corpus"]
 
 `release/` holds the tooling that produced it: `repartition_for_hf.py` (sorts and
 repartitions), `verify_release.py` (row counts, order-independent content checksum,
-sortedness and range coverage — run this before any upload), and `DATASET_CARD.md`. See
+sortedness and range coverage — run this before any upload), and `DUPLICATES.md` (the reference
+the dataset card links to). See
 [`release/README.md`](release/) for why the released layout differs from the pipeline's, and
 what that costs.
 
