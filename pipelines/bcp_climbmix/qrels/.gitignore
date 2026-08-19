@@ -1,10 +1,11 @@
-# Pipeline outputs: qrels, per-hop judgments, document caches and figures are
-# derived data and are not released with the code.
+# Derived data, never released: the qrels, the per-hop judgments, the reviewer
+# workbook and the cached document text.
 work/
-out/
 *.jsonl
-*.pdf
-*.png
 *.csv
 *.xlsm
 __pycache__/
+
+# Figures follow the corpus_analysis convention: the PNG is committed, the PDF
+# beside it is a build product.
+*.pdf

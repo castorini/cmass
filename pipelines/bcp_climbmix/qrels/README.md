@@ -104,6 +104,10 @@ inches) and saved on a fixed canvas rather than a tight bounding box, so
 `\includegraphics` never rescales them and the point sizes on the page are the
 ones set here. See `analysis/figstyle.py`.
 
+`--png` writes a raster copy beside each PDF. Following the `corpus_analysis`
+convention, the PNG is what gets committed and the PDF is treated as a build
+product; the CSVs and the per-question JSONL stay out of the repository.
+
 ## Things that will bite
 
 **Document ids have two spellings.** The corpus analysis artifacts zero-pad the
