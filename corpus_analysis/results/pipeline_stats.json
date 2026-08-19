@@ -1,0 +1,118 @@
+{
+  "note": "provenance of the ClimbMix run: parameters and per-step counts",
+  "steps": {
+    "near_step2_band": {
+      "bands": 73,
+      "rows": 7,
+      "n_perm": 512,
+      "docs": 541989461,
+      "prefilter_perms": 64,
+      "band_key_bytes": 316521845224,
+      "p_candidate": {
+        "0.5": 0.43591591665722285,
+        "0.6": 0.8741520671736436,
+        "0.7": 0.9981151470499087,
+        "0.8": 0.9999999654693371,
+        "0.9": 1.0
+      }
+    },
+    "near_step3_components": {
+      "documents": 541989461,
+      "bands": 73,
+      "buckets_ge2": 3256502320,
+      "unions": 157282835,
+      "oversized_buckets_skipped": 0,
+      "max_bucket": 50000,
+      "prefilter_threshold": 0.4,
+      "prefilter_min_match": 26,
+      "prefilter_rejected_pairs": 11695856,
+      "components_ge2": 95205467,
+      "documents_in_components": 252488302,
+      "largest_components": [
+        91408,
+        29161,
+        26329,
+        20637,
+        19057,
+        12813,
+        11395,
+        9108,
+        8795,
+        8785,
+        7865,
+        7539,
+        7405,
+        7397,
+        7095,
+        7012,
+        6836,
+        5717,
+        5686,
+        5376
+      ],
+      "size_histogram": {
+        "2-2": {
+          "components": 71986375,
+          "documents": 143972750
+        },
+        "3-9": {
+          "components": 22090158,
+          "documents": 85168313
+        },
+        "10-99": {
+          "components": 1113155,
+          "documents": 20592503
+        },
+        "100-999": {
+          "components": 15659,
+          "documents": 2253753
+        },
+        "1000-9999": {
+          "components": 113,
+          "documents": 290183
+        },
+        "10000-+": {
+          "components": 7,
+          "documents": 210800
+        }
+      }
+    },
+    "near_step4_cliques": {
+      "documents_scattered": 0,
+      "documents_in_single_linkage_components": 252488302,
+      "oversized_components": 1,
+      "max_component": 40000,
+      "thresholds": [
+        0.7,
+        0.8,
+        0.9
+      ],
+      "clusters": {
+        "0.7": 85480490,
+        "0.8": 74447252,
+        "0.9": 40540126
+      },
+      "documents_in_clusters": {
+        "0.7": 200192665,
+        "0.8": 167581829,
+        "0.9": 86933136
+      }
+    },
+    "near_step5_doc_records": {
+      "threshold": 0.7,
+      "records_with_near_duplicates": 215379056,
+      "records_exact_only": 3086979,
+      "records_total": 219066180,
+      "directed_near_edges": 872644848,
+      "oversized_components_skipped": 1,
+      "candidate_recall_at_threshold": 0.9981151470499087,
+      "bytes": 4675952587,
+      "bands": 73,
+      "rows": 7,
+      "undirected_near_pairs": 436322424,
+      "directed_near_edges_note": "corrected: the original counter incremented before neighbours were expanded over their exact-duplicate groups and before that list was inherited by redundant copies, so it undercounted the emitted entries",
+      "records_recovered_exact_only": 600145,
+      "recovery_note": "phase B skipped representatives with no verified neighbour and phase C only covered representatives outside multi-member components; these exact-duplicate records fell between them"
+    }
+  }
+}
