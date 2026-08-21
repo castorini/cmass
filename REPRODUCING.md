@@ -18,7 +18,6 @@ artifacts/<run-id>/
     per-query/
       <query_id>_eval.json
     evaluation_summary.json
-    detailed_judge_results.csv
 ```
 
 `run_config.json` is harness-specific, but should capture every setting listed
@@ -532,18 +531,12 @@ under the same setup; all final 57 artifacts completed.
 For query `q`, define:
 
 - `G(q)`: the set of released qrel document IDs with `relevance > 0`;
-- `P(q)`: the set of `previewed_docids` shown during the whole run;
-- `S(q)`: the set of `surfaced_docids`;
-- `O(q)`: the set of `opened_docids`; and
-- `C(q)`: the set of `cited_docids`.
+- `P(q)`: the set of `previewed_docids` shown during the whole run.
 
 Compute:
 
 ```text
 previewed_recall(q) = |P(q) intersect G(q)| / |G(q)|
-surfaced_recall(q)  = |S(q) intersect G(q)| / |G(q)|
-opened_recall(q)    = |O(q) intersect G(q)| / |G(q)|
-cited_recall(q)     = |C(q) intersect G(q)| / |G(q)|
 ```
 
 The paper's recall is:
@@ -554,8 +547,7 @@ Recall (%) = 100 * mean_q(previewed_recall(q))
 
 This is macro recall over the full accumulated search interaction, with no rank
 cutoff. It is not recall from only the last search and not micro recall over all
-qrels. Piika's legacy `Recall (%)` key uses `surfaced_docids`; it agrees with the
-paper only when `surfaced_docids == previewed_docids`, as in the two-tool setup.
+qrels.
 
 The remaining paper metrics are:
 
@@ -568,8 +560,7 @@ Tool Calls = mean_q(
 ```
 
 Compute the mean before rounding and report two decimal places. A final
-incomplete artifact contributes zero to all-query accuracy. Also report
-completed-only accuracy separately if any final artifact is incomplete.
+incomplete artifact contributes zero to all-query accuracy.
 
 ### Gold-answer judge
 
@@ -601,10 +592,6 @@ continue the illustrative run example above:
 {
   "json_path": "runs/example/<query_id>.json",
   "query_id": "<query_id>",
-  "question": "The benchmark question...",
-  "response": "Answer:\nExplanation: ... [shard_00459_61697]\nExact Answer: ...\nConfidence: 88%",
-  "response_confidence": 88,
-  "calibration_confidence": 88,
   "correct_answer": "The benchmark answer",
   "judge_mode": "gold-answer",
   "is_completed": true,
@@ -618,45 +605,15 @@ continue the illustrative run example above:
     "confidence": 100,
     "parse_error": false
   },
-  "tool_call_counts": {
-    "search": 1,
-    "read_document": 1
-  },
-  "citations": {
-    "cited_docids": ["shard_00459_61697"],
-    "metrics": {
-      "num_citations": 1,
-      "num_relevant": 7,
-      "precision": 1.0,
-      "recall": 0.14285714285714285
-    }
-  },
-  "retrieval": {
-    "surfaced_docids": [
-      "shard_00459_61697",
-      "shard_00071_31411"
-    ],
-    "previewed_docids": [
-      "shard_00459_61697",
-      "shard_00071_31411"
-    ],
-    "agent_docids": ["shard_00459_61697"],
-    "opened_docids": ["shard_00459_61697"],
-    "cited_docids": ["shard_00459_61697"],
-    "surfaced_recall": 0.14285714285714285,
-    "previewed_recall": 0.14285714285714285,
-    "agent_recall": 0.14285714285714285,
-    "opened_recall": 0.14285714285714285,
-    "cited_recall": 0.14285714285714285
-  },
-  "model_info": {
-    "judge_model": "provider/judge-model-id",
-    "judge_thinking": "low",
-    "pi_bin": "custom-harness",
-    "run_model": "provider/model-id"
-  }
+  "recall": 0.14285714285714285,
+  "tool_calls": 2
 }
 ```
+
+Derive `recall` from the run artifact's `previewed_docids` and derive
+`tool_calls` from `tool_call_counts.search + tool_call_counts.read_document`.
+The run artifact remains the canonical search trace; do not duplicate its
+document lists or tool breakdown in the evaluation file.
 
 For an incomplete run, set `is_completed` to `false`, set judge prompt and
 response to `null`, and use:
@@ -675,85 +632,30 @@ response to `null`, and use:
 
 ### Aggregate evaluation artifact
 
-Write `evaluation_summary.json`. The following keys align with Piika's summary
-and are sufficient to reconstruct the paper table:
-
-| Key | Type | Definition |
-| --- | --- | --- |
-| `LLM` | string | Exact run model identifier |
-| `Judge Mode` | string | `gold-answer` |
-| `Accuracy Label` | string | `Accuracy (gold-answer judge)` |
-| `Accuracy Semantics` | string | Human-readable judge definition |
-| `Accuracy (%)` | number | All-57 accuracy |
-| `Completed-Only Accuracy (%)` | number or null | Accuracy over completed artifacts |
-| `Recall (%)` | number | Legacy surfaced macro recall; use only when surfaced equals previewed |
-| `Recall Macro (%)` | number | Same legacy surfaced macro recall |
-| `Recall Micro (%)` | number | Optional surfaced micro recall |
-| `Agent Set Recall Macro (%)` | number | Compatibility alias for surfaced macro recall |
-| `Agent Set Recall Micro (%)` | number | Compatibility alias for surfaced micro recall |
-| `System Surfaced Recall Macro (%)` | number | Macro recall from `surfaced_docids` |
-| `System Surfaced Recall Micro (%)` | number | Micro recall from `surfaced_docids` |
-| `Agent Previewed Recall Macro (%)` | number | Paper headline recall |
-| `Agent Previewed Recall Micro (%)` | number | Optional previewed micro recall |
-| `Agent Recall Macro (%)` | number | Macro recall from `agent_docids` |
-| `Agent Recall Micro (%)` | number | Micro recall from `agent_docids` |
-| `Agent Opened Recall Macro (%)` | number | Macro recall from `opened_docids` |
-| `Agent Opened Recall Micro (%)` | number | Micro recall from `opened_docids` |
-| `Answer Cited Recall Macro (%)` | number | Macro recall from `cited_docids` |
-| `Answer Cited Recall Micro (%)` | number | Micro recall from `cited_docids` |
-| `Coverage Tier Semantics` | string | Definitions of the five document views |
-| `Recall Definition` | string | Exact denominator and aggregation rule |
-| `avg_tool_stats` | object | Mean count for each retrieval tool |
-| `Calibration Error (%)` | number or null | Optional response-confidence calibration error |
-| `Calibration Error Computed` | Boolean | Whether enough examples exist for calibration |
-| `Calibration Metric` | string | Name of the calibration metric |
-| `Calibration Semantics` | string | Human-readable calibration definition |
-| `Calibration Confidence Source` | string | Usually `response` |
-| `Calibration Confidence Count` | integer | Responses included in calibration |
-| `Calibration Defaulted Count` | integer | Missing confidences assigned a compatibility default |
-| `Completed Queries` | integer | Number with `status == completed` |
-| `Timeout/Incomplete Queries` | integer | Number not completed |
-| `Completed Correct` | integer | Completed and judged correct |
-| `Completed Wrong` | integer | Completed and judged incorrect |
-| `Retriever` | string | Retriever, index, and important settings |
-| `Link` | string | Public run-artifact location |
-| `Evaluation Date` | string | ISO date |
-| `per_query_metrics` | array | One compact metric object per query |
-| `judge` | object | Judge model, settings, usage, and parse counts |
-| `citation_summary` | object | Optional aggregate citation diagnostics |
-
-Per-query files may also include `judge_usage` with input, output, cache, token,
-and cost totals. This is diagnostic metadata and does not affect the three paper
-metrics.
-
-Each `per_query_metrics` item should be:
+Write `evaluation_summary.json` as one Table 1 row:
 
 ```json
 {
-  "query_id": "<query_id>",
-  "correct": true,
-  "system_surfaced_recall": 14.29,
-  "agent_previewed_recall": 14.29,
-  "agent_recall": 14.29,
-  "agent_opened_recall": 14.29,
-  "answer_cited_recall": 14.29,
-  "agent_set_recall": 14.29,
-  "recall": 14.29
+  "Model": "GPT-5.6 Sol (max)",
+  "Corpus": "BrowseComp-PlusCM",
+  "Accuracy": 80.70,
+  "Recall": 21.37,
+  "Tool calls": 98.26
 }
 ```
 
-The paper's `Tool Calls` column is not a single Piika summary key. Derive it as:
+The artifact has only the five reported columns:
 
-```text
-avg_tool_stats.search + avg_tool_stats.read_document
-```
+| Key | Type | Definition |
+| --- | --- | --- |
+| `Model` | string | Display name of the evaluated agent model |
+| `Corpus` | string | `BrowseComp-Plus` or `BrowseComp-PlusCM` |
+| `Accuracy` | number | Gold-answer accuracy over all 57 questions, in percent |
+| `Recall` | number | Mean per-question previewed recall, in percent |
+| `Tool calls` | number | Mean `search + read_document` calls per question |
 
-Also write `detailed_judge_results.csv` with this exact header for convenient
-cross-harness analysis:
-
-```csv
-query_id,predicted_answer,correct_answer,judge_correct,response_confidence,calibration_confidence,judge_confidence,is_completed,parse_error,json_path,num_citations,precision_positives,recall_positives
-```
+Keep model IDs, judge settings, corpus/index details, and execution provenance
+in `run_config.json`; they do not need duplicate fields in the aggregate row.
 
 ## Reference calculation
 
@@ -783,6 +685,14 @@ mean_tool_calls = sum(
     + run["tool_call_counts"].get("read_document", 0)
     for run in runs
 ) / query_count
+
+evaluation_summary = {
+    "Model": model_display_name,
+    "Corpus": corpus_display_name,
+    "Accuracy": round(accuracy, 2),
+    "Recall": round(macro_recall, 2),
+    "Tool calls": round(mean_tool_calls, 2),
+}
 ```
 
 ## Validation checklist
