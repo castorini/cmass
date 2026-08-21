@@ -5,7 +5,7 @@ benchmarks by projecting existing question-answering benchmarks onto a fixed ret
 question is decomposed into atomic reasoning hops, and a question is retained only when every hop is
 supported by retrievable documents in the target corpus.
 
-The first release, **BrowseComp-Plus<sup>CM</sup>**, projects BrowseComp-Plus onto the 553-million-
+The first release, **BrowseComp-Plus<sub>CM</sub>**, projects BrowseComp-Plus onto the 553-million-
 document, 400-billion-token ClimbMix corpus. The released benchmark contains 57 human-verified
 questions with question-level relevance judgments.
 
@@ -23,7 +23,7 @@ source .venv/bin/activate
 python -m pip install -r requirements.txt
 ```
 
-Load and deobfuscate the BrowseComp-Plus<sup>CM</sup> queries and qrels:
+Load and deobfuscate the BrowseComp-Plus<sub>CM</sub> queries and qrels:
 
 ```python
 from datasets import load_dataset
@@ -76,11 +76,11 @@ Accuracy and recall are percentages; tool calls are the average number of retrie
 | Model | Corpus | Accuracy | Recall | Tool calls |
 | --- | --- | ---: | ---: | ---: |
 | GPT-5.6 Sol (max) | BrowseComp-Plus | 85.96 | 84.28 | 60.16 |
-| GPT-5.6 Sol (max) | BrowseComp-Plus<sup>CM</sup> | 80.70 | 21.37 | 98.26 |
+| GPT-5.6 Sol (max) | BrowseComp-Plus<sub>CM</sub> | 80.70 | 21.37 | 98.26 |
 | Gemma 4 31B IT | BrowseComp-Plus | 26.32 | 24.91 | 24.46 |
-| Gemma 4 31B IT | BrowseComp-Plus<sup>CM</sup> | 15.79 | 2.77 | 23.42 |
+| Gemma 4 31B IT | BrowseComp-Plus<sub>CM</sub> | 15.79 | 2.77 | 23.42 |
 | Qwen 3.5 9B | BrowseComp-Plus | 14.04 | 19.33 | 33.44 |
-| Qwen 3.5 9B | BrowseComp-Plus<sup>CM</sup> | 12.28 | 2.64 | 37.93 |
+| Qwen 3.5 9B | BrowseComp-Plus<sub>CM</sub> | 12.28 | 2.64 | 37.93 |
 
 Projection makes retrieval substantially harder. For GPT-5.6 Sol, evidence recall falls from 84.28%
 to 21.37% while the agent makes 63% more retrieval calls, even though answer accuracy decreases by
