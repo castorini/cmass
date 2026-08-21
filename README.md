@@ -1,6 +1,35 @@
 # CMASS
 
-CMASS stands for **ClimbMix Agentic Search Suite**. It builds corpus-grounded agentic-search
+<h3 align="center">
+ClimbMix Agentic Search Suite
+</h3>
+
+<p align="center">
+|
+<a href="https://arxiv.org/abs/2608.20317"><b>Paper</b></a> |
+<a href="https://huggingface.co/datasets/castorini/cmass"><b>Dataset</b></a> |
+<a href="pipelines/bcp_climbmix/README.md"><b>Projection</b></a> |
+<a href="pipelines/bcp_climbmix/qrels/README.md"><b>Qrels</b></a> |
+<a href="corpus_analysis/README.md"><b>Corpus Analysis</b></a> |
+</p>
+
+<p align="center">
+  <a href="https://arxiv.org/abs/2608.20317">
+    <img alt="arXiv" src="https://img.shields.io/badge/arXiv-2608.20317-b31b1b.svg">
+  </a>
+  <a href="https://github.com/castorini/cmass/stargazers">
+    <img alt="GitHub Stars" src="https://img.shields.io/github/stars/castorini/cmass?style=flat&logo=github&color=red">
+  </a>
+  <a href="https://huggingface.co/datasets/castorini/cmass">
+    <img alt="Dataset" src="https://img.shields.io/badge/Hugging%20Face-CMASS-FFD21E">
+  </a>
+  <a href="https://github.com/castorini/cmass/blob/main/LICENSE">
+    <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg">
+  </a>
+  <img alt="Python" src="https://img.shields.io/badge/python-3.10+-blue.svg">
+</p>
+
+ClimbMix Agentic Search Suite (CMASS) builds corpus-grounded agentic-search
 benchmarks by projecting existing question-answering benchmarks onto a fixed retrieval corpus. Each
 question is decomposed into atomic reasoning hops, and a question is retained only when every hop is
 supported by retrievable documents in the target corpus.
@@ -8,8 +37,6 @@ supported by retrievable documents in the target corpus.
 The first release, **BrowseComp-Plus<sub>CM</sub>**, projects BrowseComp-Plus onto the 553-million-
 document, 400-billion-token ClimbMix corpus. The released benchmark contains 57 human-verified
 questions with question-level relevance judgments.
-
-**[Read the paper on arXiv](https://arxiv.org/abs/2608.20317)** | **[Download the dataset and qrels from Hugging Face](https://huggingface.co/datasets/castorini/cmass)**
 
 ## Quick Start
 
