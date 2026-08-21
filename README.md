@@ -9,7 +9,7 @@ The first release, **BrowseComp-Plus<sup>CM</sup>**, projects BrowseComp-Plus on
 document, 400-billion-token ClimbMix corpus. The released benchmark contains 57 human-verified
 questions with question-level relevance judgments.
 
-**[Download the dataset and qrels from Hugging Face](https://huggingface.co/datasets/castorini/cmass)**
+**[Read the paper on arXiv](https://arxiv.org/abs/2608.20317)** | **[Download the dataset and qrels from Hugging Face](https://huggingface.co/datasets/castorini/cmass)**
 
 ## Quick Start
 
@@ -105,6 +105,22 @@ only about five points.
   queries and qrels, plus the `corpus_duplicates` config: exact and near-duplicate relationships for
   every duplicated ClimbMix document (219,066,180 rows). The corresponding documents come from the
   `climbmix-400b` corpus.
+
+## Citation
+
+If you use CMASS, please cite:
+
+```bibtex
+@misc{sharifymoghaddam2026projectingbrowsecompplusclimbmixrealistic,
+      title={Projecting BrowseComp-Plus onto ClimbMix: Toward More Realistic Corpora for Agentic Search},
+      author={Sahel Sharifymoghaddam and Lingwei Gu and Yijun Ge and Jimmy Lin},
+      year={2026},
+      eprint={2608.20317},
+      archivePrefix={arXiv},
+      primaryClass={cs.IR},
+      url={https://arxiv.org/abs/2608.20317},
+}
+```
 
 ## License
 
