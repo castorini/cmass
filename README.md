@@ -8,6 +8,7 @@ ClimbMix Agentic Search Suite
 |
 <a href="https://arxiv.org/abs/2608.20317"><b>Paper</b></a> |
 <a href="https://huggingface.co/datasets/castorini/cmass"><b>Dataset</b></a> |
+<a href="REPRODUCING.md"><b>Reproduce</b></a> |
 <a href="pipelines/bcp_climbmix/README.md"><b>Projection</b></a> |
 <a href="pipelines/bcp_climbmix/qrels/README.md"><b>Qrels</b></a> |
 <a href="corpus_analysis/README.md"><b>Corpus Analysis</b></a> |
@@ -99,6 +100,8 @@ then retains 57 questions for the released benchmark.
 The paper evaluates three PIIKA configurations on the 57 human-verified questions. In this
 evaluation, agents receive no supplied documents and retrieve only through the corpus's BM25 index.
 Accuracy and recall are percentages; tool calls are the average number of retrieval calls per question.
+See the [reproduction guide](REPRODUCING.md) for the harness-neutral search, run, and evaluation
+formats needed to compare another agent against these results.
 
 | Model | Corpus | Accuracy | Recall | Tool calls |
 | --- | --- | ---: | ---: | ---: |
