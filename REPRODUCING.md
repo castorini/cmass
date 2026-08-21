@@ -27,9 +27,10 @@ JSONL while a query is running.
 
 The compatibility reference is `castorini/piika` package version 0.3.0 at
 [commit `6475fef`](https://github.com/castorini/piika/tree/6475fefe6749448c4c30cadd071f6c75c3538fa4).
-The evaluation condition and prompts come from
-[the CMASS paper](https://arxiv.org/abs/2608.20317), especially Section 6 and
-Appendix B.
+The evaluation condition comes from
+[the CMASS paper](https://arxiv.org/abs/2608.20317), especially Section 6.
+The complete prompts needed for Table 1 are included below, so reproducing the
+evaluation does not require extracting them from the paper.
 
 ## Evaluation condition
 
@@ -95,6 +96,8 @@ the experiment to a particular harness.
   },
   "execution": {
     "timeout_seconds": 300,
+    "submit_now_trigger_ratio": 0.7,
+    "submit_now_prompt_sha256": "sha256 of exact steer prompt below",
     "concurrency": 1,
     "retry_incomplete_only": true,
     "completed_attempt_selection": "first-completed"
@@ -378,31 +381,86 @@ agent calls.
 
 ## Agent run stage
 
-### Prompt and answer contract
+### Retrieval-enabled agent prompt
 
-The paper's retrieval-enabled prompt requires the agent to:
-
-- perform at least one search before answering;
-- use only facts returned by `search` and `read_document`;
-- prefer concise lexical searches;
-- inspect promising documents before answering;
-- cite supporting document IDs inline when possible; and
-- report insufficient evidence rather than fill gaps from memory.
-
-Use the exact final response structure below. Do not add text before or after
-these fields.
+Use the following prompt for every question, replacing `{question}` with the
+benchmark question. Supply the `search` and `read_document` schemas from the
+Search stage separately through the harness.
 
 ```text
+You are a research and retrieval agent using only the provided tools.
+STRICT EVIDENCE POLICY: You must perform at least one search before answering.
+Use only facts explicitly stated in results returned by the configured
+search and read_document tools, and support every factual claim
+in your answer with that retrieved evidence.
+Do not use pretrained or internal knowledge, memory, assumptions, the open
+internet, the filesystem, or any other source.
+If the retrieved evidence is insufficient, say so instead of filling the gap
+from internal knowledge.
+
+Workflow:
+1. Use search with a concise raw query string based on the original question.
+2. Prefer short lexical searches over long natural-language rewrites.
+3. Inspect the ranked hits returned directly by search before rewriting the query.
+4. If a promising candidate document appears, inspect it with
+read_document.
+5. Follow the read_document schema and any continuation guidance
+returned by the tool.
+6. Use search refinements only when they add a genuinely new clue from what
+you already saw.
+7. Every call to search and read_document must include
+reason as the first argument. Keep it specific, under 100 words, and
+focused on the clue, gap, candidate, or ranking issue.
+8. Satisfy every requested output below; use the same research pass for all
+outputs.
+9. As soon as you have enough evidence and candidates, stop using tools and
+answer in plain assistant text.
+
+Answer output:
+-- Produce a concise answer supported by the documents you found.
+-- Cite supporting docids inline when possible.
+-- Keep Exact Answer directly responsive to the question.
+
+Your final response must contain exactly these sections in this order:
 Answer:
-Explanation: <concise evidence-based explanation with [full_docid] citations>
-Exact Answer: <succinct answer>
-Confidence: <integer or decimal from 0% to 100%>
+Explanation: {your explanation for your final answer. Cite supporting
+docids inline in square brackets at the end of sentences when possible, for
+example [123].}
+Exact Answer: {your succinct, final answer}
+Confidence: {your confidence score between 0% and 100%}
+
+Do not include any text before, after, or between those sections beyond the
+requested fields and ranked document lines.
+
+If you later receive a user steer telling you to submit now, stop using tools
+immediately and answer right away with the exact final response format above.
+Do not do more research after that steer.
+
+Question: {question}
 ```
 
-The full reference prompt is in Appendix B of the paper. Record the exact prompt
-text or its content hash with every run. Hidden reasoning or chain-of-thought is
-not part of the artifact contract; retain only observable tool interactions and
-the final assistant text.
+Record the exact rendered prompt or its content hash with every run. Hidden
+reasoning or chain-of-thought is not part of the artifact contract; retain only
+observable tool interactions and the final assistant text.
+
+### Time-budget steer prompt
+
+For the paper's run condition, deliver the following as a user steer when 70%
+of the 300-second per-query budget has elapsed. After the agent observes the
+steer, block additional retrieval calls and allow it to return its best answer.
+
+```text
+Time budget is nearly exhausted.
+Further retrieval is now blocked to preserve time for submission.
+Stop using tools immediately and submit your best answer right now.
+Your final response must use exactly this format:
+Explanation: {your explanation for your final answer. Cite supporting docids inline in square brackets [] at the end of sentences when possible, for example [123].}
+Exact Answer: {your succinct, final answer}
+Confidence: {your confidence score between 0% and 100%}
+```
+
+This conditional steer is not sent when the agent finishes before the
+threshold. Record whether it was delivered in the per-query run artifact.
 
 ### Per-query run artifact
 
@@ -564,24 +622,52 @@ incomplete artifact contributes zero to all-query accuracy.
 
 ### Gold-answer judge
 
-Use one fixed judge configuration for all runs being compared. The judge sees
-only the question, the agent response, and the benchmark answer. It determines
-semantic equivalence and must not solve the question or use external knowledge.
-Its raw output must be exactly one JSON object:
+Use one fixed judge configuration for every run being compared. Replace
+`{question}`, `{response}`, and `{correct_answer}` with the corresponding
+per-query values.
 
-```json
+```text
+You are an evaluation judge.
+
+Your job is to determine whether the response's final answer is semantically equivalent to the known correct answer.
+Do not solve the question yourself.
+Do not use outside knowledge.
+Focus only on whether the response's final answer matches the correct answer.
+Allow harmless wording differences, equivalent formatting, and added correct detail.
+The correct-answer field may be a JSON array of acceptable alternatives; matching any one alternative is correct.
+For numerical answers, allow small formatting differences and obvious equivalent forms.
+If the response does not contain a final answer you can extract, set extracted_final_answer to null and correct to false.
+
+Return exactly one JSON object and nothing else.
+Do not wrap the JSON in markdown or code fences.
+Use this exact schema:
 {
-  "extracted_final_answer": "...",
-  "correct_answer": "...",
-  "reasoning": "Why the extracted answer does or does not match",
-  "correct": true,
-  "confidence": 100
+  "extracted_final_answer": string | null,
+  "correct_answer": string,
+  "reasoning": string,
+  "correct": boolean,
+  "confidence": number
 }
+
+Requirements:
+- confidence must be a number between 0 and 100
+- correct must be true or false
+- repeat the provided correct answer exactly in correct_answer
+- reasoning must explain only whether the extracted final answer matches the correct answer
+
+Question:
+{question}
+
+Response:
+{response}
+
+Correct answer:
+{correct_answer}
 ```
 
-`extracted_final_answer` may be `null`. `correct` is Boolean and `confidence`
-is between 0 and 100. Store judge parse failures explicitly; do not silently
-repair or discard them.
+The judge's raw output must be exactly one JSON object matching that schema.
+`extracted_final_answer` may be `null`. Store parse failures explicitly; do not
+silently repair or discard them.
 
 ### Per-query evaluation artifact
 
