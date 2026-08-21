@@ -229,21 +229,10 @@ A document response has this wire format:
 }
 ```
 
-With the default `parse` behavior, `doc` may instead be an object. Normalize an
-object by taking the first string field among `text`, `contents`, `content`, and
-`body`; retain a string `title` separately when present. For search previews,
-collapse whitespace and truncate the normalized text to 500 characters,
-appending `...` when truncated. The document endpoint returns the full
-normalized document; the agent tool may expose it in deterministic line-based
-pages as described below.
-
-Use ordinary text queries. Do not depend on Lucene field syntax, Boolean
-operators, or quotation marks having special semantics.
-
-For shared API use, allow at most one request in flight per worker, keep the
-worker pool modest, and use bounded exponential backoff for `429`, transient
-`5xx`, and timeout responses. An HTTP retry inside one tool invocation is still
-one agent tool call.
+The `doc` field may be a string or a parsed object. Normalize it to text before
+showing it to the agent. Search previews must collapse whitespace and contain at
+most 500 characters; document reads return the normalized document text. An
+HTTP retry inside one tool invocation still counts as one agent tool call.
 
 ### Agent tool schemas
 
@@ -273,9 +262,8 @@ not sent to the retriever.
 }
 ```
 
-`offset` and `limit` are optional. For the paginated form used in the reference
-traces, they default to line 1 and 200 lines. A full-document implementation may
-omit both, but must disclose that interface difference.
+Pagination is optional. Record whether `read_document` returned line-based
+pages or full documents so the interface used for the run is clear.
 
 The model-visible search output used by the reference two-tool interface is:
 
@@ -328,12 +316,6 @@ rendered text.
   },
   "output": "Returned 2 hits from the Pyserini REST ranking.\n...",
   "details": {
-    "toolInterface": "pyserini-rest-2tool",
-    "rawQuery": "example query",
-    "queryMode": "plain",
-    "k": 2,
-    "returnedRankStart": 1,
-    "returnedRankEnd": 2,
     "retrievedDocids": [
       "shard_00459_61697",
       "shard_00071_31411"
@@ -341,8 +323,7 @@ rendered text.
     "previewedDocids": [
       "shard_00459_61697",
       "shard_00071_31411"
-    ],
-    "timingMs": {"searchRpcMs": 123.4}
+    ]
   }
 }
 ```
@@ -365,8 +346,7 @@ rendered text.
     "totalLines": 42,
     "returnedLineStart": 1,
     "returnedLineEnd": 42,
-    "truncated": false,
-    "timingMs": {"readDocumentRpcMs": 74.2}
+    "truncated": false
   }
 }
 ```
