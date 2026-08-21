@@ -55,8 +55,8 @@ supporting documents. It may use only text returned by the two retrieval tools.
 Store gold answers and qrels in a separate evaluation process.
 
 For an exact comparison between the original BrowseComp-Plus corpus and
-ClimbMix, use the same 57 query IDs, agent prompt, model configuration, timeout,
-and judge. Only the corpus, index, and corresponding qrels should change.
+ClimbMix, use the same 57 query IDs, agent prompt, model configuration, and
+judge. Only the corpus, index, and corresponding qrels should change.
 
 ### Run manifest
 
@@ -95,9 +95,6 @@ the experiment to a particular harness.
     "document_default_lines": 200
   },
   "execution": {
-    "timeout_seconds": 300,
-    "submit_now_trigger_ratio": 0.7,
-    "submit_now_prompt_sha256": "sha256 of exact steer prompt below",
     "concurrency": 1,
     "retry_incomplete_only": true,
     "completed_attempt_selection": "first-completed"
@@ -443,25 +440,6 @@ Record the exact rendered prompt or its content hash with every run. Hidden
 reasoning or chain-of-thought is not part of the artifact contract; retain only
 observable tool interactions and the final assistant text.
 
-### Time-budget steer prompt
-
-For the paper's run condition, deliver the following as a user steer when 70%
-of the 300-second per-query budget has elapsed. After the agent observes the
-steer, block additional retrieval calls and allow it to return its best answer.
-
-```text
-Time budget is nearly exhausted.
-Further retrieval is now blocked to preserve time for submission.
-Stop using tools immediately and submit your best answer right now.
-Your final response must use exactly this format:
-Explanation: {your explanation for your final answer. Cite supporting docids inline in square brackets [] at the end of sentences when possible, for example [123].}
-Exact Answer: {your succinct, final answer}
-Confidence: {your confidence score between 0% and 100%}
-```
-
-This conditional steer is not sent when the agent finishes before the
-threshold. Record whether it was delivered in the per-query run artifact.
-
 ### Per-query run artifact
 
 Write one JSON file per query, named `<query_id>.json`. The following is the
@@ -802,7 +780,7 @@ Before reporting a result, verify all of the following:
   across 57 questions before rounding.
 - Tool calls include both `search` and `read_document`.
 - Judge parse errors, timeouts, failed calls, and retries are disclosed.
-- The exact model identifier, model settings, prompt, timeout, concurrency,
+- The exact model identifier, model settings, prompt, concurrency,
   API location, index name, dataset revision, and evaluation date are recorded.
 
 As a final numerical check, the paper's GPT-5.6 Sol (max) run on
