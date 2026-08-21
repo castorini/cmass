@@ -41,8 +41,8 @@ Hold the following choices fixed when comparing against the paper:
 | Queries | All 57 released BrowseComp-Plus<sub>CM</sub> questions |
 | Qrels | Released question-level qrels, without filtering or sampling |
 | Corpus | ClimbMix |
-| Index | `climbmix-400b` |
-| Retriever | BM25 through the Pyserini REST API |
+| Reference index | `climbmix-400b` |
+| Retriever | BM25 for direct Table 1 comparison; local or hosted access is acceptable |
 | Agent tools | `search` and `read_document` only |
 | Search preview | Whitespace-normalized, at most 500 characters per hit |
 | Supplied evidence | None |
@@ -85,10 +85,11 @@ the experiment to a particular harness.
     "prompt_sha256": "sha256 of exact rendered prompt template"
   },
   "retrieval": {
-    "backend": "pyserini-rest",
-    "base_url": "http://api.castorini.uwaterloo.ca",
-    "index": "climbmix-400b",
-    "tool_interface": "pyserini-rest-2tool",
+    "backend": "implementation name and version",
+    "transport": "local or hosted",
+    "location": "local index path or service URL",
+    "index": "ClimbMix index identifier and revision",
+    "tool_interface": "search+read_document",
     "search_preview_chars": 500,
     "default_hits": 5,
     "document_read_mode": "paginated-lines",
@@ -181,7 +182,15 @@ used as agent input.
 
 ## Search stage
 
-### REST interface
+### Retrieval interface
+
+The `search` and `read_document` tools may use a local index, the hosted API,
+or another retrieval implementation. The hosted API is optional. Record the
+backend and index used, and preserve the same model-visible search previews and
+document IDs needed for evaluation. Use BM25 when making a direct comparison
+with Table 1; results from other retrievers should identify that difference.
+
+#### Optional hosted REST API
 
 The current service location and authentication guidance are maintained in the
 [Pyserini REST API skill](https://github.com/TREC-RAG/trec-rag-skills/tree/main/skills/pyserini-rest-api).
@@ -189,7 +198,7 @@ At the time of writing, the base URL is
 `http://api.castorini.uwaterloo.ca`. Record the URL and evaluation date because
 the service location may change.
 
-Use these two endpoints:
+The hosted service exposes these two endpoints:
 
 ```text
 GET /v1/climbmix-400b/search?query=<query>&hits=<k>&max_doc_length=500
@@ -268,7 +277,7 @@ pages or full documents so the interface used for the run is clear.
 The model-visible search output used by the reference two-tool interface is:
 
 ```text
-Returned 2 hits from the Pyserini REST ranking.
+Returned 2 hits from the configured BM25 index.
 Plain query: "example query"
 Requested hits: 2
 
@@ -314,7 +323,7 @@ rendered text.
     "query": "example query",
     "hits": 2
   },
-  "output": "Returned 2 hits from the Pyserini REST ranking.\n...",
+  "output": "Returned 2 hits from the configured BM25 index.\n...",
   "details": {
     "retrievedDocids": [
       "shard_00459_61697",
@@ -438,9 +447,9 @@ trace for a particular released query.
     "prompt_variant": "plain_minimal",
     "output_mode": "answer",
     "output_modes": ["answer"],
-    "tool_interface": "pyserini-rest-2tool",
-    "search_backend_kind": "pyserini-rest",
-    "index": "climbmix-400b",
+    "tool_interface": "search+read_document",
+    "search_backend_kind": "implementation name",
+    "index": "ClimbMix index identifier",
     "dataset_revision": "13a0ff7ce702f797e2db5dfe7be38933e08088e2",
     "attempt": 1,
     "supplied_docids": []
@@ -486,7 +495,7 @@ trace for a particular released query.
         "query": "example query",
         "hits": 2
       },
-      "output": "Returned 2 hits from the Pyserini REST ranking.\n..."
+      "output": "Returned 2 hits from the configured BM25 index.\n..."
     },
     {
       "type": "tool_call",
@@ -760,8 +769,9 @@ Before reporting a result, verify all of the following:
   across 57 questions before rounding.
 - Tool calls include both `search` and `read_document`.
 - Judge parse errors, timeouts, failed calls, and retries are disclosed.
-- The exact model identifier, model settings, prompt, concurrency,
-  API location, index name, dataset revision, and evaluation date are recorded.
+- The exact model identifier, model settings, prompt, concurrency, retrieval
+  backend, index or corpus revision, dataset revision, and evaluation date are
+  recorded.
 
 As a final numerical check, the paper's GPT-5.6 Sol (max) run on
 BrowseComp-Plus<sub>CM</sub> has 46 correct answers out of 57:
