@@ -143,8 +143,11 @@ compare another agent.
 
 ## Repository
 
+- [`pipelines/cmass/`](pipelines/cmass/): the dataset- and corpus-agnostic pipeline for stages 2 and 3:
+  the audit, revision, adversarial check, human review and final check, and qrels construction (candidate
+  pooling, precision filter, duplicate expansion), with an offline demo on invented data.
 - [`pipelines/bcp_climbmix/`](pipelines/bcp_climbmix/): the BrowseComp-Plus projection (stage 1) and
-  the first qrels construction ([`qrels/`](pipelines/bcp_climbmix/qrels/)).
+  the first, BCP-only qrels construction ([`qrels/`](pipelines/bcp_climbmix/qrels/)).
 - [`review_site/`](review_site/): the human-in-the-loop review site used in stage 2, with an invented
   demo dataset. Reviewers see each question with its constraints, the audit, every hop's verbatim
   evidence in the full documents, and record decisions, per-hop checks and comments as JSONL.

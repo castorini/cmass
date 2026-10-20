@@ -2,3 +2,8 @@
 # rules still apply). One glob per line, with the reason after '#'. Never list benchmark content here.
 corpus_analysis/results/exact_duplicates_summary.json  # example exact-duplicate clusters: corpus doc ids only, no benchmark link
 review_site/demo/make_demo.py  [synthetic]  # invented demo entities (the island nation of Oskeria); no benchmark content
+pipelines/cmass/demo/make_demo_run.py  [synthetic]  # invented demo candidates and a sample audit (fictional Oskeria)
+pipelines/cmass/demo/make_stage2_demo.py  [synthetic]  # invented Stage 2 records (fictional Oskeria)
+pipelines/cmass/demo/make_stage3_fixtures.py  [synthetic]  # invented final records and verdicts (fictional Oskeria)
+pipelines/cmass/stage2/AUDIT.md  [synthetic]  # worked audit example on invented Oskeria documents
+pipelines/cmass/stage3/QRELS.md  [synthetic]  # verdict examples quoting invented Oskeria documents
