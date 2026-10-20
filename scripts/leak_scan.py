@@ -54,7 +54,7 @@ SECRET_PATTERNS = {
     "private key": re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
     # a quoted literal assigned to a key/token/secret/password name, or a .env / shell style NAME=value line
     "credential assignment": re.compile(
-        r"(?i)\b\w*(?:API_?KEY|TOKEN|SECRET|PASSWORD)\w*['\"]?\s*[:=]\s*['\"](?!<)[A-Za-z0-9_\-\.\/+=]{16,}['\"]"),
+        r"(?i)\b\w*(?:API_?KEY|TOKEN|SECRET|PASSWORD)['\"]?\s*[:=]\s*['\"](?!<)(?!(?-i:[A-Z0-9_]+)['\"])[A-Za-z0-9_\-\.\/+=]{16,}['\"]"),
     "credential in env file": re.compile(
         r"^\s*(?:export\s+)?[A-Z0-9_]*(?:API_?KEY|TOKEN|SECRET|PASSWORD)[A-Z0-9_]*=(?![<$'\"{])[^\s#]{16,}"),
 }
