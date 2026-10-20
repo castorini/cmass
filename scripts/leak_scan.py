@@ -52,8 +52,11 @@ SECRET_PATTERNS = {
     "Google API key": re.compile(r"AIza[0-9A-Za-z_\-]{35}"),
     "Slack token": re.compile(r"xox[baprs]-[A-Za-z0-9\-]{10,}"),
     "private key": re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
+    # a quoted literal assigned to a key/token/secret/password name, or a .env / shell style NAME=value line
     "credential assignment": re.compile(
-        r"(?i)\b[A-Z0-9_]*(?:API_?KEY|TOKEN|SECRET|PASSWORD)\b\s*[:=]\s*['\"]?(?!<)(?!\$\{?)[A-Za-z0-9_\-\.\/+]{16,}"),
+        r"(?i)\b\w*(?:API_?KEY|TOKEN|SECRET|PASSWORD)\w*['\"]?\s*[:=]\s*['\"](?!<)[A-Za-z0-9_\-\.\/+=]{16,}['\"]"),
+    "credential in env file": re.compile(
+        r"^\s*(?:export\s+)?[A-Z0-9_]*(?:API_?KEY|TOKEN|SECRET|PASSWORD)[A-Z0-9_]*=(?![<$'\"{])[^\s#]{16,}"),
 }
 SECRET_FILES = re.compile(r"(^|/)(\.env(\.[A-Za-z0-9_]+)?|.*\.pem|id_(rsa|ed25519|ecdsa)[^/]*|credentials[^/]*\.json)$")
 SECRET_FILE_OK = re.compile(r"(^|/)\.env\.(example|sample|template)$")
