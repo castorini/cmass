@@ -27,5 +27,5 @@ Before your first commit, run `bash scripts/install_hooks.sh`. It installs a pre
 staged files) and a pre-push hook (scans every commit being pushed). Every push and pull request also
 runs the `leak-scan` GitHub check (`.github/workflows/leak-scan.yml`). If the scanner flags something,
 remove it; do not work around the scanner. `.leak-scan-allow` exists only for aggregate statistics files
-that trip the format, size or document-id rules; each entry needs a reason and is reviewed in the pull
-request. Details: `.claude/skills/leak-scan/SKILL.md`.
+that trip the format, size or document-id rules, and for files of invented demo content tagged
+`[synthetic]`; each entry needs a reason and is reviewed in the pull request. Details: `.claude/skills/leak-scan/SKILL.md`.

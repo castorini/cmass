@@ -45,5 +45,8 @@ python3 scripts/leak_scan.py --history                # every file reachable fro
    maintainers, because removing pushed content needs GitHub Support.
 4. Only aggregate statistics files that trip `data-format`, `size` or `doc-ids` may go in
    `.leak-scan-allow` (glob, then the reason after `#`). The other rules still apply to them.
+5. A file of invented demo content (fictional entities only, such as `review_site/demo/make_demo.py`)
+   is listed with the tag `[synthetic]` after its glob. That skips `data-field` and `qa-pair` for that
+   file and nothing else; reviewers check that everything in it is invented.
 
 Data that should be public goes through the obfuscated Hugging Face release, never into this repository.

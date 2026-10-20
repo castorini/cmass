@@ -11,6 +11,7 @@ ClimbMix Agentic Search Suite
 <a href="REPRODUCING.md"><b>Reproduce</b></a> |
 <a href="pipelines/bcp_climbmix/README.md"><b>Projection</b></a> |
 <a href="pipelines/bcp_climbmix/qrels/README.md"><b>Qrels</b></a> |
+<a href="review_site/README.md"><b>Review site</b></a> |
 <a href="corpus_analysis/README.md"><b>Corpus Analysis</b></a> |
 </p>
 
@@ -30,14 +31,27 @@ ClimbMix Agentic Search Suite
   <img alt="Python" src="https://img.shields.io/badge/python-3.10+-blue.svg">
 </p>
 
-ClimbMix Agentic Search Suite (CMASS) builds corpus-grounded agentic-search
-benchmarks by projecting existing question-answering benchmarks onto a fixed retrieval corpus. Each
-question is decomposed into atomic reasoning hops, and a question is retained only when every hop is
-supported by retrievable documents in the target corpus.
+ClimbMix Agentic Search Suite (CMASS) projects existing question-answering benchmarks onto a shared,
+fixed retrieval corpus, so that agentic search can be compared across tasks on the same documents.
+The target corpus, ClimbMix, holds 553 million documents and about 400 billion tokens and was
+assembled independently of the benchmark questions.
 
-The first release, **BrowseComp-Plus<sub>CM</sub>**, projects BrowseComp-Plus onto the 553-million-
-document, 400-billion-token ClimbMix corpus. The released benchmark contains 57 human-verified
-questions with question-level relevance judgments.
+CMASS projects three search benchmarks, **BrowseComp-Plus**, **Total Recall QA** and **DeepSearchQA**,
+and the multi-hop QA dataset **HotpotQA**. Each question is decomposed into atomic hops and kept only
+if every hop is grounded in ClimbMix documents, its answer is unique, and (for set questions) its
+answer set is complete; independent agent audits, controlled revision and human review check each one.
+The result is **423 questions** spanning entity identification, multi-hop reasoning, exhaustive answer
+sets and aggregation, each with question-level relevance judgments (qrels).
+
+| Source benchmark | Questions | Unchanged | Reworded | Constraint removed | Narrowed | Answer changed |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| BrowseComp-Plus (BCP) | 80 | 37 | 15 | 10 | 17 | 1 |
+| Total Recall QA (TRQA) | 68 | 31 | 5 | 0 | 16 | 16 |
+| DeepSearchQA (DSQA) | 71 | 31 | 9 | 13 | 12 | 6 |
+| HotpotQA | 204 | 144 | 13 | 0 | 47 | 0 |
+| **Total** | **423** | | | | | |
+
+The revision columns count how each retained question changed during the audit.
 
 ## Quick Start
 
@@ -83,57 +97,65 @@ consume the release.
 
 ## Projection Pipeline
 
-The complete paper pipeline is shown below. **Stage 1: Projection** contains four operations, in
-figure order: **Hop/Clue decomposition**, **Grounding**, **Answerability check**, and **All-hops
-verification**. The first two are agent-driven; the latter two retain only corpus-answerable
-questions whose full reasoning chains are grounded. **Stage 2: Independent agent validation with
-PIIKA**, **Stage 3: Human verification**, and **Stage 4: Qrels construction** complete the pipeline.
+![Projecting QA benchmarks onto ClimbMix](assets/projection-pipeline.png)
 
-<img width="668" height="784" alt="Projecting BrowseComp-Plus onto ClimbMix pipeline" src="https://github.com/user-attachments/assets/eeea1149-b197-41f8-8a83-22435b6727ee" />
+- **Stage 0, preparation:** duplicate detection over the corpus (exact and near duplicates, Jaccard
+  0.7 or more; nothing is removed) and one task per source question.
+- **Stage 1, projection:** an agent decomposes each question into a minimal chain of atomic hops and
+  searches ClimbMix until every hop has evidence or the evidence is shown to be absent. An answerability
+  check and an all-hops verification keep the questions whose hops are all grounded and jointly derive
+  the answer; near misses are kept for the audit.
+- **Stage 2, audit, revision and human review:** an auditor agent checks constraint coverage,
+  alternatives, uniqueness and set completeness and may repair a question; hunter agents look for rival
+  answers and verifier agents check the evidence; the authors review every question in the
+  [review site](review_site/); a fresh checker agent verifies the final answer and evidence.
+- **Stage 3, qrels:** a high-recall candidate pool per question, a precision filter that keeps
+  documents supporting at least one hop, and expansion over exact and confirmed near duplicates.
 
-Of the 830 source questions, 326 are answerable from ClimbMix and 65 pass automatic all-hops
-verification. PIIKA answers all 65 correctly when given their supporting documents. Human review
-then retains 57 questions for the released benchmark.
+![Hops per question and relevant documents per question](assets/projection-stats.png)
 
-## PIIKA Results
+## Results
 
-The paper evaluates three PIIKA configurations on the 57 human-verified questions. In this
-evaluation, agents receive no supplied documents and retrieve only through the corpus's BM25 index.
-Accuracy and recall are percentages; tool calls are the average number of retrieval calls per question.
-See the [reproduction guide](REPRODUCING.md) for the harness-neutral search, run, and evaluation
-formats needed to compare another agent against these results.
+Three models with search and document-reading tools over the ClimbMix BM25 index, and closed-book.
+R@all: recall of the qrels over all retrieved documents; H.G.: hop groundedness; T.C.: mean search and
+document-read calls per question; Acc.: answer accuracy (all in %). GPT-6.1 Sol uses high reasoning
+effort; DSQA uses strict exact-set equality.
 
-| Model | Corpus | Accuracy | Recall | Tool calls |
-| --- | --- | ---: | ---: | ---: |
-| GPT-5.6 Sol (max) | BrowseComp-Plus | 85.96 | 84.28 | 60.16 |
-| GPT-5.6 Sol (max) | BrowseComp-Plus<sub>CM</sub> | 80.70 | 21.37 | 98.26 |
-| Gemma 4 31B IT | BrowseComp-Plus | 26.32 | 24.91 | 24.46 |
-| Gemma 4 31B IT | BrowseComp-Plus<sub>CM</sub> | 15.79 | 2.77 | 23.42 |
-| Qwen 3.5 9B | BrowseComp-Plus | 14.04 | 19.33 | 33.44 |
-| Qwen 3.5 9B | BrowseComp-Plus<sub>CM</sub> | 12.28 | 2.64 | 37.93 |
+| Benchmark | Model | R@all | H.G. | T.C. | Acc. | Closed-book Acc. |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| BCP (80) | GPT-6.1 Sol | 10.8 | 73.8 | 21.5 | 85.0 | 52.5 |
+| | Gemma 4 31B | 3.4 | 28.3 | 23.5 | 27.5 | 16.3 |
+| | Qwen 3.5 9B | 3.2 | 27.8 | 49.9 | 16.3 | 5.0 |
+| TRQA (68) | GPT-6.1 Sol | 9.9 | 78.2 | 8.6 | 94.1 | 86.8 |
+| | Gemma 4 31B | 14.1 | 79.1 | 12.4 | 66.2 | 50.0 |
+| | Qwen 3.5 9B | 15.7 | 84.6 | 19.7 | 57.4 | 39.7 |
+| DSQA (71) | GPT-6.1 Sol | 14.1 | 73.2 | 17.9 | 90.1 | 70.4 |
+| | Gemma 4 31B | 15.5 | 63.3 | 21.5 | 38.0 | 23.9 |
+| | Qwen 3.5 9B | 16.7 | 68.2 | 37.1 | 39.4 | 12.7 |
+| HotpotQA (204) | GPT-6.1 Sol | 16.6 | 86.7 | 6.7 | 94.6 | 89.7 |
+| | Gemma 4 31B | 16.3 | 76.0 | 10.2 | 65.7 | 36.8 |
+| | Qwen 3.5 9B | 17.2 | 80.9 | 17.0 | 70.1 | 27.5 |
 
-Projection makes retrieval substantially harder. For GPT-5.6 Sol, evidence recall falls from 84.28%
-to 21.37% while the agent makes 63% more retrieval calls, even though answer accuracy decreases by
-only about five points.
+Open-weight agents leave substantial headroom, and high accuracy can coexist with incomplete evidence:
+the strongest model answers most questions while retrieving a small fraction of the relevant documents.
+See the [reproduction guide](REPRODUCING.md) for the search, run and evaluation formats needed to
+compare another agent.
 
 ## Repository
 
-- [`pipelines/bcp_climbmix/`](pipelines/bcp_climbmix/) contains the BrowseComp-Plus-to-ClimbMix
-  implementation. Its top-level scripts implement **Stage 1: Projection**: **Hop/Clue
-  decomposition**, **Grounding**, **Answerability check**, and **All-hops verification**. The
-  [`qrels/`](pipelines/bcp_climbmix/qrels/) subdirectory implements **Stage 4: Qrels construction**.
-  Stage 1 produces 65 fully grounded questions; subsequent validation and human review yield the
-  released set of 57.
-- [`corpus_analysis/`](corpus_analysis/) measures the ClimbMix corpus: token-length distribution,
-  exact and near-duplicate detection, and how much of the corpus survives deduplication. Its
-  per-document duplicate records are released as the `corpus_duplicates` config of the Hugging Face
-  dataset; see [`corpus_analysis/release/`](corpus_analysis/release/) for how they are built and
-  verified.
-- [`scripts/deobfuscate.py`](scripts/deobfuscate.py) decodes the obfuscated `question`, `answer`, and
-  `doc_id` fields in the Hugging Face release using each row's `canary`.
-- [The Hugging Face release](https://huggingface.co/datasets/castorini/cmass) contains the benchmark
-  queries and qrels, plus the `corpus_duplicates` config: exact and near-duplicate relationships for
-  every duplicated ClimbMix document (219,066,180 rows). The corresponding documents come from the
+- [`pipelines/bcp_climbmix/`](pipelines/bcp_climbmix/): the BrowseComp-Plus projection (stage 1) and
+  the first qrels construction ([`qrels/`](pipelines/bcp_climbmix/qrels/)).
+- [`review_site/`](review_site/): the human-in-the-loop review site used in stage 2, with an invented
+  demo dataset. Reviewers see each question with its constraints, the audit, every hop's verbatim
+  evidence in the full documents, and record decisions, per-hop checks and comments as JSONL.
+- [`corpus_analysis/`](corpus_analysis/): token lengths, exact and near-duplicate detection and
+  deduplication statistics for ClimbMix; its per-document duplicate records are the
+  `corpus_duplicates` config of the Hugging Face dataset.
+- [`scripts/deobfuscate.py`](scripts/deobfuscate.py) decodes the obfuscated fields of the Hugging Face
+  release using each row's `canary`; [`scripts/leak_scan.py`](scripts/leak_scan.py) keeps benchmark
+  content out of this repository.
+- [The Hugging Face dataset](https://huggingface.co/datasets/castorini/cmass) holds the released
+  questions and qrels (obfuscated) and the `corpus_duplicates` config. The documents come from the
   `climbmix-400b` corpus.
 
 ## Contributing

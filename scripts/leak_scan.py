@@ -27,8 +27,10 @@ Rules
 
 A path that legitimately needs a blocked format or size, or lists many document ids, goes in
 .leak-scan-allow (one glob per line, with a reason after '#'); the secret, data-field, qa-pair and
-canary rules still apply to it. Never add benchmark content to the allowlist: publish it obfuscated
-through the Hugging Face release instead.
+canary rules still apply to it. A file of invented demo content (fictional entities only, never a real
+benchmark item) is listed with the tag [synthetic] after the glob; that skips the data-field and
+qa-pair rules for it, and nothing else. Never add benchmark content to the allowlist: publish it
+obfuscated through the Hugging Face release instead.
 """
 from __future__ import annotations
 
@@ -101,19 +103,24 @@ def git(*args: str, input: bytes | None = None) -> bytes:
     return r.stdout
 
 
-def allowlist() -> list[str]:
+def allowlist() -> list[tuple[str, set[str]]]:
+    """(glob, tags) per entry of .leak-scan-allow; tags such as [synthetic] follow the glob."""
     if not ALLOW_FILE.exists():
         return []
     out = []
     for line in ALLOW_FILE.read_text().splitlines():
-        glob = line.split("#", 1)[0].strip()
-        if glob:
-            out.append(glob)
+        parts = line.split("#", 1)[0].split()
+        if parts:
+            out.append((parts[0], {t.strip("[]").lower() for t in parts[1:] if t.startswith("[")}))
     return out
 
 
-def is_allowed(path: str, globs: list[str]) -> bool:
-    return any(fnmatch.fnmatch(path, g) for g in globs)
+def is_allowed(path: str, globs, tag: str | None = None) -> bool:
+    for g in globs:
+        glob, tags = (g, set()) if isinstance(g, str) else g
+        if fnmatch.fnmatch(path, glob) and (tag is None or tag in tags):
+            return True
+    return False
 
 
 def placeholder(value: str) -> bool:
@@ -124,6 +131,7 @@ def placeholder(value: str) -> bool:
 def scan_blob(path: str, data: bytes, globs: list[str], where: str = "") -> list[Finding]:
     found: list[Finding] = []
     allowed = is_allowed(path, globs)
+    synthetic = is_allowed(path, globs, "synthetic")
     ext = Path(path).suffix.lower()
     if SECRET_FILES.search(path) and not SECRET_FILE_OK.search(path):
         found.append(Finding(path, 0, "secret", "credential file; never commit it", where))
@@ -141,14 +149,14 @@ def scan_blob(path: str, data: bytes, globs: list[str], where: str = "") -> list
         for name, pat in SECRET_PATTERNS.items():
             if pat.search(line):
                 found.append(Finding(path, i, "secret", name, where))
-        for m in FIELD_RE.finditer(line):
+        for m in ([] if synthetic else FIELD_RE.finditer(line)):
             if not placeholder(m.group(2)):
                 found.append(Finding(path, i, "data-field", f'"{m.group(1)}" has a real value: '
                                                             f'{m.group(2)[:60]!r}', where))
         for pat in CANARY:
             if pat.search(line):
                 found.append(Finding(path, i, "canary", "benchmark canary string", where))
-        if QUESTION_LINE.match(line) and any(ANSWER_LINE.match(n) for n in lines[i:i + 6]):
+        if not synthetic and QUESTION_LINE.match(line) and any(ANSWER_LINE.match(n) for n in lines[i:i + 6]):
             found.append(Finding(path, i, "qa-pair", f"question followed by an answer: {line.strip()[:60]!r}", where))
     ids = set(DOC_ID.findall(text))
     if len(ids) > MAX_DOC_IDS and not allowed:
