@@ -5,6 +5,8 @@ description: Measure a parquet document corpus - token-length distribution, exac
 
 # Corpus analysis
 
+> **Public repository.** Outputs of this skill that quote document text are derived data: keep them in the output directory, which is gitignored, and never commit them. See `AGENTS.md` and the `leak-scan` skill.
+
 Runs over `corpus_analysis/` in this repository. Everything is CLI-driven; every step takes
 `--corpus-dir`, `--out-dir`, `--dry-run`, and is resumable.
 

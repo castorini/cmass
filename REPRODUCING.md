@@ -165,7 +165,7 @@ Qrel rows have this shape:
 {
   "query_id": "<query_id>",
   "iteration": "0",
-  "doc_id": "shard_00071_31411",
+  "doc_id": "shard_00012_34567",
   "relevance": 1,
   "canary": "..."
 }
@@ -285,7 +285,7 @@ Requested hits: 2
    Title: Optional title
    Excerpt: Document preview text...
 
-2. docid=shard_00071_31411 score=11.9201
+2. docid=shard_00012_34567 score=11.9201
    Excerpt: Another document preview...
 
 Use read_document(docid) to inspect a specific document before answering.
@@ -327,11 +327,11 @@ rendered text.
   "details": {
     "retrievedDocids": [
       "shard_00459_61697",
-      "shard_00071_31411"
+      "shard_00012_34567"
     ],
     "previewedDocids": [
       "shard_00459_61697",
-      "shard_00071_31411"
+      "shard_00012_34567"
     ]
   }
 }
@@ -463,11 +463,11 @@ trace for a particular released query.
   "completion_source": "assistant_text",
   "surfaced_docids": [
     "shard_00459_61697",
-    "shard_00071_31411"
+    "shard_00012_34567"
   ],
   "previewed_docids": [
     "shard_00459_61697",
-    "shard_00071_31411"
+    "shard_00012_34567"
   ],
   "agent_docids": ["shard_00459_61697"],
   "opened_docids": ["shard_00459_61697"],

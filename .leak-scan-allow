@@ -1,0 +1,3 @@
+# Paths exempt from the data-format, size and doc-ids rules (secret, data-field, qa-pair and canary
+# rules still apply). One glob per line, with the reason after '#'. Never list benchmark content here.
+corpus_analysis/results/exact_duplicates_summary.json  # example exact-duplicate clusters: corpus doc ids only, no benchmark link

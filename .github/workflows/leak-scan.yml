@@ -1,0 +1,44 @@
+# Blocks benchmark content and credentials from this public repository (see AGENTS.md).
+# Runs on every push to any branch and on every pull request; scans each new commit, not only the
+# final tree, because a file added and later deleted is still published in the history.
+name: leak-scan
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  leak-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Scan every commit this push or pull request adds
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          zero=0000000000000000000000000000000000000000
+          if [ "$EVENT" = "pull_request" ]; then
+            python scripts/leak_scan.py --commits "$BASE..$HEAD"
+          elif [ -z "$BEFORE" ] || [ "$BEFORE" = "$zero" ] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            # new branch or force push: everything not already on main
+            python scripts/leak_scan.py --commits "origin/main..$AFTER"
+          else
+            python scripts/leak_scan.py --commits "$BEFORE..$AFTER"
+          fi
+
+      - name: Scan the resulting tree
+        run: python scripts/leak_scan.py --tree HEAD

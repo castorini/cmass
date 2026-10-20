@@ -5,6 +5,8 @@ description: Build and audit per-question relevance judgments for a projected be
 
 # Qrels construction
 
+> **Public repository.** Outputs of this skill (judgments, qrels, worksheets, document text) are derived benchmark data: keep them in the work directory, which is gitignored, and never commit them. See `AGENTS.md` and the `leak-scan` skill.
+
 Runs over `pipelines/bcp_climbmix/qrels/` in this repository. Every step is
 CLI-driven, takes `--work-dir`, and is resumable per question.
 

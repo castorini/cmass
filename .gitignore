@@ -238,3 +238,14 @@ corpus_analysis/**/*.log
 
 # Figure PDFs are build products; the PNGs beside them are committed.
 corpus_analysis/figures/out/*.pdf
+
+# Public repository: dataset, archive and credential files never belong here (see AGENTS.md;
+# scripts/leak_scan.py enforces this on every commit, push and pull request).
+*.jsonl
+*.ndjson
+*.trec
+*.parquet
+*.zip
+.env
+.env.*
+!.env.example

@@ -136,6 +136,20 @@ only about five points.
   every duplicated ClimbMix document (219,066,180 rows). The corresponding documents come from the
   `climbmix-400b` corpus.
 
+## Contributing
+
+This repository is public. Benchmark content (questions, answers, hops, evidence, document text,
+qrels), dataset files and credentials never go in it; released data is published only in obfuscated
+form on Hugging Face. Read [`AGENTS.md`](AGENTS.md) and install the leak-scan hooks before your first
+commit:
+
+```bash
+bash scripts/install_hooks.sh
+```
+
+Every push and pull request also runs the `leak-scan` check
+([`scripts/leak_scan.py`](scripts/leak_scan.py)).
+
 ## Citation
 
 If you use CMASS, please cite:
