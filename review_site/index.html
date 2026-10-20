@@ -1,0 +1,920 @@
+<title>Projection Evidence Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+/* Layout: an evidence ledger. Fixed top bar; question index on the left; the selected question reads
+   top-down like the paper's projection figures (question with bracketed constraints, then the hop
+   table); documents open in a right-hand drawer with the verbatim quotes marked. */
+:root {
+  --bg: #f3f5f8; --panel: #ffffff; --sunk: #eaeef3; --ink: #18212b; --muted: #5a6776; --line: #d9e0e8;
+  --accent: #2753b8; --accent-ink: #ffffff; --accent-soft: #e5ecfa;
+  --ok: #1d7347; --ok-soft: #e2f2e8; --warn: #9a6200; --warn-soft: #fbefd6; --bad: #b0281f; --bad-soft: #fbe4e1;
+  --conf: #2f6a95; --conf-soft: #e1eef7; --mark: #ffe98a; --mark-ink: #18212b; --shadow: 0 1px 2px rgba(20,30,45,.06), 0 4px 16px rgba(20,30,45,.06);
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-read: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --s-xs: .75rem; --s-sm: .8125rem; --s-md: .9375rem; --s-lg: 1.125rem; --s-xl: 1.375rem;
+  --r: 6px; --side: 320px; --top: 52px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e1319; --panel: #151c24; --sunk: #1b232d; --ink: #e3e9f0; --muted: #96a3b2; --line: #28323e;
+  --accent: #8eacf5; --accent-ink: #0e1319; --accent-soft: #1c2944;
+  --ok: #6fcb95; --ok-soft: #14301f; --warn: #eebd5a; --warn-soft: #362a10; --bad: #ff8c82; --bad-soft: #3b1a18;
+  --conf: #86bce3; --conf-soft: #142a3a; --mark: #6b5a12; --mark-ink: #fff8dc; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.35);
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0e1319; --panel: #151c24; --sunk: #1b232d; --ink: #e3e9f0; --muted: #96a3b2; --line: #28323e;
+  --accent: #8eacf5; --accent-ink: #0e1319; --accent-soft: #1c2944;
+  --ok: #6fcb95; --ok-soft: #14301f; --warn: #eebd5a; --warn-soft: #362a10; --bad: #ff8c82; --bad-soft: #3b1a18;
+  --conf: #86bce3; --conf-soft: #142a3a; --mark: #6b5a12; --mark-ink: #fff8dc; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.35);
+  color-scheme: dark }
+
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 var(--s-md)/1.5 var(--f-body); }
+* { box-sizing: border-box; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mono { font-family: var(--f-mono); font-size: .92em; }
+.muted { color: var(--muted); }
+.label { font-size: var(--s-xs); text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+
+/* ---------- app frame ---------- */
+.app { display: grid; grid-template-rows: auto 1fr; height: 100%; }
+.topbar { display: flex; align-items: center; gap: 12px 20px; flex-wrap: wrap; padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--line); position: relative; z-index: 3; }
+.brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.brand h1 { margin: 0; font: 600 var(--s-lg)/1.2 var(--f-body); letter-spacing: -.01em; white-space: nowrap; }
+.brand .corpus { font: 500 var(--s-xs)/1 var(--f-mono); color: var(--muted); }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; background: var(--sunk); padding: 3px; border-radius: 8px; max-width: 100%; }
+.tab { border: 0; background: transparent; padding: 5px 12px; border-radius: 6px; font-weight: 500; font-size: var(--s-sm); color: var(--muted); display: flex; gap: 6px; align-items: baseline; }
+.tab .n { font: 400 var(--s-xs) var(--f-mono); }
+.tabs { align-items: center; }
+.tabs[hidden] { display: none; }
+.nmtabs { background: var(--warn-soft); }
+.rwtabs { background: var(--accent-soft); }
+.tabs .grp { font: 600 var(--s-xs)/1 var(--f-body); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 0 6px 0 8px; white-space: nowrap; }
+.nmtabs .grp { color: var(--warn); }
+.rwtabs .grp { color: var(--accent); }
+.tab[aria-selected="true"] { background: var(--panel); color: var(--ink); box-shadow: var(--shadow); }
+.spacer { flex: 1; }
+.savestate { font-size: var(--s-xs); color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.savestate .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.savestate[data-s="saved"] .dot { background: var(--ok); }
+.savestate[data-s="saving"] .dot { background: var(--warn); }
+.savestate[data-s="error"] .dot { background: var(--bad); }
+.btn { border: 1px solid var(--line); background: var(--panel); padding: 6px 12px; border-radius: var(--r); font-size: var(--s-sm); font-weight: 500; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn:disabled { opacity: .5; cursor: default; }
+
+.body { display: grid; grid-template-columns: var(--side) minmax(0, 1fr); min-height: 0; }
+.side { border-right: 1px solid var(--line); background: var(--panel); display: grid; grid-template-rows: auto 1fr; min-height: 0; }
+.filters { padding: 12px 16px; display: grid; gap: 10px; border-bottom: 1px solid var(--line); }
+.filters input[type=search] { width: 100%; padding: 7px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); }
+.chiprow { display: flex; flex-wrap: wrap; gap: 4px; }
+.fchip { border: 1px solid var(--line); background: transparent; padding: 2px 9px; border-radius: 999px; font-size: var(--s-xs); color: var(--muted); }
+.fchip[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: transparent; font-weight: 600; }
+.progress { font-size: var(--s-xs); color: var(--muted); display: grid; gap: 4px; }
+.bar { height: 5px; background: var(--sunk); border-radius: 3px; overflow: hidden; display: flex; }
+.bar span { display: block; height: 100%; }
+.qlist { overflow-y: auto; min-height: 0; }
+.qitem { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 2px 10px; padding: 9px 16px; border-bottom: 1px solid var(--line); cursor: pointer; border-left: 3px solid transparent; }
+.qitem:hover { background: var(--bg); }
+.qitem[aria-current="true"] { background: var(--accent-soft); border-left-color: var(--accent); }
+.qitem .id { font: 500 var(--s-xs) var(--f-mono); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qitem .q { grid-column: 1 / -1; font-size: var(--s-sm); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.qitem .marks { display: flex; gap: 5px; align-items: center; }
+.rv { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--muted); }
+.rv[data-d="accept"] { background: var(--ok); border-color: var(--ok); }
+.rv[data-d="accept_with_fixes"] { background: var(--conf); border-color: var(--conf); }
+.rv[data-d="reject"] { background: var(--bad); border-color: var(--bad); }
+.rv[data-d="unsure"] { background: var(--warn); border-color: var(--warn); }
+.rv[data-d="comment"] { border-color: var(--accent); background: var(--accent-soft); }
+
+.main { overflow-y: auto; min-height: 0; padding-block: 20px 64px; padding-inline: 16px; }
+.sheet { max-width: 1080px; margin: 0 auto; display: grid; gap: 20px; }
+.empty { color: var(--muted); padding: 40px 0; text-align: center; }
+
+/* ---------- pills ---------- */
+.pill { display: inline-flex; align-items: center; gap: 5px; padding: 1px 8px; border-radius: 999px; font: 600 var(--s-xs)/1.6 var(--f-body); white-space: nowrap; letter-spacing: .01em; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.conf { background: var(--conf-soft); color: var(--conf); }
+.pill.neutral { background: var(--sunk); color: var(--muted); }
+.pill.fix { background: var(--accent-soft); color: var(--accent); }
+
+/* ---------- question header ---------- */
+.qhead { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: grid; gap: 14px; box-shadow: var(--shadow); }
+.crumbs { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; font-size: var(--s-sm); color: var(--muted); }
+.crumbs .mono { color: var(--ink); }
+.qtext { font: 400 1.25rem/1.6 var(--f-read); margin: 0; text-wrap: pretty; }
+.cspan { border-radius: 3px; padding: 0 2px; cursor: pointer; box-decoration-break: clone; -webkit-box-decoration-break: clone; transition: background .12s; }
+.cspan::before { content: "["; color: var(--muted); font-weight: 400; }
+.cspan::after { content: "]" attr(data-id); color: var(--muted); font: 600 .62em var(--f-body); vertical-align: sub; }
+.cspan.covered { background: var(--ok-soft); }
+.cspan.partially_covered { background: var(--warn-soft); }
+.cspan.not_covered { background: var(--bad-soft); }
+.cspan.hl, .cspan:hover { outline: 2px solid var(--accent); }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px 20px; }
+.fact { display: grid; gap: 2px; min-width: 0; }
+.fact .v { font-size: var(--s-md); overflow-wrap: anywhere; }
+.fact .v.answer { font-weight: 600; }
+.canary { font-size: var(--s-xs); color: var(--muted); overflow-wrap: anywhere; }
+.note-src { font-size: var(--s-sm); color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; }
+
+/* ---------- audit + review row ---------- */
+.duo { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 12px; min-width: 0; }
+.card h2 { margin: 0; font: 600 var(--s-md)/1.3 var(--f-body); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.card p { margin: 0; }
+.stats { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: var(--s-sm); color: var(--muted); font-variant-numeric: tabular-nums; }
+.stats b { color: var(--ink); font-weight: 600; }
+.verif { font-size: var(--s-sm); display: grid; gap: 4px; border-top: 1px solid var(--line); padding-top: 10px; }
+.verif .pill { justify-self: start; }
+.salvage { font-size: var(--s-sm); display: grid; gap: 6px; background: var(--sunk); border-radius: var(--r); padding: 10px 12px; }
+.salvage .pill { justify-self: start; }
+.salvage ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
+.salvage p { margin: 0; }
+.origq { font-size: var(--s-sm); color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; }
+.origq p { margin: 2px 0 0; font-family: var(--f-read); }
+details.why { font-size: var(--s-sm); background: var(--warn-soft); border-radius: var(--r); padding: 8px 12px; }
+details.gold { font-size: var(--s-sm); background: var(--sunk); border-radius: var(--r); padding: 8px 12px; min-width: 0; max-width: 100%; }
+details.gold summary { cursor: pointer; }
+details.gold .tw { overflow-x: auto; margin-top: 8px; }
+details.gold td { vertical-align: top; }
+details.gold p { margin: 8px 0 0; }
+details.why summary { cursor: pointer; }
+details.why p { margin: 8px 0; }
+.verif ul { margin: 2px 0 0; padding-left: 18px; display: grid; gap: 2px; }
+.flag { font-size: var(--s-sm); background: var(--bad-soft); color: var(--bad); border-radius: var(--r); padding: 6px 10px; }
+.review { border-color: var(--accent); }
+.decisions { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 6px; }
+.dec { border: 1px solid var(--line); background: var(--panel); border-radius: var(--r); padding: 7px 4px; font-size: var(--s-sm); font-weight: 500; text-align: center; }
+.dec kbd { display: block; font: 400 var(--s-xs) var(--f-mono); color: var(--muted); }
+.dec[aria-pressed="true"][data-v="accept"] { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+.dec[aria-pressed="true"][data-v="accept_with_fixes"] { background: var(--conf-soft); border-color: var(--conf); color: var(--conf); }
+.dec[aria-pressed="true"][data-v="reject"] { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
+.dec[aria-pressed="true"][data-v="unsure"] { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
+textarea { width: 100%; min-height: 84px; resize: vertical; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); line-height: 1.45; }
+textarea.small { min-height: 54px; font-size: var(--s-sm); }
+.hint { font-size: var(--s-xs); color: var(--muted); }
+
+/* ---------- sections ---------- */
+.section { display: grid; gap: 10px; }
+.section > header { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.section h3 { margin: 0; font: 600 var(--s-lg)/1.25 var(--f-body); text-wrap: balance; }
+.tablewrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+table { width: 100%; border-collapse: collapse; font-size: var(--s-sm); }
+th { text-align: left; font: 600 var(--s-xs)/1.3 var(--f-body); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 9px 12px; border-bottom: 1px solid var(--line); background: var(--sunk); white-space: nowrap; }
+td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child > td { border-bottom: 0; }
+td.num { font: 500 var(--s-sm) var(--f-mono); color: var(--muted); white-space: nowrap; }
+.span-q { font-family: var(--f-read); font-size: var(--s-md); }
+.hopref { display: inline-block; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; margin: 0 3px 3px 0; font: 500 var(--s-xs)/1.6 var(--f-mono); background: var(--bg); cursor: pointer; }
+.hopref:hover { border-color: var(--accent); color: var(--accent); }
+.agree { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.agree button { border: 0; background: transparent; padding: 2px 8px; font-size: var(--s-xs); color: var(--muted); }
+.agree button + button { border-left: 1px solid var(--line); }
+.agree button[aria-pressed="true"][data-v="agree"] { background: var(--ok-soft); color: var(--ok); font-weight: 600; }
+.agree button[aria-pressed="true"][data-v="disagree"] { background: var(--bad-soft); color: var(--bad); font-weight: 600; }
+.cbtn { border: 0; background: transparent; color: var(--accent); font-size: var(--s-xs); padding: 2px 4px; }
+.ccell { display: grid; gap: 6px; min-width: 180px; }
+.has-comment { font-size: var(--s-xs); color: var(--ink); background: var(--accent-soft); border-radius: 4px; padding: 3px 6px; white-space: pre-wrap; }
+
+/* ---------- hops (paper-figure style) ---------- */
+.hops { display: grid; gap: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.hop { border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 6px minmax(0,1fr); }
+.hop:last-child { border-bottom: 0; }
+.hop .stripe { background: var(--line); }
+.hop[data-s="grounded"] .stripe, .hop[data-s="derivation_ok"] .stripe { background: var(--ok); }
+.hop[data-s="partially_grounded"] .stripe { background: var(--warn); }
+.hop[data-s="ungrounded"] .stripe, .hop[data-s="derivation_wrong"] .stripe { background: var(--bad); }
+.hop[data-s="dropped"] .stripe { background: repeating-linear-gradient(180deg, var(--line) 0 6px, transparent 6px 10px); }
+.hop[data-s="dropped"] .clue { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+.hop.flash { animation: flash 1.2s ease-out; }
+@keyframes flash { from { background: var(--accent-soft); } to { background: transparent; } }
+.hoprow { display: grid; grid-template-columns: 48px 112px minmax(0,1fr) 150px; gap: 12px; padding: 12px 14px; align-items: start; cursor: pointer; }
+.hoprow:hover { background: var(--bg); }
+.hopnum { font: 600 var(--s-md) var(--f-mono); }
+.hopnum .chev { display: inline-block; transition: transform .15s; color: var(--muted); font-size: .8em; margin-right: 3px; }
+.hop[aria-expanded="true"] .chev { transform: rotate(90deg); }
+.clue { font: 400 var(--s-md)/1.5 var(--f-read); }
+.clue .cons { display: inline-flex; gap: 3px; margin-left: 6px; vertical-align: 1px; }
+.ctag { font: 600 .66rem/1.5 var(--f-body); color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }
+.hopstat { display: grid; gap: 4px; justify-items: start; }
+.hopdetail { padding: 0 14px 16px 74px; display: grid; gap: 14px; }
+.kv { display: grid; grid-template-columns: 130px minmax(0,1fr); gap: 4px 12px; font-size: var(--s-sm); }
+.kv > .k { color: var(--muted); }
+.snip { font: 400 var(--s-sm)/1.5 var(--f-read); color: var(--muted); font-style: italic; }
+.ev { display: grid; gap: 6px; }
+.evhead { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: var(--s-sm); }
+.docbtn { border: 1px solid var(--line); background: var(--bg); border-radius: 4px; padding: 1px 7px; font: 500 var(--s-xs)/1.7 var(--f-mono); }
+.docbtn:hover { border-color: var(--accent); color: var(--accent); }
+.docbtn.invalid { text-decoration: line-through; color: var(--bad); }
+blockquote.quote { margin: 0; padding: 8px 12px; border-left: 3px solid var(--ok); background: var(--ok-soft); border-radius: 0 var(--r) var(--r) 0; font: 400 var(--s-md)/1.55 var(--f-read); color: var(--ink); }
+blockquote.quote.partial { border-left-color: var(--warn); background: var(--warn-soft); }
+.rej { font-size: var(--s-sm); display: grid; gap: 4px; }
+.rej div { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.issue { font-size: var(--s-sm); background: var(--warn-soft); color: var(--ink); border-radius: var(--r); padding: 6px 10px; }
+.issue b { color: var(--warn); }
+.yours { display: grid; gap: 6px; border-top: 1px dashed var(--line); padding-top: 12px; }
+.yours .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+details.searches summary { cursor: pointer; font-size: var(--s-sm); color: var(--muted); }
+.slog { font-size: var(--s-sm); display: grid; gap: 6px; margin-top: 8px; }
+.slog .qy { font-family: var(--f-mono); font-size: var(--s-xs); }
+
+/* ---------- document drawer ---------- */
+.scrim { position: fixed; inset: 0; background: rgba(10,15,22,.35); z-index: 9; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(760px, 100%); background: var(--panel); z-index: 10; display: grid; grid-template-rows: auto 1fr; box-shadow: -8px 0 30px rgba(0,0,0,.18); padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.drawer header { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.drawer header .mono { font-weight: 500; }
+.doctext { overflow-y: auto; padding: 16px 20px 40px; font: 400 var(--s-sm)/1.65 var(--f-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.doctext mark { background: var(--mark); color: var(--mark-ink); border-radius: 2px; padding: 0 1px; }
+.doctext mark.cur { outline: 2px solid var(--accent); }
+.doctext .gap { color: var(--muted); font-style: italic; }
+
+.kbdhelp { font-size: var(--s-xs); color: var(--muted); }
+.kbdhelp kbd { font: 500 .7rem var(--f-mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 3px; padding: 0 4px; background: var(--bg); }
+.toast { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: var(--r); font-size: var(--s-sm); z-index: 20; max-width: calc(100% - 32px); }
+.sidetoggle { display: none; }
+
+@media (max-width: 900px) {
+  .duo { grid-template-columns: minmax(0,1fr); }
+  .hoprow { grid-template-columns: 40px minmax(0,1fr); }
+  .hoprow .hoptype { grid-column: 2; grid-row: 1; }
+  .hoprow .clue { grid-column: 1 / -1; }
+  .hoprow .hopstat { grid-column: 1 / -1; grid-auto-flow: column; justify-content: start; }
+  .hopdetail { padding: 0 14px 16px 20px; }
+  .kv { grid-template-columns: minmax(0,1fr); }
+}
+@media (max-width: 760px) {
+  html, body { height: auto; }
+  .app { display: block; height: auto; }
+  .main { overflow: visible; }
+  .qlist { max-height: 70vh; }
+  .body { grid-template-columns: minmax(0,1fr); }
+  .side { border-right: 0; }
+  .side[data-open="false"] { display: none; }
+  .side[data-open="true"] + .main { display: none; }
+  .sidetoggle { display: inline-block; }
+  .decisions { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .brand h1 { font-size: var(--s-md); }
+  .kbdhelp { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <div class="topbar" id="topbar">
+    <button class="btn sidetoggle" id="sidetoggle" aria-controls="side">Questions</button>
+    <div class="brand"><h1>Projection Evidence Review</h1><span class="corpus" id="corpus"></span></div>
+    <div class="tabs" role="tablist" id="tabs" aria-label="Released sets"></div>
+    <div class="tabs nmtabs" role="tablist" id="nmtabs" aria-label="Near misses"></div>
+    <div class="tabs rwtabs" role="tablist" id="rwtabs" aria-label="Salvageable with rewrites"></div>
+    <div class="spacer"></div>
+    <div class="savestate" id="savestate" data-s="idle"><span class="dot"></span><span id="savetext">Loading…</span></div>
+    <button class="btn primary" id="exportbtn">Export reviewed JSONL</button>
+  </div>
+  <div class="body">
+    <aside class="side" id="side" data-open="false">
+      <div class="filters">
+        <input type="search" id="q" placeholder="Search question, id, answer…  ( / )" aria-label="Search questions">
+        <div><div class="label" id="fverdict-label">Audit verdict</div><div class="chiprow" id="fverdict"></div></div>
+        <div><div class="label">Your review</div><div class="chiprow" id="freview"></div></div>
+        <div class="progress" id="progress"></div>
+      </div>
+      <div class="qlist" id="qlist" role="listbox" aria-label="Questions"></div>
+    </aside>
+    <main class="main" id="main"><div class="sheet" id="sheet"><div class="empty">Loading audited questions…</div></div></main>
+  </div>
+</div>
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-label="Document">
+  <header>
+    <span class="mono" id="dtitle"></span><span class="muted" id="dmeta"></span>
+    <div class="spacer"></div>
+    <button class="btn" id="dprev" title="Previous quote">↑ Quote</button>
+    <button class="btn" id="dnext" title="Next quote">↓ Quote</button>
+    <button class="btn" id="dclose">Close</button>
+  </header>
+  <div class="doctext" id="dtext"></div>
+</aside>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+"use strict";
+let DATASETS = [];   // [{id, name, title?, nm?, rw?}], read from data/manifest.json at boot
+const isNM = (ds) => /^(nm|rw)_/.test(ds);  // near misses and rewrites both carry a salvage block
+const isRW = (ds) => ds.startsWith("rw_");
+const OUTCOME = {
+  salvaged: ["ok", "Salvaged"], salvaged_with_rewrite: ["fix", "Salvaged with rewrite"], salvaged_with_gold_change: ["warn", "Salvaged, gold changed"],
+  not_salvageable: ["bad", "Not salvageable"], do_not_repair: ["neutral", "Do not repair"],
+};
+const CAVEAT = { any_one_member_rule: "relies on any-one-member rule", member_changed: "grounded member changed",
+  attribution_added: "rewrite adds an attribution", scope_narrowed: "rewrite narrows the question",
+  heavy_rewrite: "heavy rewrite (3+ clauses changed)", clue_replaced: "an identifying clue replaced by a new one" };
+const outcomeOf = (r) => ((audit(r).salvage || {}).outcome) || "";
+const statusPill = (r) => { if (isNM(S.ds) && outcomeOf(r)) { const o = OUTCOME[outcomeOf(r)]; return pill(o[0], o[1]); } const v = VERDICT[audit(r).verdict] || VERDICT.not_audited; return pill(v[0], v[1]); };
+const VERDICT = {
+  pass: ["ok", "Pass"], pass_with_fixes: ["fix", "Pass with fixes"], fail: ["bad", "Fail"], not_audited: ["neutral", "Not audited"],
+};
+const HOPSTAT = {
+  grounded: ["ok", "Grounded"], partially_grounded: ["warn", "Partially grounded"], ungrounded: ["bad", "Ungrounded"],
+  derivation_ok: ["ok", "Derivation ✓"], derivation_wrong: ["bad", "Derivation ✗"], dropped: ["neutral", "Dropped by rewrite"],
+};
+const CONSTAT = { covered: ["ok", "Covered"], partially_covered: ["warn", "Partial"], not_covered: ["bad", "Not covered"] };
+const FAIL_REASON = {
+  constraint_not_covered: "constraint not fully covered", hop_not_grounded: "hop not fully grounded",
+  added_hop_not_grounded: "added hop not grounded", answer_not_derived: "answer not derived",
+  fails_as_written: "fails as written; fixed version in rewrites",
+  fix_withdrawn: "fails as written; its fix was withdrawn",
+};
+const SOURCE = { original: ["neutral", "cited by hop"], other_hop: ["conf", "cited by another hop"], search: ["fix", "new · BM25 search"] };
+const DECISIONS = [
+  ["accept", "Accept", "1"], ["accept_with_fixes", "Accept w/ fixes", "2"], ["reject", "Reject", "3"], ["unsure", "Unsure", "4"],
+];
+
+const S = {
+  ds: "hotpotqa", data: {}, docs: {}, canary: {}, sel: {}, open: {}, filter: { text: "", verdict: "all", review: "all" },
+  reviews: {}, mode: "browser",
+};
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const key = (ds, qid) => `${ds}~${qid}`;
+const pill = (cls, text) => `<span class="pill ${cls}">${esc(text)}</span>`;
+const qtext = (r) => r.question || r.problem || "";
+const gold = (r) => (r.answers ? r.answers.join(" | ") : r.gold_answer ?? r.answer ?? "");
+const audit = (r) => r.audit || { verdict: "not_audited" };
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 2600); }
+function lsGet(k) { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+// db snapshots hand back frozen objects; reviews are always edited as plain copies
+const clone = (o) => (o == null ? o : JSON.parse(JSON.stringify(o)));
+
+/* ---------------- storage ---------------- */
+function setSave(state, text) { $("savestate").dataset.s = state; $("savetext").textContent = text; }
+const MODE_TEXT = {
+  local: "Saving to reviews/ on disk", browser: "Saving in this browser only",
+};
+/* Edits not yet confirmed by the store, as {key: time of the latest edit}. They survive a reload,
+   and on the next load each one is pushed if it is newer than the stored review; otherwise the
+   stored review wins. Reviews merely cached in this browser are never pushed, so deletions made
+   elsewhere stay deleted. */
+const unsynced = () => lsGet("per-unsynced") || {};
+function markUnsynced(k, ts) { const u = unsynced(); u[k] = ts; lsSet("per-unsynced", u); }
+function clearUnsynced(k, ts) { const u = unsynced(); if (u[k] && u[k] <= ts) { delete u[k]; lsSet("per-unsynced", u); } }
+function mergeUnsynced(remote) {
+  const u = unsynced(), push = [];
+  for (const [k, ts] of Object.entries(u)) {
+    const r = remote[k];
+    if (DATASETS.some((d) => k.startsWith(d.id + "~")) && ts > ((r && r.updated_at) || "")) {
+      if (S.reviews[k]) remote[k] = S.reviews[k]; else delete remote[k];
+      push.push(k);
+    } else clearUnsynced(k, ts);
+  }
+  return push;
+}
+async function initStore() {
+  S.reviews = lsGet("per-reviews") || {};
+  try {
+    const ctl = new AbortController(); setTimeout(() => ctl.abort(), 1500);
+    const r = await fetch("api/ping", { signal: ctl.signal });
+    if (r.ok && (await r.json()).mode === "local") {
+      S.mode = "local";
+      const all = await (await fetch("api/reviews")).json();
+      const push = mergeUnsynced(all);
+      S.reviews = all; lsSet("per-reviews", all);
+      setSave("saved", MODE_TEXT.local); push.forEach(flush); return;
+    }
+  } catch {}
+  setSave("idle", MODE_TEXT.browser);
+}
+async function pushOne(k) {
+  const ts = unsynced()[k] || "";
+  const v = S.reviews[k] || null;
+  if (S.mode === "local") {
+    const i = k.indexOf("~");
+    const r = await fetch(`api/reviews/${encodeURIComponent(k.slice(0, i))}/${encodeURIComponent(k.slice(i + 1))}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(v) });
+    if (!r.ok) throw new Error(await r.text());
+    const j = await r.json();
+    clearUnsynced(k, ts); return `Saved · ${j.file}`;
+  }
+  return "Saved in this browser";
+}
+/* One write at a time per review: an edit made while a write is in flight is sent when it ends,
+   always as the latest state. Transient refusals are retried with backoff. */
+const pending = {}, inflight = {}, dirty = {};
+const FATAL = new Set(["invalid_argument", "quota_exceeded", "revoked", "not_granted", "capability_disabled", "capability_removed"]);
+async function flush(k) {
+  if (inflight[k]) { dirty[k] = true; return; }
+  inflight[k] = true;
+  let tries = 0, delay = 1000;
+  try {
+    do {
+      dirty[k] = false;
+      try { setSave("saved", await pushOne(k)); tries = 0; }
+      catch (e) {
+        if (FATAL.has(e && e.code) || ++tries > 4) {
+          setSave("error", "Not saved yet: kept in this browser, saved on your next visit");
+          toast("Your last review change could not be saved yet. It is kept in this browser and will be saved when you reopen the page.");
+          break;
+        }
+        setSave("saving", "Retrying save…");
+        await new Promise((r) => setTimeout(r, delay + Math.random() * 500)); delay *= 2.5;
+        dirty[k] = true;
+      }
+    } while (dirty[k]);
+  } finally { inflight[k] = false; renderList(); }
+}
+function saveReview(ds, qid) {
+  const k = key(ds, qid);
+  markUnsynced(k, new Date().toISOString());
+  lsSet("per-reviews", S.reviews);
+  setSave("saving", "Saving…");
+  clearTimeout(pending[k]);
+  pending[k] = setTimeout(() => flush(k), 500);
+}
+function review(ds, qid, create) {
+  const k = key(ds, qid);
+  if (!S.reviews[k] && create) S.reviews[k] = { decision: null, comment: "", constraints: {}, hops: {} };
+  return S.reviews[k];
+}
+function prune(rv) {
+  if (!rv) return null;
+  for (const grp of ["constraints", "hops"]) for (const [k, v] of Object.entries(rv[grp] || {})) if (!v.agree && !(v.comment || "").trim()) delete rv[grp][k];
+  const empty = !rv.decision && !(rv.comment || "").trim() && !Object.keys(rv.constraints || {}).length && !Object.keys(rv.hops || {}).length;
+  return empty ? null : rv;
+}
+function updateReview(fn) {
+  const r = current(); if (!r) return;
+  const rv = clone(review(S.ds, r.record_id, true));
+  fn(rv);
+  rv.updated_at = new Date().toISOString();
+  const k = key(S.ds, r.record_id);
+  const p = prune(rv);
+  if (p) S.reviews[k] = p; else delete S.reviews[k];
+  saveReview(S.ds, r.record_id);
+}
+function reviewState(ds, qid) {
+  const rv = S.reviews[key(ds, qid)];
+  if (!rv) return null;
+  return rv.decision || "comment";
+}
+
+/* ---------------- export ---------------- */
+function reviewedJsonl(ds) {
+  return (S.data[ds] || []).map((r) => JSON.stringify({ ...r, review: S.reviews[key(ds, r.record_id)] || null })).join("\n") + "\n";
+}
+async function exportAll() {
+  for (const d of DATASETS) await loadDataset(d.id);
+  if (S.mode === "local") {
+    for (const d of DATASETS) { const a = document.createElement("a"); a.href = `api/export/${d.id}`; a.download = `${d.id}_reviewed.jsonl`; document.body.appendChild(a); a.click(); a.remove(); await new Promise((r) => setTimeout(r, 300)); }
+    toast("Also on disk: reviewed/<dataset>_reviewed.jsonl"); return;
+  }
+  const n = Object.keys(S.reviews).length;
+  for (const d of DATASETS) {
+    const url = URL.createObjectURL(new Blob([reviewedJsonl(d.id)], { type: "application/x-ndjson" }));
+    const a = document.createElement("a"); a.href = url; a.download = `${d.id}_reviewed.jsonl`; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+  toast(`Exported ${n} reviewed question(s)`);
+}
+
+/* ---------------- data ---------------- */
+const loading = {};
+function loadDataset(ds) {
+  if (S.data[ds]) return Promise.resolve();
+  loading[ds] = loading[ds] || fetch(`data/${ds}.json`).then((r) => r.json()).then((j) => {
+    j.records.forEach((r) => { if (r.record_id === undefined && r.id !== undefined) Object.defineProperty(r, "record_id", { value: r.id, enumerable: false }); });
+    S.data[ds] = j.records; if (j.canary) S.canary[ds] = j.canary;
+  });
+  return loading[ds];
+}
+const docLoading = {};
+function loadDocs(ds) {
+  if (S.docs[ds]) return Promise.resolve(S.docs[ds]);
+  docLoading[ds] = docLoading[ds] || fetch(`data/docs_${ds}.json`).then((r) => r.json()).then((j) => (S.docs[ds] = j));
+  return docLoading[ds];
+}
+function differs(r) {
+  const a = audit(r);
+  if (!a.paper_stage3) return false;
+  return (a.paper_stage3 === "kept") === (a.verdict === "fail");
+}
+function current() { return (S.data[S.ds] || []).find((r) => r.record_id === S.sel[S.ds]); }
+function filtered() {
+  const t = S.filter.text.trim().toLowerCase();
+  return (S.data[S.ds] || []).filter((r) => {
+    const v = audit(r).verdict;
+    if (S.filter.verdict.startsWith("c:")) { if (!((audit(r).salvage || {}).caveats || []).includes(S.filter.verdict.slice(2))) return false; }
+    else if (S.filter.verdict === "o:clean") { if (!outcomeOf(r).startsWith("salvaged") || ((audit(r).salvage || {}).caveats || []).length) return false; }
+    else if (S.filter.verdict.startsWith("o:")) { if (outcomeOf(r) !== S.filter.verdict.slice(2)) return false; }
+    else if (S.filter.verdict === "differs") { if (!differs(r)) return false; }
+    else if (S.filter.verdict === "revised") { if (!(audit(r).verification && audit(r).verification.result === "revised")) return false; }
+    else if (S.filter.verdict !== "all" && v !== S.filter.verdict) return false;
+    const rs = reviewState(S.ds, r.record_id);
+    if (S.filter.review === "unreviewed" && rs) return false;
+    if (S.filter.review === "reviewed" && !rs) return false;
+    if (S.filter.review === "reject" && rs !== "reject") return false;
+    if (!t) return true;
+    return (r.record_id + " " + qtext(r) + " " + gold(r) + " " + (r.derived_answer || "")).toLowerCase().includes(t);
+  });
+}
+
+/* ---------------- render: chrome ---------------- */
+function renderTabs() {
+  const tab = (d) => `<button class="tab" role="tab" data-ds="${d.id}" aria-selected="${d.id === S.ds}" title="${d.title || d.name}">${d.name}<span class="n">${S.data[d.id] ? S.data[d.id].length : "…"}</span></button>`;
+  const grp = (label, ds) => (ds.length ? `<span class="grp">${label}</span>` + ds.map(tab).join("") : "");
+  $("tabs").innerHTML = grp("Originals", DATASETS.filter((d) => !d.nm && !d.rw));
+  $("nmtabs").innerHTML = grp("Near misses", DATASETS.filter((d) => d.nm));
+  $("rwtabs").innerHTML = grp("Salvageable with rewrites", DATASETS.filter((d) => d.rw));
+  for (const id of ["tabs", "nmtabs", "rwtabs"]) $(id).hidden = !$(id).innerHTML;
+}
+function renderFilters() {
+  const rows = S.data[S.ds] || [];
+  const present = new Set(rows.map(outcomeOf));
+  const cavs = [...new Set(rows.flatMap((r) => (audit(r).salvage || {}).caveats || []))];
+  const vs = isRW(S.ds)
+    ? [["all", "All"], ["o:clean", "No caveat"], ...cavs.map((c) => ["c:" + c, CAVEAT[c] || c]), ["revised", "Revised by 2nd reader"]]
+    : isNM(S.ds)
+    ? [["all", "All"], ["o:clean", "Salvaged, no caveat"], ...Object.entries(OUTCOME).filter(([k]) => present.has(k)).map(([k, v]) => ["o:" + k, v[1]]), ["revised", "Revised by 2nd reader"]]
+    : [["all", "All"], ["pass", "Pass"], ["pass_with_fixes", "Fixed"], ["fail", "Fail"], ["revised", "Revised by 2nd reader"]];
+  if (S.ds === "bcp") vs.push(["differs", "Differs from paper"]);
+  if (!vs.some(([v]) => v === S.filter.verdict)) S.filter.verdict = "all";
+  $("fverdict-label").textContent = isRW(S.ds) ? "Rewrite caveats" : isNM(S.ds) ? "Salvage outcome" : "Audit verdict";
+  $("fverdict").innerHTML = vs.map(([v, l]) => `<button class="fchip" data-f="verdict" data-v="${v}" aria-pressed="${S.filter.verdict === v}">${l}</button>`).join("");
+  const rs = [["all", "All"], ["unreviewed", "To do"], ["reviewed", "Reviewed"], ["reject", "Rejected"]];
+  $("freview").innerHTML = rs.map(([v, l]) => `<button class="fchip" data-f="review" data-v="${v}" aria-pressed="${S.filter.review === v}">${l}</button>`).join("");
+}
+function renderList() {
+  const rows = S.data[S.ds] || [];
+  const list = filtered();
+  const cnt = { pass: 0, pass_with_fixes: 0, fail: 0 };
+  let reviewed = 0;
+  rows.forEach((r) => { cnt[audit(r).verdict] = (cnt[audit(r).verdict] || 0) + 1; if (reviewState(S.ds, r.record_id)) reviewed++; });
+  const pct = (n) => (rows.length ? (100 * n) / rows.length : 0);
+  if (isRW(S.ds)) {
+    const clean = rows.filter((r) => !((audit(r).salvage || {}).caveats || []).length).length;
+    const gold = rows.filter((r) => (audit(r).salvage || {}).proposed_answer).length;
+    $("progress").innerHTML = `<div><b>${rows.length}</b> salvageable only with a rewrite${gold ? ` (<b>${gold}</b> with a gold change)` : ""} · <b>${clean}</b> without caveats</div>
+      <div class="bar"><span style="width:${pct(clean)}%;background:var(--ok)"></span><span style="width:${pct(rows.length - clean)}%;background:var(--warn)"></span></div>
+      <div>Reviewed by you: <b>${reviewed}</b> of ${rows.length}${list.length !== rows.length ? ` · showing ${list.length}` : ""}</div>`;
+  } else if (isNM(S.ds)) {
+    const oc = {}; rows.forEach((r) => { const o = outcomeOf(r) || "pending"; oc[o] = (oc[o] || 0) + 1; });
+    const sal = (oc.salvaged || 0) + (oc.salvaged_with_rewrite || 0) + (oc.salvaged_with_gold_change || 0);
+    $("progress").innerHTML = `<div>Salvage: <b>${oc.salvaged || 0}</b> salvaged · <b>${oc.salvaged_with_rewrite || 0}</b> rewrite · <b>${oc.salvaged_with_gold_change || 0}</b> gold change · <b>${(oc.not_salvageable || 0) + (oc.do_not_repair || 0)}</b> not${oc.pending ? ` · ${oc.pending} pending` : ""}</div>
+      <div class="bar"><span style="width:${pct(oc.salvaged || 0)}%;background:var(--ok)"></span><span style="width:${pct((oc.salvaged_with_rewrite || 0) + (oc.salvaged_with_gold_change || 0))}%;background:var(--accent)"></span><span style="width:${pct((oc.not_salvageable || 0) + (oc.do_not_repair || 0))}%;background:var(--bad)"></span></div>
+      <div>${sal} of ${rows.length} salvageable · reviewed by you: <b>${reviewed}</b>${list.length !== rows.length ? ` · showing ${list.length}` : ""}</div>`;
+  } else
+  $("progress").innerHTML = `<div>Audit: <b>${cnt.pass}</b> pass · <b>${cnt.pass_with_fixes}</b> fixed · <b>${cnt.fail}</b> fail</div>
+    <div class="bar"><span style="width:${pct(cnt.pass)}%;background:var(--ok)"></span><span style="width:${pct(cnt.pass_with_fixes)}%;background:var(--accent)"></span><span style="width:${pct(cnt.fail)}%;background:var(--bad)"></span></div>
+    <div>Reviewed by you: <b>${reviewed}</b> of ${rows.length}${list.length !== rows.length ? ` · showing ${list.length}` : ""}</div>`;
+  $("qlist").innerHTML = list.map((r) => {
+    const rs = reviewState(S.ds, r.record_id);
+    return `<div class="qitem" role="option" data-id="${esc(r.record_id)}" aria-current="${r.record_id === S.sel[S.ds]}">
+      <span class="id">${esc(r.record_id)}</span>
+      <span class="marks">${statusPill(r)}<span class="rv" ${rs ? `data-d="${rs}"` : ""} title="${rs ? "Your review: " + rs.replace(/_/g, " ") : "Not reviewed yet"}"></span></span>
+      <span class="q">${esc(qtext(r))}</span></div>`;
+  }).join("") || `<div class="empty">${rows.length ? "No questions match these filters." : S.data[S.ds] ? "None in this set: no " + esc((DATASETS.find((d) => d.id === S.ds) || {}).name || "") + " near miss needed a rewrite." : "Loading…"}</div>`;
+}
+
+/* ---------------- render: question ---------------- */
+function wsPattern(s) { return String(s).trim().split(/\s+/).map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("\\s+"); }
+function highlightQuestion(q, constraints) {
+  const spans = [];
+  (constraints || []).forEach((c) => {
+    if (!c.text) return;
+    // a constraint split across the sentence is stored as "part ... part"
+    let from = 0;
+    c.text.split(/\s*(?:\.\.\.|…)\s*/).filter(Boolean).forEach((part) => {
+      const re = new RegExp(wsPattern(part), "g"); re.lastIndex = from;
+      const m = re.exec(q) || new RegExp(wsPattern(part)).exec(q);
+      if (m) { spans.push({ s: m.index, e: m.index + m[0].length, c }); from = m.index + m[0].length; }
+    });
+  });
+  spans.sort((a, b) => a.s - b.s);
+  let out = "", i = 0;
+  for (const sp of spans) {
+    if (sp.s < i) continue;
+    out += esc(q.slice(i, sp.s));
+    out += `<span class="cspan ${esc(sp.c.status)}" data-cid="${esc(sp.c.id)}" data-id="${esc(sp.c.id)}" title="${esc(sp.c.id)} · ${esc((CONSTAT[sp.c.status] || ["", sp.c.status])[1])}">${esc(q.slice(sp.s, sp.e))}</span>`;
+    i = sp.e;
+  }
+  return out + esc(q.slice(i));
+}
+function hopLabel(ref) { return typeof ref === "number" ? `H${ref}` : String(ref); }
+function factRows(r) {
+  const f = [];
+  const a = gold(r);
+  f.push(["Gold answer", `<span class="v answer">${esc(a)}</span>`]);
+  if (r.derived_answer !== undefined) f.push(["Derived answer (grounded)", `<span class="v answer">${esc(r.derived_answer)}</span>`]);
+  if (r.answer_type) f.push(["Answer type", `<span class="v">${esc(r.answer_type)}</span>`]);
+  if (r.problem_category) f.push(["Category", `<span class="v">${esc(r.problem_category)}</span>`]);
+  if (r.hotpot_type) f.push(["HotpotQA type", `<span class="v">${esc(r.hotpot_type)}</span>`]);
+  if (r.operator) f.push(["Operator", `<span class="v mono">${esc(r.operator)}</span>`]);
+  if (r.target_attribute) f.push(["Target attribute", `<span class="v">${esc(r.target_attribute)}</span>`]);
+  if (r.subset) f.push(["Subset", `<span class="v mono">${esc(r.subset)}</span>`]);
+  if (r.source) f.push(["Source", `<span class="v mono">${esc(r.source)}</span>`]);
+  return f.map(([k, v]) => `<div class="fact"><span class="label">${esc(k)}</span>${v}</div>`).join("");
+}
+function agreeToggle(scope, id, cur) {
+  return `<span class="agree" data-scope="${scope}" data-id="${esc(id)}">
+    <button data-v="agree" aria-pressed="${cur === "agree"}" title="I agree with the audit">Agree</button><button data-v="disagree" aria-pressed="${cur === "disagree"}" title="I disagree with the audit">Disagree</button></span>`;
+}
+function constraintsTable(r, a, rv) {
+  const cons = a.constraints || [];
+  if (!cons.length) return "";
+  const rows = cons.map((c) => {
+    const st = CONSTAT[c.status] || ["neutral", c.status];
+    const mine = (rv && rv.constraints && rv.constraints[c.id]) || {};
+    const open = S.open[`c:${c.id}`] || mine.comment;
+    return `<tr data-cid="${esc(c.id)}">
+      <td class="num">${esc(c.id)}</td>
+      <td class="span-q">${esc(c.text)}${c.note ? `<div class="muted" style="font:400 var(--s-sm)/1.45 var(--f-body);margin-top:3px">${esc(c.note)}</div>` : ""}</td>
+      <td>${(c.covered_by || []).map((h) => `<span class="hopref" data-hop="${esc(h)}">${esc(hopLabel(h))}</span>`).join("") || '<span class="muted">—</span>'}</td>
+      <td>${pill(st[0], st[1])}</td>
+      <td><div class="ccell">${agreeToggle("constraints", c.id, mine.agree)}
+        ${open ? `<textarea class="small" data-scope="constraints" data-id="${esc(c.id)}" id="c-${esc(r.record_id)}-${esc(c.id)}" placeholder="Comment on ${esc(c.id)}">${esc(mine.comment || "")}</textarea>` : `<button class="cbtn" data-open="c:${esc(c.id)}">+ Comment</button>`}</div></td></tr>`;
+  }).join("");
+  return `<section class="section"><header><h3>Constraint coverage</h3><span class="muted">${cons.filter((c) => c.status === "covered").length} of ${cons.length} covered · click a hop to jump to it</span></header>
+    <div class="tablewrap"><table><thead><tr><th>#</th><th>Constraint (span of the question)</th><th>Covered by</th><th>Status</th><th>Your check</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
+}
+function evidenceBlock(ev, invalid) {
+  const src = SOURCE[ev.source] || ["neutral", ev.source];
+  const quotes = (ev.quotes || []).map((q) => `<blockquote class="quote ${ev.supports === "partial" ? "partial" : ""}">${esc(q)}</blockquote>`).join("");
+  return `<div class="ev"><div class="evhead"><button class="docbtn ${invalid.has(ev.doc_id) ? "invalid" : ""}" data-doc="${esc(ev.doc_id)}" data-quotes="${esc(JSON.stringify(ev.quotes || []))}">${esc(ev.doc_id)}</button>
+    ${pill(src[0], src[1])}${pill(ev.supports === "full" ? "ok" : "warn", ev.supports === "full" ? "supports hop" : "partial support")}</div>${quotes}</div>`;
+}
+function hopBlock(r, h, ah, id, rv, invalid, isAdded) {
+  const st = HOPSTAT[ah.status] || ["neutral", ah.status || "not audited"];
+  const type = ah.type || (h && h.kind === "derivation" ? "derivation" : "");
+  const typePill = type === "required" ? pill("neutral", "Required") : type === "confirmatory" ? pill("conf", "Confirmatory") : type === "derivation" ? pill("neutral", "Derivation") : "";
+  const clue = isAdded ? ah.clue : h.clue;
+  const mine = (rv && rv.hops && rv.hops[id]) || {};
+  const expanded = !!S.open[`h:${id}`];
+  const cons = (ah.constraints || []).map((c) => `<span class="ctag">${esc(c)}</span>`).join("");
+  const nNew = (ah.evidence || []).filter((e) => e.source !== "original").length;
+  const cited = isAdded ? [] : [...new Set([h.doc_id, ...(h.supporting_doc_ids || []), ...(h.doc_ids || [])].filter(Boolean))];
+  let detail = "";
+  if (expanded) {
+    const ev = (ah.evidence || []).map((e) => evidenceBlock(e, invalid)).join("") || `<div class="muted">No supporting document found.</div>`;
+    const rej = (ah.rejected_docs || []).length ? `<div class="rej"><span class="label">Checked and rejected</span>${ah.rejected_docs.map((d) => `<div><button class="docbtn ${invalid.has(d.doc_id) ? "invalid" : ""}" data-doc="${esc(d.doc_id)}" data-quotes="[]">${esc(d.doc_id)}</button><span>${esc(d.reason || "")}</span></div>`).join("")}</div>` : "";
+    const orig = isAdded ? `<div class="kv"><span class="k">Proposed by</span><span>the audit, to cover ${esc((ah.constraints || []).join(", ") || "a missing constraint")}</span></div>`
+      : `<div class="kv">
+        <span class="k">Original snippet</span><span class="snip">${esc(h.snippet || "—")}</span>
+        <span class="k">Cited documents</span><span>${cited.map((d) => `<button class="docbtn ${invalid.has(d) ? "invalid" : ""}" data-doc="${esc(d)}" data-quotes="[]" title="${invalid.has(d) ? "Not found in climbmix-400b" : ""}">${esc(d)}</button>`).join(" ")}</span>
+        ${h.is_bridge !== undefined ? `<span class="k">Bridge hop</span><span>${h.is_bridge ? "yes" : "no"}</span>` : ""}
+        ${h.kind ? `<span class="k">Kind</span><span>${esc(h.kind)}</span>` : ""}
+        ${h.redundant !== undefined ? `<span class="k">Original flag</span><span>${h.redundant ? "redundant (confirmatory)" : "not redundant"}</span>` : ""}
+      </div>`;
+    detail = `<div class="hopdetail">
+      ${ah.clue_issue ? `<div class="issue"><b>Clue issue.</b> ${esc(ah.clue_issue)}</div>` : ""}
+      <div class="ev"><span class="label">Audit evidence (verbatim)</span>${ev}</div>
+      ${ah.note ? `<div class="kv"><span class="k">Audit note</span><span>${esc(ah.note)}</span></div>` : ""}
+      ${rej}${orig}
+      <div class="yours"><div class="row"><span class="label">Your check</span>${agreeToggle("hops", id, mine.agree)}</div>
+        <textarea class="small" data-scope="hops" data-id="${esc(id)}" id="h-${esc(r.record_id)}-${esc(id)}" placeholder="Comment on ${isAdded ? id : "hop " + id} (e.g. wrong document, missing qualifier, better quote)">${esc(mine.comment || "")}</textarea></div>
+    </div>`;
+  }
+  const mineMark = mine.agree === "disagree" ? pill("bad", "You: disagree") : mine.agree === "agree" ? pill("ok", "You: agree") : mine.comment ? pill("fix", "Commented") : "";
+  return `<div class="hop" id="hop-${esc(id)}" data-s="${esc(ah.status || "")}" aria-expanded="${expanded}">
+    <div class="stripe"></div><div>
+    <div class="hoprow" data-toggle="h:${esc(id)}">
+      <span class="hopnum"><span class="chev">▶</span>${esc(isAdded ? id : id)}</span>
+      <span class="hoptype">${typePill}</span>
+      <span class="clue">${esc(clue)}<span class="cons">${cons}</span></span>
+      <span class="hopstat">${pill(st[0], st[1])}${nNew ? pill("fix", `+${nNew} new doc${nNew > 1 ? "s" : ""}`) : ""}${mineMark}</span>
+    </div>${detail}</div></div>`;
+}
+function nmWhy(r) {
+  if (!r.failed_gate) return "";
+  const rows = [];
+  if (r.stage_rank !== undefined) rows.push(["Stage rank", `${esc(r.stage_rank)} (1 = dropped at the last gate)`]);
+  if (r.piika_correct !== undefined) rows.push(["Solver (PIIKA) correct", r.piika_correct ? "yes" : "no"]);
+  if (r.failure_kind) rows.push(["Failure kind", esc(r.failure_kind)]);
+  if (r.failure_patterns) rows.push(["Failure patterns", esc([].concat(r.failure_patterns).join(", "))]);
+  if (r.rivals && r.rivals.length) rows.push(["Rival answers", r.rivals.map((x) => esc(typeof x === "string" ? x : x.candidate || JSON.stringify(x))).join("; ")]);
+  if (r.missed_members && r.missed_members.length) rows.push(["Missed members", esc([].concat(r.missed_members).map((x) => typeof x === "string" ? x : JSON.stringify(x)).join("; "))]);
+  if (r.recomputed_answer !== undefined) rows.push(["Recomputed answer", esc(String(r.recomputed_answer))]);
+  return `<details class="why"><summary>Why the pipeline dropped it: <b>${esc(r.failed_gate)}</b></summary>
+    <p>${esc(r.reason || "")}</p>${rows.length ? `<div class="kv">${rows.map(([k, v]) => `<span class="k">${k}</span><span>${v}</span>`).join("")}</div>` : ""}</details>`;
+}
+function fixedBlock(a) {
+  const t = (DATASETS.find((d) => d.id === a.fixed_in) || {}).title || a.fixed_in;
+  return `<div class="salvage"><span class="label">Fixed version</span> ${pill("fix", "In " + esc(t))}
+    ${a.fixed_question ? `<p><b>Question:</b> ${esc(a.fixed_question)}</p>` : ""}
+    ${a.fixed_answer ? `<p><b>Answer:</b> ${esc(a.fixed_answer)}</p>` : ""}</div>`;
+}
+const GC_OUT = { valid_as_is: ["ok", "Valid as is"], fixed: ["fix", "Fixed"], not_fixable: ["bad", "Not fixable"] };
+const GC_ROLE = { counts: "counts", excluded: "excluded", excluded_by_fix: "excluded by the fix", not_a_candidate: "not a candidate" };
+const GC_ST = { grounded: ["ok", "grounded"], partially_grounded: ["warn", "partial"], absent: ["neutral", "absent"] };
+function goldBlock(g, ds) {
+  const dsqa = /dsqa/.test(ds || "");
+  const o = GC_OUT[g.outcome] || ["neutral", g.outcome];
+  const rows = (g.candidates || []).map((c) => { const st = GC_ST[c.status] || ["neutral", c.status];
+    return `<tr><td>${esc(c.title)}${c.name_in_corpus && c.name_in_corpus !== c.title ? `<div class="muted">${esc(c.name_in_corpus)}</div>` : ""}</td>
+      <td>${esc(GC_ROLE[c.role] || c.role)}</td><td>${pill(st[0], st[1])}</td><td>${esc(c.value || "")}</td>
+      <td>${(c.hops || []).map((h) => `<span class="hopref" data-hop="${esc(h)}">${esc(hopLabel(h))}</span>`).join("")}</td>
+      <td class="muted">${esc(c.note || "")}</td></tr>`; }).join("");
+  const ex = (g.extras || []).map((x) => `<li><b>${esc(x.entity)}</b>${x.qualifies ? " · qualifies" : ""}${x.changes_answer ? " · would change the answer" : ""}${x.note ? ": " + esc(x.note) : ""}</li>`).join("");
+  return `<details class="gold"><summary>${dsqa ? "Gold answer set" : "TRQA gold pool"}: ${(g.candidates || []).length} ${dsqa ? "entities" : "candidates"} ${pill(o[0], o[1])}${g.trivial ? " " + pill("bad", "trivial as written") : ""}</summary>
+    <div class="tw"><table><thead><tr><th>${dsqa ? "entity" : "TRQA candidate"}</th><th>role</th><th>ClimbMix</th><th>value</th><th>hops</th><th>note</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${ex ? `<p><b>${dsqa ? "Entities outside the gold set" : "Entities outside TRQA's pool"}</b></p><ul>${ex}</ul>` : ""}
+    ${g.note ? `<p class="muted">${esc(g.note)}</p>` : ""}</details>`;
+}
+function salvageBlock(sv) {
+  const o = OUTCOME[sv.outcome] || ["neutral", sv.outcome];
+  return `<div class="salvage"><span class="label">Salvage</span> ${pill(o[0], o[1])}
+    ${(sv.repairs || []).length ? `<ul>${sv.repairs.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    ${sv.rewrite_rationale ? `<p><b>Why the rewrite keeps the answer unique:</b> ${esc(sv.rewrite_rationale)}</p>` : ""}
+    ${(sv.caveats || []).length ? `<div>${sv.caveats.map((c) => pill("warn", CAVEAT[c] || c)).join(" ")}</div>` : ""}
+    ${sv.blocker ? `<p><b>Blocker:</b> ${esc(sv.blocker)}</p>` : ""}
+    ${sv.note ? `<p class="muted">${esc(sv.note)}</p>` : ""}</div>`;
+}
+function renderDetail() {
+  const r = current();
+  const sheet = $("sheet");
+  if (!r) { sheet.innerHTML = `<div class="empty">${!S.data[S.ds] ? "Loading…" : S.data[S.ds].length ? "Pick a question on the left." : "This set is empty."}</div>`; return; }
+  const a = audit(r);
+  const rv = S.reviews[key(S.ds, r.record_id)];
+  const v = VERDICT[a.verdict] || VERDICT.not_audited;
+  const invalid = new Set(a.invalid_doc_ids || []);
+  const st = a.stats || {};
+  const extra = [r.entity_set_description, r.annotator_note].filter(Boolean);
+  const ac = a.answer_check || {};
+  const hops = r.hops.map((h, i) => hopBlock(r, h, h.audit || {}, String(i + 1), rv, invalid, false)).join("");
+  const added = (a.added_hops || []).map((h) => hopBlock(r, null, h, h.id, rv, invalid, true)).join("");
+  const searches = a.searches || [];
+  const sv = a.salvage || null;
+  const proposedQ = sv && sv.proposed_question;
+  sheet.innerHTML = `
+  <section class="qhead">
+    <div class="crumbs"><span>${esc((({ name, title, nm, rw }) => (nm || rw ? title : name))(DATASETS.find((d) => d.id === S.ds)))}</span><span class="mono">${esc(r.record_id)}</span>${a.expansion ? pill("neutral", /dsqa/.test(S.ds) ? "DSQA expansion" : "TRQA expansion") : ""}${pill(v[0], v[1])}${sv && OUTCOME[sv.outcome] ? pill(OUTCOME[sv.outcome][0], OUTCOME[sv.outcome][1]) : ""}<span>${r.hops.length} hops</span>${r.failed_gate ? `<span>dropped at: ${esc(r.failed_gate)}</span>` : ""}${a.paper_stage3 ? pill(a.paper_stage3 === "kept" ? "neutral" : "warn", a.paper_stage3 === "kept" ? "Paper: kept in the 57" : "Paper: dropped at Stage 3") : ""}${differs(r) ? pill("bad", "Differs from paper") : ""}</div>
+    ${proposedQ ? `<span class="label">Proposed question (salvage rewrite)</span>` : ""}
+    <p class="qtext">${highlightQuestion(proposedQ || qtext(r), a.constraints)}</p>
+    ${proposedQ ? `<div class="origq"><span class="label">Original question</span><p>${esc(qtext(r))}</p></div>` : ""}
+    <div class="facts">${factRows(r)}${sv && sv.proposed_answer ? `<div class="fact"><span class="label">Proposed answer (gold change)</span><span class="v answer">${esc(sv.proposed_answer)}</span></div>` : ""}</div>
+    ${nmWhy(r)}
+    ${extra.map((x) => `<div class="note-src">${esc(x)}</div>`).join("")}
+    ${S.canary[S.ds] ? `<div class="canary">Canary-protected data: keep this page private. <span class="mono">${esc(S.canary[S.ds])}</span></div>` : ""}
+  </section>
+  <div class="duo">
+    <section class="card">
+      <h2>Audit ${pill(v[0], v[1])}${(a.fail_reasons || []).map((x) => pill("bad", FAIL_REASON[x] || x)).join("")}</h2>
+      ${sv ? salvageBlock(sv) : ""}
+      ${a.fixed_in ? fixedBlock(a) : ""}
+      ${a.gold_check ? goldBlock(a.gold_check, S.ds) : ""}
+      <p>${esc(a.summary || "This question has not been audited yet.")}</p>
+      ${ac.status ? `<p class="muted" style="font-size:var(--s-sm)"><b style="color:var(--ink)">Answer chain:</b> ${esc(ac.note || "")} ${pill(ac.status === "derives_gold" ? "ok" : ac.status === "partial" ? "warn" : "bad", ac.status.replace(/_/g, " "))}</p>` : ""}
+      ${a.deep_search ? `<div class="verif"><span class="label">Deep search</span> ${pill(a.deep_search.result === "flipped" ? "ok" : a.deep_search.result === "partly_fixed" ? "warn" : "neutral", a.deep_search.result === "flipped" ? "Flipped to pass" : a.deep_search.result === "partly_fixed" ? "Partly fixed" : "No new evidence")}
+        ${a.deep_search.note ? `<span class="muted">${esc(a.deep_search.note)}</span>` : ""}
+        ${(a.deep_search.items || []).length ? `<ul>${a.deep_search.items.map((x) => `<li><b>${esc(x.item)}</b>: ${esc(x.before)} → ${esc(x.after)}${x.evidence ? " · " + esc(x.evidence) : ""}${x.queries ? ` · ${esc(x.queries)} queries` : ""}</li>`).join("")}</ul>` : ""}</div>` : ""}
+      ${a.verification ? `<div class="verif"><span class="label">Second reader</span> ${a.verification.result === "revised" ? pill("warn", "Revised") : pill("ok", "Confirmed")}
+        ${a.verification.note ? `<span class="muted">${esc(a.verification.note)}</span>` : ""}
+        ${(a.verification.changes || []).length ? `<ul>${a.verification.changes.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>` : ""}</div>` : ""}
+      ${st.n_hops !== undefined ? `<div class="stats"><span><b>${st.n_constraints_covered}/${st.n_constraints}</b> constraints covered</span><span><b>${st.n_hops_grounded}/${st.n_hops}</b> hops grounded</span><span><b>${st.n_hops_grounded_only_via_new_docs}</b> grounded only by new docs</span><span><b>${st.n_added_hops}</b> added hops</span><span><b>${searches.length}</b> searches</span></div>` : ""}
+      ${invalid.size ? `<div class="flag">Cited doc IDs not found in climbmix-400b: <span class="mono">${[...invalid].map(esc).join(", ")}</span></div>` : ""}
+    </section>
+    <section class="card review">
+      <h2>Your review</h2>
+      <div class="decisions" id="decisions">${DECISIONS.map(([val, lab, k]) => `<button class="dec" data-v="${val}" aria-pressed="${rv && rv.decision === val}">${lab}<kbd>${k}</kbd></button>`).join("")}</div>
+      <textarea id="qcomment-${esc(r.record_id)}" data-scope="question" placeholder="Comments on this question: missing constraints, wrong grounding, answer issues…">${esc((rv && rv.comment) || "")}</textarea>
+      <div class="hint">${rv && rv.updated_at ? "Last edited " + new Date(rv.updated_at).toLocaleString() : "Saved automatically as you type."}</div>
+    </section>
+  </div>
+  ${constraintsTable(r, a, rv)}
+  <section class="section"><header><h3>Hops</h3><span class="muted">Green: grounded · amber: partially grounded · red: ungrounded. Open a hop for its quotes and documents.</span></header>
+    <div class="hops">${hops}</div></section>
+  ${added ? `<section class="section"><header><h3>Hops added by the audit</h3><span class="muted">Proposed to cover constraints the original hops miss</span></header><div class="hops">${added}</div></section>` : ""}
+  ${searches.length ? `<section class="section"><details class="searches"><summary>BM25 searches run during the audit (${searches.length})</summary><div class="slog">${searches.map((s) => `<div><span class="qy">${esc(s.query)}</span> <span class="muted">→ ${s.results.slice(0, 5).map(esc).join(", ")}${s.results.length > 5 ? "…" : ""}</span></div>`).join("")}</div></details></section>` : ""}
+  <div class="kbdhelp"><kbd>j</kbd>/<kbd>k</kbd> next/previous question · <kbd>1</kbd>–<kbd>4</kbd> decision · <kbd>e</kbd> expand all hops · <kbd>/</kbd> search · <kbd>Esc</kbd> close document</div>`;
+}
+
+/* ---------------- document drawer ---------------- */
+let marks = [], markIdx = 0;
+async function openDoc(docid, quotes) {
+  $("drawer").hidden = false; $("scrim").hidden = false;
+  $("dtitle").textContent = docid; $("dmeta").textContent = "loading…"; $("dtext").textContent = "";
+  const docs = await loadDocs(S.ds);
+  const text = docs[docid];
+  if (text == null) { $("dmeta").textContent = ""; $("dtext").innerHTML = `<span class="gap">This ID is not in climbmix-400b (no document returned by the API).</span>`; return; }
+  const ranges = [];
+  // mark every evidence quote this hop uses; with none given, mark all audit quotes for this doc
+  let qs = quotes && quotes.length ? quotes : [];
+  if (!qs.length) {
+    const r = current();
+    const hs = [...r.hops.map((h) => h.audit || {}), ...((r.audit || {}).added_hops || [])];
+    hs.forEach((h) => (h.evidence || []).forEach((e) => { if (e.doc_id === docid) qs = qs.concat(e.quotes || []); }));
+  }
+  qs.forEach((q) => { const re = new RegExp(wsPattern(q), "g"); let m; while ((m = re.exec(text))) { ranges.push([m.index, m.index + m[0].length]); if (!m[0].length) break; } });
+  ranges.sort((x, y) => x[0] - y[0]);
+  let out = "", i = 0;
+  for (const [s, e] of ranges) { if (s < i) continue; out += esc(text.slice(i, s)) + `<mark>${esc(text.slice(s, e))}</mark>`; i = e; }
+  out += esc(text.slice(i));
+  out = out.replace(/\[… (excerpt|document continues)[^\]]*\]/g, (m) => `<span class="gap">${m}</span>`);
+  $("dtext").innerHTML = out;
+  $("dmeta").textContent = `${text.length.toLocaleString()} chars · ${ranges.length} quote match${ranges.length === 1 ? "" : "es"}`;
+  marks = [...$("dtext").querySelectorAll("mark")]; markIdx = 0; focusMark();
+}
+function focusMark() {
+  marks.forEach((m) => m.classList.remove("cur"));
+  if (!marks.length) { $("dtext").scrollTop = 0; return; }
+  const m = marks[markIdx]; m.classList.add("cur");
+  $("dtext").scrollTop = m.offsetTop - $("dtext").clientHeight / 3;
+}
+function closeDoc() { $("drawer").hidden = true; $("scrim").hidden = true; }
+
+/* ---------------- selection ---------------- */
+async function selectDataset(ds) {
+  S.ds = ds; lsSet("per-ds", ds);
+  renderTabs(); renderFilters(); renderList(); renderDetail();
+  await loadDataset(ds);
+  if (!S.sel[ds]) { const f = filtered()[0]; if (f) S.sel[ds] = f.record_id; }
+  renderTabs(); renderFilters(); renderList(); renderDetail();
+  loadDocs(ds);
+}
+function select(qid, scroll) {
+  S.sel[S.ds] = qid; S.open = {}; lsSet("per-sel", S.sel);
+  renderList(); renderDetail(); $("main").scrollTop = 0;
+  if (window.matchMedia("(max-width: 760px)").matches) { $("side").dataset.open = "false"; window.scrollTo(0, 0); }
+  if (scroll) { const el = document.querySelector(`.qitem[data-id="${CSS.escape(qid)}"]`); if (el) el.scrollIntoView({ block: "nearest" }); }
+}
+function step(d) {
+  const list = filtered(); if (!list.length) return;
+  const i = list.findIndex((r) => r.record_id === S.sel[S.ds]);
+  const n = list[Math.max(0, Math.min(list.length - 1, i + d))];
+  if (n) select(n.record_id, true);
+}
+
+/* ---------------- events ---------------- */
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  const tab = t.closest(".tab"); if (tab) return selectDataset(tab.dataset.ds);
+  const fc = t.closest(".fchip"); if (fc) { S.filter[fc.dataset.f] = fc.dataset.v; renderFilters(); renderList(); return; }
+  const qi = t.closest(".qitem"); if (qi) return select(qi.dataset.id);
+  const doc = t.closest(".docbtn"); if (doc) { e.stopPropagation(); return openDoc(doc.dataset.doc, JSON.parse(doc.dataset.quotes || "[]")); }
+  const dec = t.closest(".dec"); if (dec) { const v = dec.dataset.v; updateReview((rv) => { rv.decision = rv.decision === v ? null : v; }); renderDetail(); return; }
+  const ag = t.closest(".agree button"); if (ag) {
+    const box = ag.parentElement, scope = box.dataset.scope, id = box.dataset.id, v = ag.dataset.v;
+    updateReview((rv) => { rv[scope] = rv[scope] || {}; const o = rv[scope][id] = rv[scope][id] || {}; o.agree = o.agree === v ? null : v; });
+    renderDetail(); return;
+  }
+  const op = t.closest("[data-open]"); if (op) { S.open[op.dataset.open] = true; renderDetail(); const ta = document.querySelector(`textarea[data-id="${CSS.escape(op.dataset.open.slice(2))}"][data-scope="constraints"]`); if (ta) ta.focus(); return; }
+  const hr = t.closest(".hopref"); if (hr) return jumpHop(hr.dataset.hop);
+  const cs = t.closest(".cspan"); if (cs) { const row = document.querySelector(`tr[data-cid="${CSS.escape(cs.dataset.cid)}"]`); if (row) row.scrollIntoView({ block: "center", behavior: "smooth" }); return; }
+  const tg = t.closest("[data-toggle]"); if (tg) { const k = tg.dataset.toggle; S.open[k] = !S.open[k]; renderDetail(); return; }
+  if (t.id === "dclose" || t.id === "scrim") return closeDoc();
+  if (t.id === "dnext") { if (marks.length) { markIdx = (markIdx + 1) % marks.length; focusMark(); } return; }
+  if (t.id === "dprev") { if (marks.length) { markIdx = (markIdx - 1 + marks.length) % marks.length; focusMark(); } return; }
+  if (t.id === "exportbtn") return exportAll();
+  if (t.id === "sidetoggle") { $("side").dataset.open = $("side").dataset.open === "true" ? "false" : "true"; return; }
+});
+function jumpHop(ref) {
+  const id = String(ref);
+  S.open[`h:${id}`] = true; renderDetail();
+  const el = $(`hop-${id}`); if (el) { el.scrollIntoView({ block: "center", behavior: "smooth" }); el.classList.add("flash"); }
+}
+document.addEventListener("input", (e) => {
+  const t = e.target;
+  if (t.id === "q") { S.filter.text = t.value; renderList(); return; }
+  if (t.tagName !== "TEXTAREA") return;
+  const scope = t.dataset.scope, id = t.dataset.id, val = t.value;
+  updateReview((rv) => {
+    if (scope === "question") rv.comment = val;
+    else { rv[scope] = rv[scope] || {}; const o = rv[scope][id] = rv[scope][id] || {}; o.comment = val; }
+  });
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") { if (!$("drawer").hidden) return closeDoc(); if (document.activeElement) document.activeElement.blur(); return; }
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.tagName)) return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === "j") { e.preventDefault(); step(1); }
+  else if (e.key === "k") { e.preventDefault(); step(-1); }
+  else if (e.key === "/") { e.preventDefault(); $("side").dataset.open = "true"; $("q").focus(); }
+  else if (e.key === "e") { const r = current(); if (!r) return; const all = r.hops.every((_, i) => S.open[`h:${i + 1}`]); r.hops.forEach((_, i) => (S.open[`h:${i + 1}`] = !all)); ((r.audit || {}).added_hops || []).forEach((h) => (S.open[`h:${h.id}`] = !all)); renderDetail(); }
+  else if (/^[1-4]$/.test(e.key)) { const v = DECISIONS[+e.key - 1][0]; updateReview((rv) => { rv.decision = rv.decision === v ? null : v; }); renderDetail(); }
+  else if (!$("drawer").hidden && (e.key === "n" || e.key === "ArrowDown")) { if (marks.length) { e.preventDefault(); markIdx = (markIdx + 1) % marks.length; focusMark(); } }
+});
+
+/* ---------------- boot ---------------- */
+(async function boot() {
+  try {
+    const m = await (await fetch("data/manifest.json")).json();
+    DATASETS = m.datasets || []; $("corpus").textContent = m.corpus || "";
+  } catch { DATASETS = []; }
+  if (!DATASETS.length) { document.body.insertAdjacentHTML("afterbegin", `<div class="empty">No data: build data/manifest.json with build_site_data.py (or demo/make_demo.py).</div>`); return; }
+  S.ds = DATASETS[0].id;
+  S.sel = lsGet("per-sel") || {};
+  const ds = lsGet("per-ds");
+  if (ds && DATASETS.some((d) => d.id === ds)) S.ds = ds;
+  renderTabs(); renderFilters();
+  initStore().then(() => { renderList(); renderDetail(); });
+  await selectDataset(S.ds);
+  DATASETS.forEach((d) => loadDataset(d.id).then(renderTabs));
+})();
+})();
+</script>

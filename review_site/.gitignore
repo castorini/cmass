@@ -1,0 +1,5 @@
+# Built and written at run time; never committed (they hold the data being reviewed).
+data/
+reviews/
+reviewed/
+demo/build/
