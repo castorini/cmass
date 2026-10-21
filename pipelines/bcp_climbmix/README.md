@@ -1,5 +1,11 @@
 # BrowseComp-Plus -> ClimbMix: Stage 1 Projection
 
+> **The full Stage 1 procedure as it was run** (both grounding passes and their union, the coverage audit, the
+> author review, the independent projections, the near-miss repairs and the near-miss selection) is in
+> [`pipelines/cmass/stage1/bcp/`](../cmass/stage1/bcp/). This directory is the earlier release: its task
+> construction, projection and answerability scripts are the ones that ran; `stage1_all_hops_verification.js` and
+> `stage1_all_hops_verification_build_output.py` are a later single-pass rewrite that did not produce the 65.
+
 The top-level scripts in this directory implement **Stage 1: Projection** of the paper pipeline. They
 project the 830 BrowseComp-Plus (BCP) test questions onto the ClimbMix corpus (`climbmix-400b`, BM25)
 and keep only questions whose full reasoning chains are grounded in the corpus. **Stage 2:
@@ -18,9 +24,9 @@ verification filter the resulting candidates. Script names use the paper's stage
 without a second numbering scheme. This directory also includes a convenience input builder
 corresponding to **Task construction** in **Stage 0: Dataset and corpus preparation**.
 
-The output is the 65-question all-hops-grounded set: 54 from the BCP test split plus 11 independently
-projected questions evaluated by the same All-hops verification operation. Subsequent human review
-produced the released 57-question benchmark.
+The Stage 1 output was 65 questions: 50 that passed the union of two grounding passes, a coverage audit and an
+author review; 11 from an independent projection, checked by a separate retrieval-verified audit; and 4 near
+misses repaired and accepted under a relaxed temporal-qualifier policy (see `pipelines/cmass/stage1/bcp/`).
 
 The `.js` workflows are agentic (Claude Code Workflow scripts): one agent per question, one output
 file per question, so each workflow is resumable - a question whose output file exists is skipped.
