@@ -7,7 +7,7 @@ human-reviewed questions with question-level relevance judgments (qrels).
 | Paper stage | Where |
 | --- | --- |
 | Stage 0: dataset and corpus preparation | duplicate detection in [`corpus_analysis/`](../../corpus_analysis/); task construction for BrowseComp-Plus in [`pipelines/bcp_climbmix/`](../bcp_climbmix/) |
-| Stage 1: projection (hop/clue decomposition, grounding, answerability check, all-hops verification) | [`pipelines/bcp_climbmix/`](../bcp_climbmix/) |
+| Stage 1: projection (hop/clue decomposition, grounding, answerability check, all-hops verification) | [`pipelines/bcp_climbmix/`](../bcp_climbmix/) for BrowseComp-Plus; the Stage 1 code for the other three datasets is not released yet |
 | **Stage 2: audit, revision and human review** (steps C1-C6) | [`stage2/`](stage2/) and [`tools/`](tools/); human review in [`review_site/`](../../review_site/) |
 | **Stage 3: qrels construction** (candidate pooling, precision filter, duplicate expansion) | [`stage3/`](stage3/) |
 
@@ -50,7 +50,8 @@ Each run is one directory holding the Stage 1 candidates and every stage's per-q
 
 - **Corpus backend.** `cli` runs the same two-command CLI as Stage 1 (`search "<query>" <hits> <preview_chars>`
   and `doc <docid>`, both printing JSON); `rest` talks to a Pyserini-style REST server (`base_url`, `index`,
-  and `token_env`, the name of the environment variable holding a bearer token). Documents and searches are
+  and `token_env`, the name of the environment variable holding a bearer token, or `token_file`, a dotenv file
+  that sets it). Documents and searches are
   cached in the run directory; requests are paced across every process on the host (`min_gap_s`, `slots`),
   and identical searches in flight are shared, because many agents use one corpus service.
 - **Dataset families** carry the paper's revision limits: `hotpotqa` (correct wording or add one grounded
