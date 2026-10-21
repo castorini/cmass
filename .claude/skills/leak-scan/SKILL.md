@@ -21,6 +21,7 @@ python3 scripts/leak_scan.py --staged                 # before committing
 python3 scripts/leak_scan.py --commits origin/main..HEAD
 python3 scripts/leak_scan.py --tree HEAD              # the current tree
 python3 scripts/leak_scan.py --history                # every file reachable from any ref (audit)
+python3 scripts/leak_scan.py --files PATH ...         # working-tree files or directories, before staging
 ```
 
 ## Rules

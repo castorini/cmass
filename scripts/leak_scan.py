@@ -226,6 +226,7 @@ def main() -> int:
     g.add_argument("--new-commits", metavar="SHA")
     g.add_argument("--tree", nargs="?", const="HEAD", metavar="REV")
     g.add_argument("--history", action="store_true")
+    g.add_argument("--files", nargs="+", metavar="PATH", help="working-tree files or directories, without git")
     a = ap.parse_args()
     globs = allowlist()
     blobs, findings, seen = Blobs(), [], set()
@@ -251,6 +252,17 @@ def main() -> int:
             parts = line.split(" ", 1)
             if len(parts) == 2 and git("cat-file", "-t", parts[0]).strip() == b"blob":
                 check(parts[1], parts[0], "history")
+    elif a.files:
+        root = Path(git("rev-parse", "--show-toplevel").decode().strip())
+        for arg in a.files:
+            base = Path(arg).resolve()
+            for f in sorted([base] if base.is_file() else base.rglob("*")):
+                if not f.is_file() or ".git" in f.parts or "__pycache__" in f.parts:
+                    continue
+                rel = f.relative_to(root).as_posix() if f.is_relative_to(root) else str(f)
+                if (rel, "file") not in seen:
+                    seen.add((rel, "file"))
+                    findings.extend(scan_blob(rel, f.read_bytes(), globs, "working tree"))
     else:
         for p, sha in tree_blobs(a.tree):
             check(p, sha, a.tree)
