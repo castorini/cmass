@@ -7,3 +7,4 @@ pipelines/cmass/demo/make_stage2_demo.py  [synthetic]  # invented Stage 2 record
 pipelines/cmass/demo/make_stage3_fixtures.py  [synthetic]  # invented final records and verdicts (fictional Oskeria)
 pipelines/cmass/stage2/AUDIT.md  [synthetic]  # worked audit example on invented Oskeria documents
 pipelines/cmass/stage3/QRELS.md  [synthetic]  # verdict examples quoting invented Oskeria documents
+pipelines/cmass/stage1/trqa/demo/make_demo.py  [synthetic]  # invented TRQA demo tasks, agent outputs, pools and leads (fictional Oskeria)
