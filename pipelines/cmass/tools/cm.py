@@ -8,7 +8,8 @@
   cm.py history --set SET --qid QID                                       # every query already tried for this question
 
 Run inside a run directory (or set $CMASS_RUN). --set/--qid log every search to work/<set>/<qid>.searchlog.jsonl,
-which becomes part of the question's record. Documents are cached, so re-reading costs nothing.
+which becomes part of the question's record; with --stage 1 (Stage 1 agents) the log is
+stage1/<set>/<qid>.searchlog.jsonl instead, so a Stage 2 auditor starts with its own history. Documents are cached, so re-reading costs nothing.
 
 search refuses a query too similar to one already tried for the question (token overlap 0.6 or more):
 change the words, try a rarer term or a short 2-4 word query, or pass --force only to rerun it deeper.
@@ -150,6 +151,7 @@ def main():
     s.add_argument("--force", action="store_true")
     s.add_argument("--set")
     s.add_argument("--qid")
+    s.add_argument("--stage", choices=["1", "2"], default="2", help="1: log to Stage 1's search log")
     d = sub.add_parser("doc")
     d.add_argument("docid")
     d.add_argument("--grep", nargs="*")
@@ -157,6 +159,7 @@ def main():
     d.add_argument("--max", type=int, default=6000)
     d.add_argument("--set")
     d.add_argument("--qid")
+    d.add_argument("--stage", choices=["1", "2"], default="2", help="1: log to Stage 1's search log")
     q = sub.add_parser("quote")
     q.add_argument("docid")
     q.add_argument("start")
@@ -167,8 +170,11 @@ def main():
     h = sub.add_parser("history")
     h.add_argument("--set", required=True)
     h.add_argument("--qid", required=True)
+    h.add_argument("--stage", choices=["1", "2"], default="2", help="1: log to Stage 1's search log")
     a = p.parse_args()
     run = Run(a.run)
+    if getattr(a, "stage", "2") == "1":
+        run.log_stage = "stage1"
     corpus = Corpus(run)
     {"search": cmd_search, "doc": cmd_doc, "quote": cmd_quote, "verify": cmd_verify,
      "history": cmd_history}[a.cmd](run, corpus, a)

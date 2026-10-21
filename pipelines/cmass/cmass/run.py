@@ -1,6 +1,10 @@
 """The run directory: one place per pipeline run, holding every stage's per-question records.
 
   <run>/cmass.json                      config (config.py)
+  <run>/tasks/<set>.jsonl               Stage 0 output: one task per source question (Stage 1 input)
+  <run>/stage1/<set>/<step>/<qid>.json  Stage 1 per-question agent outputs, one directory per step
+  <run>/stage1/<set>/<qid>.searchlog.jsonl  every Stage 1 search for the question (cm.py --stage 1)
+  <run>/stage1/<set>/*.jsonl            Stage 1 deterministic lists (survivors of each filter)
   <run>/inputs/<set>.jsonl              Stage 1 output: projected candidates or near misses (records.py)
   <run>/cache/docs/<docid>.json         document text cache ({"docid", "text"})
   <run>/cache/searches/<key>.json       search result cache
@@ -32,6 +36,7 @@ class Run:
         self.cache = self.root / "cache"
         self.docs = self.cache / "docs"
         self.searches = self.cache / "searches"
+        self.log_stage = "stage2"      # which search log cm.py writes: "stage1" keeps Stage 2's history independent
 
     # ------------------------------------------------------------------ paths
     def input_file(self, sid: str) -> Path:
@@ -43,8 +48,19 @@ class Run:
     def audit_file(self, sid: str, qid: str) -> Path:
         return self.work_dir(sid) / f"{qid}.audit.json"
 
-    def searchlog(self, sid: str, qid: str) -> Path:
+    def searchlog(self, sid: str, qid: str, stage: str | None = None) -> Path:
+        if (stage or self.log_stage) == "stage1":
+            return self.stage1_dir(sid) / f"{qid}.searchlog.jsonl"
         return self.work_dir(sid) / f"{qid}.searchlog.jsonl"
+
+    def task_file(self, sid: str) -> Path:
+        return self.root / (self.config.set(sid).get("tasks") or f"tasks/{sid}.jsonl")
+
+    def stage1_dir(self, sid: str) -> Path:
+        return self.root / "stage1" / sid
+
+    def stage1_file(self, sid: str, step: str, qid: str) -> Path:
+        return self.stage1_dir(sid) / step / f"{qid}.json"
 
     def packet(self, sid: str, qid: str) -> Path:
         return self.root / "packets" / sid / f"{qid}.md"
@@ -82,6 +98,18 @@ class Run:
                 r.setdefault("record_id", str(r.get("id", "")))
                 r["record_id"] = str(r["record_id"])
                 out.append(r)
+        return out
+
+    def tasks(self, sid: str) -> list[dict]:
+        """Stage 0 tasks of a set (Stage 1 input), record_id as a string."""
+        p = self.task_file(sid)
+        if not p.exists():
+            raise SystemExit(f"tasks for set {sid} not found: {p}")
+        out = []
+        for r in read_jsonl(p):
+            r.setdefault("record_id", str(r.get("id", "")))
+            r["record_id"] = str(r["record_id"])
+            out.append(r)
         return out
 
     def record(self, sid: str, qid: str) -> dict:
