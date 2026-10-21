@@ -22,6 +22,7 @@ import fcntl
 import hashlib
 import json
 import os
+import threading
 import random
 import subprocess
 import tempfile
@@ -61,7 +62,7 @@ class Corpus:
     def save_doc(self, docid: str, text: str) -> None:
         p = self._doc_path(docid)
         if not p.exists():
-            tmp = p.with_name(f"{p.name}.tmp{os.getpid()}")
+            tmp = p.with_name(f"{p.name}.tmp{os.getpid()}.{threading.get_ident()}")
             tmp.write_text(json.dumps({"docid": docid, "text": text}, ensure_ascii=False))
             tmp.replace(p)
 
@@ -214,7 +215,7 @@ class Corpus:
                         res = [{"rank": c.get("rank", i + 1), "docid": c["docid"], "score": c.get("score"),
                                 "preview": c.get("preview", "")} for i, c in enumerate(d.get("results", []))]
                     rec = {"query": query, "hits": hits, "results": res, "ts": time.strftime("%Y-%m-%dT%H:%M:%S")}
-                    tmp = p.with_name(f"{p.name}.tmp{os.getpid()}")
+                    tmp = p.with_name(f"{p.name}.tmp{os.getpid()}.{threading.get_ident()}")
                     tmp.write_text(json.dumps(rec, ensure_ascii=False))
                     tmp.replace(p)
             finally:

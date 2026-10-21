@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 from pathlib import Path
 
 from . import config as _config
@@ -130,14 +131,14 @@ class Run:
 def write_json(path: Path, obj) -> None:
     """Atomic JSON write (agents of a running workflow may be reading the file)."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(f"{path.name}.tmp{os.getpid()}")
+    tmp = path.with_name(f"{path.name}.tmp{os.getpid()}.{threading.get_ident()}")
     tmp.write_text(json.dumps(obj, ensure_ascii=False, indent=1))
     tmp.replace(path)
 
 
 def write_jsonl(path: Path, rows) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(f"{path.name}.tmp{os.getpid()}")
+    tmp = path.with_name(f"{path.name}.tmp{os.getpid()}.{threading.get_ident()}")
     with open(tmp, "w") as f:
         for r in rows:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
