@@ -1,13 +1,15 @@
-# CMASS projection pipeline: audit, revision, human review and qrels
+# CMASS projection pipeline: projection, audit, revision, human review and qrels
 
-The dataset- and corpus-agnostic pipeline behind CMASS's four benchmarks. It takes projected question-answer
-candidates and a retrieval endpoint with `search` and `get_document`, and produces audited, revised and
-human-reviewed questions with question-level relevance judgments (qrels).
+The pipeline behind CMASS's four benchmarks. Stage 1 projects each source question onto the corpus, with the
+procedure that was run for each dataset in [`stage1/`](stage1/). Stages 2 and 3 are dataset- and
+corpus-agnostic: they take projected question-answer candidates and a retrieval endpoint with `search` and
+`get_document`, and produce audited, revised and human-reviewed questions with question-level relevance
+judgments (qrels).
 
 | Paper stage | Where |
 | --- | --- |
-| Stage 0: dataset and corpus preparation | duplicate detection in [`corpus_analysis/`](../../corpus_analysis/); task construction for BrowseComp-Plus in [`pipelines/bcp_climbmix/`](../bcp_climbmix/) |
-| Stage 1: projection (hop/clue decomposition, grounding, answerability check, all-hops verification) | [`pipelines/bcp_climbmix/`](../bcp_climbmix/) for BrowseComp-Plus; the Stage 1 code for the other three datasets is not released yet |
+| Stage 0: dataset and corpus preparation | duplicate detection in [`corpus_analysis/`](../../corpus_analysis/); task construction per dataset in [`stage1/<dataset>/`](stage1/) |
+| Stage 1: projection (hop/clue decomposition, grounding, answerability check, filters) | [`stage1/`](stage1/): the procedure as run for each dataset ([`bcp/`](stage1/bcp/), [`trqa/`](stage1/trqa/), [`dsqa/`](stage1/dsqa/), [`hotpotqa/`](stage1/hotpotqa/)) |
 | **Stage 2: audit, revision and human review** (steps C1-C6) | [`stage2/`](stage2/) and [`tools/`](tools/); human review in [`review_site/`](../../review_site/) |
 | **Stage 3: qrels construction** (candidate pooling, precision filter, duplicate expansion) | [`stage3/`](stage3/) |
 
@@ -18,8 +20,9 @@ human-reviewed questions with question-level relevance judgments (qrels).
 | path | what |
 | --- | --- |
 | `cmass/` | shared package: the run directory (`run.py`), configuration and dataset rules (`config.py`), the corpus client (`corpus.py`), text matching (`text.py`), candidate records (`records.py`), Stage 2 state (`stage2.py`) |
-| `tools/` | `cm.py` (the agents' corpus CLI: search, doc, quote, verify, history), `validate.py` (audit schema and verbatim quotes), `packets.py`, `assemble.py`, `check_records.py`, `stage2_state.py`, `finalize.py` |
+| `tools/` | `cm.py` (the agents' corpus CLI: search, doc, quote, verify, history), `validate.py` (audit schema and verbatim quotes), `packets.py`, `assemble.py`, `check_records.py`, `stage2_state.py`, `finalize.py`, `check_workflows.js` (Workflow syntax check) |
 | `stage2/` | agent guides (`AUDIT.md`, `REVISION.md`, `ADVERSARIAL.md`, `FINAL_CHECK.md`), record formats (`SCHEMA.md`), Workflow scripts (`audit.js`, `adversarial.js`, `revision.js`, `final_check.js`) |
+| `stage1/` | Stage 0 task construction and Stage 1 projection for each dataset: Workflow scripts, agent guides, builders, manual decisions, offline demos |
 | `stage3/` | the judging standard (`QRELS.md`), `qrels.py` (phase 1), `dups.py` (phase 2), `qrels_state.py`, Workflow scripts (`phase1.js`, `phase2.js`) |
 | `demo/` | an invented corpus and offline corpus CLI, and generators that run every deterministic step end to end |
 
@@ -63,8 +66,8 @@ Each run is one directory holding the Stage 1 candidates and every stage's per-q
 
 ## Run it
 
-Stage by stage, with the commands in order: [`stage2/README.md`](stage2/README.md) and
-[`stage3/README.md`](stage3/README.md). In short:
+Stage by stage, with the commands in order: [`stage1/<dataset>/README.md`](stage1/README.md),
+[`stage2/README.md`](stage2/README.md) and [`stage3/README.md`](stage3/README.md). From Stage 2 on, in short:
 
 ```bash
 cd my_run                                          # holds cmass.json and inputs/<set>.jsonl
@@ -90,6 +93,7 @@ The demo uses an invented corpus about a fictional island nation and invented ca
 corpus service and holds no benchmark content:
 
 ```bash
+python3 pipelines/cmass/stage1/bcp/demo/make_demo.py  # Stage 0 and Stage 1 for one dataset (also trqa, dsqa, hotpotqa)
 python3 pipelines/cmass/demo/test_stage3.py           # Stage 3 phase 1 and phase 2, end to end
 python3 pipelines/cmass/demo/make_stage2_demo.py      # Stage 2 records for every path of the flow
 cd pipelines/cmass/demo/run

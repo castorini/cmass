@@ -1,11 +1,21 @@
 ---
 name: cmass-pipeline
-description: Run or extend the CMASS projection pipeline's Stage 2 (audit, revision, adversarial check, human review, final check) and Stage 3 (qrels construction and duplicate expansion) on projected question-answer candidates over a fixed corpus. Use when asked to audit projected questions, repair or revise them, run the hunter/verifier check, finalize a reviewed set, build or verify qrels, expand qrels over duplicates, or set up a run directory. Triggers include "audit the projections", "stage 2", "final check", "finalize", "build qrels", "qrels phase 1", "duplicate expansion", "run directory", "cmass.json".
+description: Run or extend the CMASS projection pipeline - Stage 0 task construction and Stage 1 projection per dataset (BrowseComp-Plus, TRQA, DSQA, HotpotQA), Stage 2 (audit, revision, adversarial check, human review, final check) and Stage 3 (qrels construction and duplicate expansion) on projected question-answer candidates over a fixed corpus. Use when asked to project a benchmark onto the corpus, build tasks, run the projector or the Stage 1 gates, audit projected questions, repair or revise them, run the hunter/verifier check, finalize a reviewed set, build or verify qrels, expand qrels over duplicates, or set up a run directory. Triggers include "project", "stage 1", "projection", "build tasks", "near misses", "audit the projections", "stage 2", "final check", "finalize", "build qrels", "qrels phase 1", "duplicate expansion", "run directory", "cmass.json".
 ---
 
-# CMASS pipeline (Stages 2 and 3)
+# CMASS pipeline (Stages 0-3)
 
-Code in `pipelines/cmass/`; read its `README.md`, then `stage2/README.md` or `stage3/README.md` for the step at hand.
+Code in `pipelines/cmass/`; read its `README.md`, then `stage1/<dataset>/README.md`, `stage2/README.md` or
+`stage3/README.md` for the step at hand.
+
+## Stage 0 and Stage 1
+
+Each dataset's procedure, as it was run, is in `stage1/<dataset>/` (`bcp`, `trqa`, `dsqa`, `hotpotqa`): task
+construction into `tasks/<set>.jsonl`, Workflow scripts with their agent guides, a state tool that decides what is
+pending, the builders, and `MANUAL.md`-style manual decisions. It ends by writing `inputs/<set>.jsonl` and
+`inputs/<set>_near_misses.jsonl` for Stage 2. Stage 1 agents search with `tools/cm.py ... --stage 1 --step <step>`
+(each step its own search log) and `--center`. Check Workflow syntax with `node tools/check_workflows.js <dir>`
+(`node --check` is not enough). Do not change a dataset's steps, criteria or filters: they document what was run.
 
 ## Setup
 

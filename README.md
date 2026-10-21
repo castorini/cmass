@@ -9,8 +9,8 @@ ClimbMix Agentic Search Suite
 <a href="https://arxiv.org/abs/2608.20317"><b>Paper</b></a> |
 <a href="https://huggingface.co/datasets/castorini/cmass"><b>Dataset</b></a> |
 <a href="REPRODUCING.md"><b>Reproduce</b></a> |
-<a href="pipelines/bcp_climbmix/README.md"><b>Projection</b></a> |
-<a href="pipelines/bcp_climbmix/qrels/README.md"><b>Qrels</b></a> |
+<a href="pipelines/cmass/README.md"><b>Pipeline</b></a> |
+<a href="pipelines/cmass/stage3/README.md"><b>Qrels</b></a> |
 <a href="review_site/README.md"><b>Review site</b></a> |
 <a href="corpus_analysis/README.md"><b>Corpus Analysis</b></a> |
 </p>
@@ -92,8 +92,7 @@ print([row["doc_id"] for row in query_qrels])
 ```
 
 If the Hugging Face release requires authentication, run `hf auth login` first. See
-[`pipelines/bcp_climbmix/`](pipelines/bcp_climbmix/) to reproduce the projection rather than only
-consume the release.
+[`pipelines/cmass/`](pipelines/cmass/) to reproduce the projection rather than only consume the release.
 
 ## Projection Pipeline
 
@@ -101,16 +100,18 @@ consume the release.
 
 - **Stage 0, preparation:** duplicate detection over the corpus (exact and near duplicates, Jaccard
   0.7 or more; nothing is removed) and one task per source question.
-- **Stage 1, projection:** an agent decomposes each question into a minimal chain of atomic hops and
-  searches ClimbMix until every hop has evidence or the evidence is shown to be absent. An answerability
-  check and an all-hops verification keep the questions whose hops are all grounded and jointly derive
-  the answer; near misses are kept for the audit.
+- **Stage 1, projection:** agents decompose each question into hops, search ClimbMix for evidence of
+  each hop, and judge whether the answer can be derived; filters then keep the candidates whose hops are
+  grounded and set near misses aside for the audit. The filters differ by dataset (grounding passes, a
+  coverage audit and an author review for BrowseComp-Plus; a strict audit and agent gates for the others):
+  see [`pipelines/cmass/stage1/`](pipelines/cmass/stage1/).
 - **Stage 2, audit, revision and human review:** an auditor agent checks constraint coverage,
   alternatives, uniqueness and set completeness and may repair a question; hunter agents look for rival
   answers and verifier agents check the evidence; the authors review every question in the
   [review site](review_site/); a fresh checker agent verifies the final answer and evidence.
-- **Stage 3, qrels:** a high-recall candidate pool per question, a precision filter that keeps
-  documents supporting at least one hop, and expansion over exact and confirmed near duplicates.
+- **Stage 3, qrels:** a candidate pool per question (the accepted evidence plus an agent-written recall
+  pass), tiered judge agents that keep documents supporting at least one hop, and expansion over exact and
+  near duplicates of the kept documents.
 
 ![Hops per question and relevant documents per question](assets/projection-stats.png)
 
@@ -143,11 +144,12 @@ compare another agent.
 
 ## Repository
 
-- [`pipelines/cmass/`](pipelines/cmass/): the dataset- and corpus-agnostic pipeline for stages 2 and 3:
-  the audit, revision, adversarial check, human review and final check, and qrels construction (candidate
-  pooling, precision filter, duplicate expansion), with an offline demo on invented data.
-- [`pipelines/bcp_climbmix/`](pipelines/bcp_climbmix/): the BrowseComp-Plus projection (stage 1) and
-  the first, BCP-only qrels construction ([`qrels/`](pipelines/bcp_climbmix/qrels/)).
+- [`pipelines/cmass/`](pipelines/cmass/): the pipeline. [`stage1/`](pipelines/cmass/stage1/) holds the
+  task construction and projection as run for each of the four datasets; stages 2 and 3 are dataset- and
+  corpus-agnostic: the audit, revision, adversarial check, human review and final check, and qrels
+  construction (candidate pooling, precision filter, duplicate expansion). Offline demos on invented data.
+- [`pipelines/bcp_climbmix/`](pipelines/bcp_climbmix/): the first release of the BrowseComp-Plus projection
+  and the first, BCP-only qrels construction ([`qrels/`](pipelines/bcp_climbmix/qrels/)).
 - [`review_site/`](review_site/): the human-in-the-loop review site used in stage 2, with an invented
   demo dataset. Reviewers see each question with its constraints, the audit, every hop's verbatim
   evidence in the full documents, and record decisions, per-hop checks and comments as JSONL.
