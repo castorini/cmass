@@ -14,7 +14,10 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-DOCS = json.loads((Path(__file__).resolve().parent / "corpus.json").read_text())
+_HERE = Path(__file__).resolve().parent
+DOCS = json.loads((_HERE / "corpus.json").read_text())
+for _extra in sorted(_HERE.parent.glob("stage1/*/demo/corpus.json")):    # Stage 1 demos add their own invented documents
+    DOCS.update(json.loads(_extra.read_text()))
 TOK = re.compile(r"[a-z0-9]+")
 
 
