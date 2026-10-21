@@ -29,7 +29,8 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-CORPUS = json.loads((HERE / "corpus.json").read_text())
+sys.path.insert(0, str(HERE))
+from demo_cm import DOCS as CORPUS  # noqa: E402  (the core corpus plus every Stage 1 demo's documents, as served)
 SET = "demo"
 
 
