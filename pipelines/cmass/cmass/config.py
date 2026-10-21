@@ -8,7 +8,8 @@ The config is `cmass.json` in the run directory (or the file named by $CMASS_CON
       "backend": "cli",                          # "cli" or "rest"
       "cli": {"search": ["python3", "/path/to/cm.py", "search"],
               "doc":    ["python3", "/path/to/cm.py", "doc"]},
-      "rest": {"base_url": "https://example.org", "index": "climbmix-400b", "token_env": "PYSERINI_API_TOKEN"},
+      "rest": {"base_url": "https://example.org", "index": "climbmix-400b", "token_env": "PYSERINI_API_TOKEN",
+               "token_file": "~/.env.local"},       # token_file: optional dotenv file with that variable
       "min_gap_s": 2.0, "slots": 1, "retries": 20
     },
     "sets": {

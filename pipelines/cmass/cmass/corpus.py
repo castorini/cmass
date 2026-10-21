@@ -6,8 +6,9 @@
   backend "rest"  a Pyserini-style REST server:
                     GET <base_url>/v1/<index>/search?query=&hits=   -> {"candidates": [{"docid", "rank", "score", "doc"}]}
                     GET <base_url>/v1/<index>/doc/<docid>           -> {"doc": ...}
-                  The bearer token is read from the environment variable named by "token_env"; it is never
-                  printed or written anywhere.
+                  The bearer token is read from the environment variable named by "token_env", or else from
+                  "token_file", a dotenv-style file with a NAME=value line for that variable (useful when agents'
+                  shells do not share one exported environment). It is never printed or written anywhere.
 
 Every document fetched is cached under <run>/cache/docs, every search under <run>/cache/searches, so
 re-reading costs nothing. Requests are paced across all processes on the host (one request start every
@@ -102,10 +103,23 @@ class Corpus:
             self.f.close()
 
     # ------------------------------------------------------------------ backends
+    def _token(self) -> str:
+        rest = self.cfg.get("rest") or {}
+        name = rest.get("token_env", "PYSERINI_API_TOKEN")
+        tok = os.environ.get(name, "")
+        if not tok and rest.get("token_file"):
+            f = Path(rest["token_file"]).expanduser()
+            if f.exists():
+                for line in f.read_text().splitlines():
+                    k, _, v = line.partition("=")
+                    if k.strip().removeprefix("export ").strip() == name:
+                        tok = v.strip().strip("'\"")
+        return tok
+
     def _rest_get(self, path: str, params: dict | None) -> dict:
         rest = self.cfg.get("rest") or {}
         base = rest.get("base_url", "").rstrip("/")
-        token = os.environ.get(rest.get("token_env", "PYSERINI_API_TOKEN"), "")
+        token = self._token()
         url = f"{base}{path}" + (f"?{urllib.parse.urlencode(params)}" if params else "")
         delay = 3.0
         for _ in range(int(self.cfg.get("retries", 20))):
