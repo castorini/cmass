@@ -8,3 +8,4 @@ pipelines/cmass/demo/make_stage3_fixtures.py  [synthetic]  # invented final reco
 pipelines/cmass/stage2/AUDIT.md  [synthetic]  # worked audit example on invented Oskeria documents
 pipelines/cmass/stage3/QRELS.md  [synthetic]  # verdict examples quoting invented Oskeria documents
 pipelines/cmass/stage1/trqa/demo/make_demo.py  [synthetic]  # invented TRQA demo tasks, agent outputs, pools and leads (fictional Oskeria)
+pipelines/cmass/stage1/hotpotqa/demo/make_demo.py  [synthetic]  # invented HotpotQA-shaped questions, sources and agent outputs (fictional Oskeria)
