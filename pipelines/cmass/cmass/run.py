@@ -3,7 +3,8 @@
   <run>/cmass.json                      config (config.py)
   <run>/tasks/<set>.jsonl               Stage 0 output: one task per source question (Stage 1 input)
   <run>/stage1/<set>/<step>/<qid>.json  Stage 1 per-question agent outputs, one directory per step
-  <run>/stage1/<set>/<qid>.searchlog.jsonl  every Stage 1 search for the question (cm.py --stage 1)
+  <run>/stage1/<set>/<qid>.searchlog.jsonl  every Stage 1 search for the question (cm.py --stage 1; with
+                                        --step S: stage1/<set>/S/<qid>.searchlog.jsonl, that step's own log)
   <run>/stage1/<set>/*.jsonl            Stage 1 deterministic lists (survivors of each filter)
   <run>/inputs/<set>.jsonl              Stage 1 output: projected candidates or near misses (records.py)
   <run>/cache/docs/<docid>.json         document text cache ({"docid", "text"})
@@ -37,6 +38,7 @@ class Run:
         self.docs = self.cache / "docs"
         self.searches = self.cache / "searches"
         self.log_stage = "stage2"      # which search log cm.py writes: "stage1" keeps Stage 2's history independent
+        self.log_step = None           # Stage 1 only: a step's own log, so independent passes do not share a history
 
     # ------------------------------------------------------------------ paths
     def input_file(self, sid: str) -> Path:
@@ -50,6 +52,8 @@ class Run:
 
     def searchlog(self, sid: str, qid: str, stage: str | None = None) -> Path:
         if (stage or self.log_stage) == "stage1":
+            if self.log_step:
+                return self.stage1_dir(sid) / self.log_step / f"{qid}.searchlog.jsonl"
             return self.stage1_dir(sid) / f"{qid}.searchlog.jsonl"
         return self.work_dir(sid) / f"{qid}.searchlog.jsonl"
 

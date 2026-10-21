@@ -9,13 +9,18 @@
 
 Run inside a run directory (or set $CMASS_RUN). --set/--qid log every search to work/<set>/<qid>.searchlog.jsonl,
 which becomes part of the question's record; with --stage 1 (Stage 1 agents) the log is
-stage1/<set>/<qid>.searchlog.jsonl instead, so a Stage 2 auditor starts with its own history. Documents are cached, so re-reading costs nothing.
+stage1/<set>/<qid>.searchlog.jsonl instead, so a Stage 2 auditor starts with its own history; --step NAME gives a
+Stage 1 step its own log (stage1/<set>/NAME/<qid>.searchlog.jsonl), so two independent passes do not share one.
+
+search --center shows each hit's preview around its densest window of query terms instead of the document start
+(it reads each hit's full text: free when the backend returns full text with the search, as the rest backend does). Documents are cached, so re-reading costs nothing.
 
 search refuses a query too similar to one already tried for the question (token overlap 0.6 or more):
 change the words, try a rarer term or a short 2-4 word query, or pass --force only to rerun it deeper.
 --only lists just the hits whose full text contains one of the phrases (a deep sweep: use --hits 50).
 """
 import argparse
+import bisect
 import json
 import re
 import sys
@@ -42,6 +47,37 @@ def near_duplicate(run, sid, qid, query, threshold=0.6):
     return best if best[0] >= threshold else None
 
 
+_STOP = set(
+    "the a an of in on and or to for with is are was were be by as at from that this "
+    "their they it its his her he she who which what when where how into over under more "
+    "less than but not only also can could would should may might will did does do has have "
+    "had been being you your we our us i me my one two three first second name real life "
+    "series character played play plays year years".split())
+
+
+def centered(text, query, width):
+    """A width-char window around the densest match of the query's terms (the Stage 1 clients' previews)."""
+    toks = {t for t in re.findall(r"[a-z0-9]+", query.lower()) if len(t) > 2 and t not in _STOP}
+    low, hits = text.lower(), []
+    for t in toks:
+        i = low.find(t)
+        while i != -1 and len(hits) <= 4000:
+            hits.append((i, t))
+            i = low.find(t, i + len(t))
+    if not hits:
+        return text[:width]
+    hits.sort()
+    pos = [h[0] for h in hits]
+    best, key = 0, (-1, -1)
+    for s in range(len(hits)):
+        e = bisect.bisect_left(pos, pos[s] + width)
+        k = (len({h[1] for h in hits[s:e]}), e - s)
+        if k > key:
+            best, key = s, k
+    start = max(0, pos[best] - width // 4)
+    return ("…" if start else "") + text[start:start + width] + ("…" if start + width < len(text) else "")
+
+
 def cmd_search(run, corpus, a):
     if a.set and a.qid and not a.force:
         dup = near_duplicate(run, a.set, a.qid, a.query)
@@ -55,7 +91,7 @@ def cmd_search(run, corpus, a):
         print("(no results)")
     shown = 0
     for h in hits:
-        if a.only or a.grep:
+        if a.only or a.grep or a.center:
             flat = re.sub(r"\s+", " ", corpus.get_document(h["docid"]) or "")
         else:
             flat = h.get("preview") or re.sub(r"\s+", " ", corpus.get_document(h["docid"]) or "")
@@ -71,7 +107,7 @@ def cmd_search(run, corpus, a):
                 s0 = max(0, i - a.chars)
                 print(f"#{h['rank']:<2} {h['docid']:<20} {score} [{g}] | {'…' if s0 else ''}{flat[s0:i + len(g) + a.chars]}")
             continue
-        preview = flat[:a.chars]
+        preview = centered(flat, a.query, a.chars) if a.center else flat[:a.chars]
         for g in a.grep or []:
             loc = locate(flat, g)
             if loc:
@@ -149,9 +185,11 @@ def main():
     s.add_argument("--grep", nargs="*")
     s.add_argument("--only", nargs="*")
     s.add_argument("--force", action="store_true")
+    s.add_argument("--center", action="store_true", help="preview around the densest window of query terms")
     s.add_argument("--set")
     s.add_argument("--qid")
     s.add_argument("--stage", choices=["1", "2"], default="2", help="1: log to Stage 1's search log")
+    s.add_argument("--step", help="with --stage 1: this step's own search log")
     d = sub.add_parser("doc")
     d.add_argument("docid")
     d.add_argument("--grep", nargs="*")
@@ -160,6 +198,7 @@ def main():
     d.add_argument("--set")
     d.add_argument("--qid")
     d.add_argument("--stage", choices=["1", "2"], default="2", help="1: log to Stage 1's search log")
+    d.add_argument("--step", help="with --stage 1: this step's own search log")
     q = sub.add_parser("quote")
     q.add_argument("docid")
     q.add_argument("start")
@@ -171,10 +210,14 @@ def main():
     h.add_argument("--set", required=True)
     h.add_argument("--qid", required=True)
     h.add_argument("--stage", choices=["1", "2"], default="2", help="1: log to Stage 1's search log")
+    h.add_argument("--step", help="with --stage 1: this step's own search log")
     a = p.parse_args()
     run = Run(a.run)
     if getattr(a, "stage", "2") == "1":
         run.log_stage = "stage1"
+        run.log_step = getattr(a, "step", None)
+    elif getattr(a, "step", None):
+        p.error("--step needs --stage 1")
     corpus = Corpus(run)
     {"search": cmd_search, "doc": cmd_doc, "quote": cmd_quote, "verify": cmd_verify,
      "history": cmd_history}[a.cmd](run, corpus, a)
