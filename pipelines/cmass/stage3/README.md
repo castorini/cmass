@@ -195,6 +195,62 @@ documents; a live factual hop keeps no document; a derivation hop's input keeps 
 a recorded quote is not verbatim in its document; an exact duplicate's text differs from its parent's; `qrels.trec`
 differs from `qrels.jsonl`; or (with `keep_seed_docs`) a live hop's Stage 1 document is missing.
 
+## Corpus scan: complete candidates for broad hops (`scan.py`)
+
+Recall takes the BM25 top `recall_k` per hop, an arbitrary slice of a broad hop with many supporting documents.
+`scan.py` reads every document of the corpus once and returns, for each hop, every document its match rules accept, so
+the hop's candidate set is complete with respect to its rules. One pass serves all hops of all questions. The format,
+matching semantics and outputs are in the module docstring.
+
+- **A rule** is a JSON line `{"rule_id", "group", "all": [[alt, ...], ...], "none": [alt, ...]}`. A document matches
+  when every clause of `all` has one of its phrases and no phrase of `none` occurs. Phrases are literal and
+  case-insensitive, matched on word boundaries after whitespace normalisation, so `IUU` does not match inside
+  `Taliuuna` or `IUU_2`.
+- **A group is one hop** (e.g. `<set>/<qid>/<hop>`), and it matches the union of its rules. A hop may have as many
+  rules as it needs.
+- **The coverage contract.** A hop's rules must match 100% of the hop's established qrels. They are validated against
+  those qrels before the scan, and a hop is not scanned until its group passes. Several rules per hop make this always
+  achievable: a known document that no rule matches gets a rule of its own kind, not a looser rule for everyone.
+
+```bash
+S=python3 <checkout>/pipelines/cmass/stage3/scan.py
+$S check --rules rules.jsonl --known hop_qrels.jsonl --corpus /data/climbmix --write-passing passing.jsonl --json check.json
+#   hop_qrels.jsonl: {"group", "doc_id"} per established qrel; exit 1 while any group is below 100%;
+#   per group: matched/known, missed ids, the rules carrying each document (--docs), why a rule missed (--why)
+$S scan --corpus /data/climbmix --rules passing.jsonl --out scan_out [--workers 32] [--resume] [--shards A:B]
+$S merge --out scan_out       # counts.json (per group and per rule), matches/<group>.txt, rule_matches/<rule_id>.txt
+```
+
+`--max-per-rule N` and `--max-per-group N` stop recording ids after N per shard. The counts stay exact. Each shard
+writes `shards/<shard>.{matches,groups}.jsonl`, then `done.json`, all atomically. `--resume` skips the done shards,
+and an output directory refuses a scan with other rules. For ClimbMix, document ids are `shard_<NNNNN>_<row>` with
+the row unpadded, as the corpus service spells it. `check` also accepts the padded spelling the duplicate map uses.
+
+**Throughput.** Measured on one ClimbMix shard (86,016 documents, 254 M characters) on the 96-core host, with
+invented rules (`../demo/scan_bench.py`, which prints timings only). Per worker it includes reading, normalisation,
+matching and writing; peak RSS is 167 MB per worker.
+
+| matcher | rules (distinct phrases) | docs/s per worker | 32 workers running at once | full pass, 563 M docs, 32 workers |
+|---|---|---|---|---|
+| `aho` (pyahocorasick 2.3.1) | 300 (287) | 10,100 | 8,500 per worker | 0.6 h |
+| `aho` | 3,000 in 1,000 groups (299) | 6,900 | not measured | about 0.8 to 0.9 h |
+| `token` (stdlib fallback) | 300 (287) | 4,500 | not measured | 1.1 h or more |
+
+The automaton scans about 45 M characters/s whatever the number of phrases (tested to 30,000 phrases). The `token`
+fallback slows as phrases sharing a common word multiply: 14 M characters/s at 300 phrases, 7 M at 3,000, 1 M at 30,000.
+Install pyahocorasick for a full pass. Disk reads were not measured, because only one shard was read: the full pass
+reads 559 GB of compressed parquet, about 270 MB/s sustained at 0.6 h. Two other designs were rejected:
+- **One Python regex alternation:** 5 M characters/s at 300 phrases and 0.3 M at 3,000.
+- **An RE2 alternation through pyarrow:** fast at 300 phrases, but it collapses to about 1 M characters/s past
+  1,000 phrases, once its DFA memory budget runs out.
+
+[`../demo/test_scan.py`](../demo/test_scan.py) runs both matchers against a brute-force reference, and every command
+above, on invented documents (`../demo/scan_corpus/`):
+
+```bash
+python3 pipelines/cmass/demo/test_scan.py        # ends with "all scan demo checks passed"
+```
+
 ## Demo and tests
 
 [`../demo/test_stage3.py`](../demo/test_stage3.py) runs every deterministic step above on the invented demo corpus,

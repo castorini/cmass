@@ -1,0 +1,11 @@
+[
+ {"rule_id": "demo/q1/h1/iuu", "group": "demo/q1/h1", "all": [["IUU", "illegal, unreported and unregulated"], ["fishing", "fisheries"]], "none": ["board game"]},
+ {"rule_id": "demo/q1/h1/cod_quota", "group": "demo/q1/h1", "all": [["cod quota", "cod stock"], ["iuu", "Illegal, unreported and unregulated"]]},
+ {"rule_id": "demo/q2/h1/keeper", "group": "demo/q2/h1", "all": [["lighthouse keeper"], ["Vardequist"]]},
+ {"rule_id": "demo/q3/h1/harbour", "group": "demo/q3/h1", "all": [["port ilse"], ["ilse harbour", "harbour master"]]},
+ {"rule_id": "demo/q4/h1/cafe", "group": "demo/q4/h1", "all": [["Café Ardune"]]},
+ {"rule_id": "ardune_any", "all": [["Ardune"]]},
+ {"rule_id": "cxx", "all": [["C++"], ["velmaran"]]},
+ {"rule_id": "gulf_not_amberly", "all": [["gulf"]], "none": ["Gulf of Amberly"]},
+ {"rule_id": "ferry", "all": [["ferry"], ["ardune", "selm"]], "meta": {"note": "invented demo rule"}}
+]
