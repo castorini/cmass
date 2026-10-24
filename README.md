@@ -118,7 +118,8 @@ consume the release.
 
 Three models with search and document-reading tools over the ClimbMix BM25 index, and closed-book.
 R@all: recall of the qrels over all retrieved documents; H.G.: hop groundedness; T.C.: mean search and
-document-read calls per question; Acc.: answer accuracy (all in %). GPT-6.1 Sol uses high reasoning
+document-read calls per question; Acc.: answer accuracy. R@all, H.G. and accuracy are percentages;
+T.C. is a count. GPT-6.1 Sol uses high reasoning
 effort; DSQA uses strict exact-set equality.
 
 | Benchmark | Model | R@all | H.G. | T.C. | Acc. | Closed-book Acc. |
@@ -138,11 +139,18 @@ effort; DSQA uses strict exact-set equality.
 
 Open-weight agents leave substantial headroom, and high accuracy can coexist with incomplete evidence:
 the strongest model answers most questions while retrieving a small fraction of the relevant documents.
-See the [reproduction guide](REPRODUCING.md) for the search, run and evaluation formats needed to
-compare another agent.
+See the [four-dataset reproduction guide](REPRODUCING.md),
+[exact generation and judge prompts](REPRODUCING.md#exact-prompts),
+[recorded settings](evaluation/SETTINGS.md), and
+[complete results including DSQA strict/relaxed scores](evaluation/RESULTS.md).
+The DSQA complete-set generation instruction and its single-call, two-verdict
+judge apply to both closed-book and retrieval-enabled runs. Terminal unanswered
+outcomes count as failures; the result denominators remain the full revised sets.
 
 ## Repository
 
+- [`evaluation/`](evaluation/): four-dataset Piika evaluation prompts, input preparation,
+  settings, aggregate results, DSQA verdict validation and metric helpers.
 - [`pipelines/bcp_climbmix/`](pipelines/bcp_climbmix/): the BrowseComp-Plus projection (stage 1) and
   the first qrels construction ([`qrels/`](pipelines/bcp_climbmix/qrels/)).
 - [`review_site/`](review_site/): the human-in-the-loop review site used in stage 2, with an invented
