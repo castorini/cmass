@@ -6,8 +6,9 @@ dups.py, with make_stage3_fixtures.py standing in for the agents.
 
 pool -> std-check -> recall -> fetch -> chunks -> (bad verdicts: check and state must catch them) -> first judge ->
 check -> second-judge rounds, compare, adjudication until qrels_state says complete (one question escalates) -> build
--> verify; then dups lookup -> fetch -> chunks -> near-duplicate verification -> apply -> lookup (closure) -> build ->
-verify --phase phase2; plus the duplicate-map readers (parquet and JSON) and the id spelling round trip.
+-> verify; then dups lookup -> fetch -> chunks (the quote check settles the near duplicates holding their parent's quote)
+-> verification of the rest -> apply -> lookup (closure) -> build -> verify --phase phase2; near_dup_mode agent and
+quote_only on copies of the phase-1 run; plus the duplicate-map readers (parquet and JSON) and the id spelling round trip.
 """
 from __future__ import annotations
 
@@ -141,45 +142,107 @@ def main() -> None:
     assert "accepted evidence demo_doc_001 not in the qrels" in out, out
     qf.write_text(good)
 
-    # ------------------------------------------------------------------ phase 2
+    # ------------------------------------------------------------------ phase 2 (near_dup_mode quote_first, the default)
+    alt = run.with_name(run.name + "_modes") if keep else Path(tempfile.mkdtemp(prefix="cmass_stage3_modes_"))
+    shutil.rmtree(alt, ignore_errors=True)
+    shutil.copytree(run, alt / "phase1")                            # the other modes start from here (below)
+    p2d = run / "qrels" / SET / "phase2"
+    rows = lambda path: [json.loads(l) for l in path.read_text().splitlines()]   # noqa: E731
     r1 = last_json(run_cmd(D + ["lookup", "--round", "1"], run))
-    # demo_doc_104 (a copy of demo_doc_103 without its founding sentence) is new for demo-3; for demo-4 it is new, or
-    # judged_dropped when recall already pooled it in phase 1
-    assert r1["new_exact"] == 2 and r1["new_near"] + r1["pairs"].get("near_judged_dropped", 0) == 4, r1
+    # new near duplicates: demo_doc_102 and demo_doc_150 (copies of demo_doc_002) for demo-1 and demo-2; demo_doc_104 (a
+    # copy of demo_doc_103 without its founding sentence) and demo_doc_151 (of demo_doc_011) for demo-3; demo_doc_104 for
+    # demo-4 is new, or judged_dropped when recall already pooled it in phase 1
+    assert r1["new_exact"] == 2 and r1["new_near"] + r1["pairs"].get("near_judged_dropped", 0) == 7, r1
     run_cmd(D + ["fetch", "--round", "1"], run)
     ch = last_json(run_cmd(D + ["chunks", "--round", "1"], run))
-    assert ch["questions"][:3] == ["demo-1", "demo-2", "demo-3"] and set(ch["questions"]) <= set(want), ch
-    md = (run / "qrels" / SET / "phase2" / "r1" / "work" / "demo-1" / "chunk_01_a.md").read_text()
-    assert "Near duplicate of demo_doc_002" in md and "verbatim in this document: yes" in md, md[:800]
-    run_cmd(D + ["apply", "--round", "1"], run, ok=False)            # not verified yet: apply refuses
+    # the quote check: demo_doc_102 holds both questions' parent quotes; demo_doc_150 holds demo-2's but not demo-1's
+    # ("hills, and runs"); demo_doc_151 holds demo-3's partial one; demo_doc_104 holds none
+    assert ch["near_dup_mode"] == "quote_first" and ch["settled_by_quote"] == 4 and ch["no_quote_match"] == 0, ch
+    assert ch["questions"][:2] == ["demo-1", "demo-3"] and set(ch["questions"]) <= {"demo-1", "demo-3", "demo-4"}, ch
+    qc = {(x["id"], x["doc_id"]): x for x in rows(p2d / "quote_r1.jsonl")}
+    assert qc[("demo-1", "demo_doc_150")]["route"] == "agent" and qc[("demo-2", "demo_doc_150")]["route"] == "quote", qc
+    parent_hop = {(x["id"], x["doc_id"]): x["parent_hops"] for x in rows(p2d / "pairs_r1.jsonl")}[("demo-3", "demo_doc_151")]
+    inherited = {"supports": parent_hop["2"]["supports"], "quote": parent_hop["2"]["quotes"][0]}    # the parent's own
+    assert inherited["supports"] == "partial" and qc[("demo-3", "demo_doc_151")]["hops"] == {"2": inherited}, qc
+    assert json.loads((p2d / "r1" / "work" / "demo-1" / "chunks.json").read_text()) == {"01": ["demo_doc_150"]}
+    md = (p2d / "r1" / "work" / "demo-1" / "chunk_01_a.md").read_text()
+    assert "Near duplicate of demo_doc_002" in md and "verbatim in this document: NO" in md, md[:800]
+    assert not (p2d / "r1" / "work" / "demo-2").exists()             # demo-2: everything settled by quote, no agent
+    s2 = json.loads(run_cmd(ST + ["--phase2", "1", "demo-2"], run).stdout)
+    assert s2["complete"] and s2["to_judge"] == 0, s2
+    run_cmd(D + ["apply", "--round", "1"], run, ok=False)            # demo-1 and demo-3 not verified yet: apply refuses
     run_cmd(F + ["first", run, "--phase2", "1"], HERE)
     for x in ch["questions"]:
         run_cmd(T + ["--phase2", "1", "check", x], run)
     st, summ = tier_rounds(["--phase2", "1"])
-    assert summ["complete"] == len(ch["questions"]), summ
+    assert summ["complete"] == summ["questions"] == len(ch["questions"]) + 1, summ        # + demo-2, settled by quote
+    assert not any("demo_doc_102" in f.read_text() for f in (p2d / "r1" / "judged").rglob("*.json"))   # never judged
     ap = last_json(run_cmd(D + ["apply", "--round", "1"], run))
-    assert ap["exact_added"] == 2 and ap["near_added"] == 2 and ap["near_rejected"] == r1["new_near"] - 2, ap
+    assert ap["exact_added"] == 2 and ap["near_by_quote"] == 4 and ap["near_judged"] == 1 and ap["near_added"] == 5, ap
+    assert ap["near_rejected"] == r1["new_near"] - 5 and ap["no_quote_match"] == 0, ap
     r2 = last_json(run_cmd(D + ["lookup", "--round", "2"], run))
     assert r2["closure"] and r2["pairs"].get("exact_already_kept") and r2["pairs"].get("near_already_kept"), r2
     run_cmd(D + ["status"], run)
     b = last_json(run_cmd(D + ["build"], run))
-    assert b["closure"] and b["phase2_pairs"] == b["phase1_pairs"] + 4, b
+    assert b["closure"] and b["phase2_pairs"] == b["phase1_pairs"] + 7 and b["near_by_quote"] == 4, b
     v2 = last_json(run_cmd(T + ["verify", "--phase", "phase2"], run))
     assert v2["problems"] == 0, v2
-    p2 = {json.loads(l)["id"]: set(json.loads(l)["qrels"]) for l in (run / "qrels" / SET / "phase2" / "qrels.jsonl").read_text().splitlines()}
+    p2 = {r["id"]: set(r["qrels"]) for r in rows(p2d / "qrels.jsonl")}
     for x in ("demo-1", "demo-2"):
-        assert p2[x] == want[x] | {"demo_doc_101", "demo_doc_102"}, p2[x]
-    assert p2["demo-3"] == want["demo-3"] and p2["demo-4"] == want["demo-4"], p2
-    hm = {json.loads(l)["id"]: {h["id"]: h["docs"] for h in json.loads(l)["hops"]}
-          for l in (run / "qrels" / SET / "phase2" / "qrels_hops.jsonl").read_text().splitlines()}
-    assert hm["demo-1"]["2"]["demo_doc_101"]["source"] == "exact_dup" and hm["demo-1"]["2"]["demo_doc_102"]["source"] == "near_dup"
+        assert p2[x] == want[x] | {"demo_doc_101", "demo_doc_102", "demo_doc_150"}, p2[x]
+    assert p2["demo-3"] == want["demo-3"] | {"demo_doc_151"} and p2["demo-4"] == want["demo-4"], p2
+    hm = {r["id"]: {h["id"]: h["docs"] for h in r["hops"]} for r in rows(p2d / "qrels_hops.jsonl")}
+    assert hm["demo-1"]["2"]["demo_doc_101"]["source"] == "exact_dup" and hm["demo-1"]["2"]["demo_doc_150"]["source"] == "near_dup"
+    assert hm["demo-1"]["2"]["demo_doc_102"]["source"] == hm["demo-2"]["1"]["demo_doc_150"]["source"] == "near_dup_quote"
+    assert hm["demo-3"]["2"]["demo_doc_151"] == {"supports": "partial", "source": "near_dup_quote", "parent": "demo_doc_011",
+                                                  "jaccard": 0.75, "quotes": [inherited["quote"]]}, hm["demo-3"]["2"]
+    ex = {(e["id"], e["doc_id"]): e["verdict_source"] for e in rows(p2d / "expansion.jsonl")}
+    assert ex == {("demo-1", "demo_doc_101"): "exact", ("demo-1", "demo_doc_102"): "quote", ("demo-1", "demo_doc_150"): "judged",
+                  ("demo-2", "demo_doc_101"): "exact", ("demo-2", "demo_doc_102"): "quote", ("demo-2", "demo_doc_150"): "quote",
+                  ("demo-3", "demo_doc_151"): "quote"}, ex
+
+    # ------------------------------------------------------------------ near_dup_mode agent and quote_only, from phase 1
+    def mode_run(mode):
+        m = alt / mode
+        shutil.copytree(alt / "phase1", m)
+        cfg = json.loads((m / "cmass.json").read_text())
+        cfg["sets"][SET]["qrels"]["near_dup_mode"] = mode
+        (m / "cmass.json").write_text(json.dumps(cfg, indent=1) + "\n")
+        assert last_json(run_cmd(D + ["lookup", "--round", "1"], m))["new_near"] == r1["new_near"]
+        run_cmd(D + ["fetch", "--round", "1"], m)
+        return m, last_json(run_cmd(D + ["chunks", "--round", "1"], m))
+
+    m, cha = mode_run("agent")            # no quote check: every near duplicate to the agents (today's chunks)
+    assert cha["settled_by_quote"] == 0 and cha["near_docs"] == r1["new_near"], cha
+    assert cha["questions"][:3] == ["demo-1", "demo-2", "demo-3"], cha
+    md = (m / "qrels" / SET / "phase2" / "r1" / "work" / "demo-1" / "chunk_01_a.md").read_text()
+    assert "Near duplicate of demo_doc_002" in md and "verbatim in this document: yes" in md, md[:800]
+
+    m, chq = mode_run("quote_only")       # matches added, the rest dropped without an agent
+    assert chq["settled_by_quote"] == 4 and chq["no_quote_match"] == r1["new_near"] - 4 and chq["questions"] == [], chq
+    sq = last_json(run_cmd(ST + ["--phase2", "1", "--all"], m))
+    assert sq["complete"] == sq["questions"] and not sq["incomplete"], sq
+    apq = last_json(run_cmd(D + ["apply", "--round", "1"], m))
+    assert apq["near_by_quote"] == 4 and apq["near_judged"] == 0, apq
+    assert apq["near_rejected"] == apq["no_quote_match"] == r1["new_near"] - 4, apq
+    rej = {(r["id"], r["doc_id"]): r["reason"] for r in rows(m / "qrels" / SET / "phase2" / "rejected_r1.jsonl")}
+    assert rej[("demo-1", "demo_doc_150")] == rej[("demo-3", "demo_doc_104")] == "no_quote_match", rej
+    assert last_json(run_cmd(D + ["lookup", "--round", "2"], m))["closure"]
+    bq = last_json(run_cmd(D + ["build"], m))
+    assert bq["phase2_pairs"] == bq["phase1_pairs"] + 6 and bq["near_by_quote"] == 4, bq
+    assert last_json(run_cmd(T + ["verify", "--phase", "phase2"], m))["problems"] == 0
+    p2q = {r["id"]: set(r["qrels"]) for r in rows(m / "qrels" / SET / "phase2" / "qrels.jsonl")}
+    assert p2q["demo-1"] == want["demo-1"] | {"demo_doc_101", "demo_doc_102"}, p2q            # demo_doc_150 dropped
+    assert p2q["demo-2"] == p2["demo-2"] and p2q["demo-3"] == p2["demo-3"], p2q
+    assert any(r["reason"] == "no_quote_match" and r["phase"] == 2
+               for r in rows(m / "qrels" / SET / "phase2" / "rejections.jsonl"))
 
     # ------------------------------------------------------------------ the duplicate-map readers and id spellings
     sys.path.insert(0, str(PKG / "stage3"))
     import dups
     from cmass.run import Run
     r = Run(run)
-    docs = [f"demo_doc_{i:03d}" for i in range(1, 15)] + [f"demo_doc_{i}" for i in range(101, 107)]
+    docs = [f"demo_doc_{i:03d}" for i in range(1, 15)] + [f"demo_doc_{i}" for i in (*range(101, 107), 150, 151)]
     readers = {}
     for path in ("dups/corpus_duplicates.parquet", "dups/corpus_duplicates.json"):
         if path.endswith(".parquet") and not (run / path).exists():
@@ -192,10 +255,14 @@ def main() -> None:
     assert dm.to_map("shard_99999_42") == "shard_99999_00042" and dm.to_corpus("shard_99999_00042") == "shard_99999_42"
     assert dm.to_map("demo_doc_002") == "demo_doc_002"
     print(json.dumps({"run": str(run), "phase1_pairs": b["phase1_pairs"], "phase2_pairs": b["phase2_pairs"],
+                      "near_dups": {"new": r1["new_near"], "settled_by_quote": ap["near_by_quote"],
+                                    "judged_kept": ap["near_judged"], "judged_dropped": ap["near_rejected"],
+                                    "quote_only_dropped": apq["no_quote_match"]},
                       "rounds": [(x, nr["round"], nr["flags"], d, f) for x, nr, d, f in log],
                       "map_readers": sorted(readers), "result": "all Stage 3 demo checks passed"}))
     if not keep:
         shutil.rmtree(run)
+        shutil.rmtree(alt)
 
 
 if __name__ == "__main__":

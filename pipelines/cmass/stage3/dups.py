@@ -4,25 +4,40 @@ should not be scored as wrong because the copy's id was never pooled.
 
   dups.py --set S lookup --round N     duplicates of the kept documents -> qrels/S/phase2/pairs_rN.jsonl (+ _summary.json)
   dups.py --set S fetch --round N      cache the text of every new pair and its parent (through cmass.corpus)
-  dups.py --set S chunks --round N     render the new near duplicates for verification: phase2/rN/work/QID/chunk_NN_*.md
+  dups.py --set S chunks --round N     the quote check of every new near duplicate -> phase2/quote_rN.jsonl; render the
+                                       ones left for the agents: phase2/rN/work/QID/chunk_NN_*.md
   (judge them: workflow phase2.js, or by hand with `qrels.py --phase2 N show|check|second|compare|adj-check`)
-  dups.py --set S apply --round N      exact duplicates added, verified near duplicates added -> phase2/added_rN.jsonl
+  dups.py --set S apply --round N      exact duplicates, near duplicates settled by quote and verified ones added
+                                       -> phase2/added_rN.jsonl
   dups.py --set S lookup --round N+1   ... until a round has no new pair (closure)
   dups.py --set S build                phase2/{qrels.jsonl, qrels_hops.jsonl, rejections.jsonl, expansion.jsonl,
                                        conflicts.jsonl, stats.json, qrels.trec}; then `qrels.py verify --phase phase2`
   dups.py --set S status               where each round stands
 
-Rules (the paper's duplicate expansion):
+Rules:
   exact duplicate  byte-identical to a kept document (the map groups texts by SHA-256 over text.strip(); apply checks
                    the two texts are equal): added without reading, with exactly its parent's hops and support labels.
-  near duplicate   5-gram word-shingle Jaccard >= threshold (0.7) with a kept document: added only after an agent has
-                   verified, on the duplicate's own text, that it supports a live hop (same verdict format and tiered
-                   review as phase 1); being similar to its parent proves nothing.
+  near duplicate   5-gram word-shingle Jaccard >= threshold (0.7) with a kept document. Being similar to its parent
+                   proves nothing, so `chunks` first runs the quote check: for each live hop the parent supports in the
+                   question's qrels, if one of the parent's recorded quotes for that hop (at least min_quote_chars, 15
+                   characters) is verbatim in the duplicate's own text (cmass.text.is_verbatim), the duplicate inherits
+                   that hop with the parent's support label (full / partial) and the matched quote (source
+                   near_dup_quote). Then, by the qrels config "near_dup_mode":
+                     quote_first (default)  matching at least one hop: added for exactly the matched hops, no agent;
+                                            matching none: added only after agents have verified, on its own text, that
+                                            it supports a live hop (same verdict format and tiered review as phase 1)
+                     agent                  no quote check: every near duplicate goes to the agents
+                     quote_only             matches added as in quote_first; the rest dropped without an agent
+                                            (rejected, reason no_quote_match)
+                   The CMASS release: near duplicates were first matched by the parent's verbatim quotes; in the first
+                   BrowseComp-Plus expansion round the ones that matched no quote were judged by an agent (quote_first),
+                   in the other datasets and in later rounds they were dropped without an agent check (quote_only).
   closure          round N+1 looks up the duplicates of what round N added.
-A duplicate already in the question's qrels is `already_kept`; one the judges dropped for that question (phase 1 or an
-earlier round) is `judged_dropped` and its verdict stands; a duplicate reachable from several parents is listed once,
-with the closest parent (exact first, then highest Jaccard). An exact duplicate that was judged and dropped, or whose
-text is not identical to its parent's, is not added; it is listed in conflicts for a reviewer.
+A duplicate already in the question's qrels is `already_kept`; one dropped for that question (by the judges in phase 1
+or an earlier round, or as no_quote_match) is `judged_dropped` and stays dropped; a duplicate reachable from several
+parents is listed once, with the closest parent (exact first, then highest Jaccard), and only that parent's quotes are
+checked. An exact duplicate that was judged and dropped, or whose text is not identical to its parent's, is not added;
+it is listed in conflicts for a reviewer.
 
 The duplicate map (run config, "duplicates"): the `corpus_duplicates` config of the Hugging Face dataset
 castorini/cmass, one row per document that has any duplicate: doc_id, exact_duplicates [doc_id], near_duplicates
@@ -46,6 +61,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import qrels as Q  # noqa: E402
+from cmass.text import is_verbatim, norm_ws  # noqa: E402
 from qrels import natural_key, read_jsonl, write_json, write_jsonl  # noqa: E402
 
 
@@ -198,7 +214,21 @@ def round_set(q, rnd: int):
 
 
 def near_qids(qr) -> list[str]:
-    return list(dict.fromkeys(x["id"] for x in qr.pairs() if x["kind"] == "near" and x["status"] == "new"))
+    """Questions with a new near duplicate for the agents (every new one until `chunks` has run the quote check)."""
+    return list(dict.fromkeys(x["id"] for x in qr.pairs() if x["kind"] == "near" and x["status"] == "new"
+                              and qr.for_agents(x["id"], x["doc_id"])))
+
+
+def quote_hops(qr, x: dict, text: str) -> dict[str, dict]:
+    """The quote check: {hop: {supports, quote}} for each hop of the parent one of whose recorded quotes (at least
+    min_quote_chars) is verbatim in the near duplicate's text; the first such quote, with the parent's support label."""
+    out = {}
+    for hid, v in x["parent_hops"].items():
+        for qt in v["quotes"]:
+            if len(norm_ws(qt)) >= qr.cfg["min_quote_chars"] and is_verbatim(text, qt):
+                out[hid] = {"supports": v["supports"], "quote": qt}
+                break
+    return out
 
 
 def cmd_fetch(q, a) -> None:
@@ -208,6 +238,20 @@ def cmd_fetch(q, a) -> None:
 
 def cmd_chunks(q, a) -> None:
     qr = round_set(q, a.round)
+    mode = qr.cfg["near_dup_mode"]
+    checked = []          # the quote check first (module docstring); only what it leaves for the agents is rendered
+    for x in qr.pairs():
+        if x["kind"] != "near" or x["status"] != "new":
+            continue
+        text = qr.text(x["doc_id"]) if mode != "agent" else None
+        hops = quote_hops(qr, x, text) if text is not None else {}
+        route = ("quote" if hops else "agent" if mode != "quote_only" else
+                 "not_in_corpus" if text is None else "no_quote_match")
+        checked.append({"id": x["id"], "doc_id": x["doc_id"], "parent": x["parent"], "jaccard": x["jaccard"],
+                        "mode": mode, "route": route, "hops": hops})
+    write_jsonl(qr.quote_file, checked)
+    qr._quote = None
+    routes = Counter(r["route"] for r in checked)
     qids = near_qids(qr)
     res = []
     for x in qids:
@@ -215,9 +259,11 @@ def cmd_chunks(q, a) -> None:
             print(f"warning: {x} has no clean standard (standards/{x}.json); its judges need one", file=sys.stderr)
         res.append(Q.cmd_chunks(qr, argparse.Namespace(qid=x)))
     write_json(q.p2_dir / f"r{a.round}" / "qids.json", qids)
-    print(json.dumps({"set": q.sid, "round": a.round, "questions": qids,
+    print(json.dumps({"set": q.sid, "round": a.round, "near_dup_mode": mode, "near_new": len(checked),
+                      "settled_by_quote": routes["quote"], "no_quote_match": routes["no_quote_match"], "questions": qids,
                       "near_docs": sum(r["to_judge"] + r["already_chunked"] for r in res),
-                      "new_chunks": sum(r["n_chunks"] for r in res), "not_in_corpus": sum(r["not_in_corpus"] for r in res),
+                      "new_chunks": sum(r["n_chunks"] for r in res),
+                      "not_in_corpus": sum(r["not_in_corpus"] for r in res) + routes["not_in_corpus"],
                       "workflow_args": {"set": q.sid, "round": a.round, "qids": qids}}))
 
 
@@ -258,13 +304,23 @@ def cmd_apply(q, a) -> None:
             elif not x["parent_hops"]:
                 conflicts.append(base | {"issue": "parent_has_no_hops"})
             else:
-                added.append(base | {"source": "exact_dup", "hops": {
+                added.append(base | {"verdict_source": "exact", "hops": {
                     hid: {"supports": v["supports"], "source": "exact_dup", "parent": x["parent"], "quotes": v["quotes"]}
                     for hid, v in x["parent_hops"].items()}})
             continue
         if x["status"] != "new":
             continue
-        if x["doc_id"] in qr.missing(x["id"]):
+        qc = qr.quote_check().get(key, {})
+        if qc.get("route") == "quote":
+            added.append(base | {"verdict_source": "quote", "hops": {
+                hid: {"supports": v["supports"], "source": "near_dup_quote", "parent": x["parent"], "jaccard": x["jaccard"],
+                      "quotes": [v["quote"]]} for hid, v in qc["hops"].items()}})
+            continue
+        if qc.get("route") == "no_quote_match":
+            rejected.append(base | {"reason": "no_quote_match", "note": "none of the parent's quotes is verbatim in this "
+                                    "copy; dropped without an agent check (near_dup_mode quote_only)", "adjudicated": False})
+            continue
+        if qc.get("route") == "not_in_corpus" or x["doc_id"] in qr.missing(x["id"]):
             conflicts.append(base | {"issue": "text_not_found"})
             continue
         if x["id"] not in verdicts:
@@ -275,7 +331,7 @@ def cmd_apply(q, a) -> None:
             pending.append(key)
             continue
         if v.get("keep"):
-            added.append(base | {"source": "adjudicated" if x["doc_id"] in adj else "judged", "hops": {
+            added.append(base | {"verdict_source": "judged", "adjudicated": x["doc_id"] in adj, "hops": {
                 str(h["hop"]): {"supports": h["supports"], "source": "near_dup", "parent": x["parent"],
                                 "jaccard": x["jaccard"], "quotes": [h["quote"]]} for h in v["hops"]}})
         else:
@@ -284,7 +340,10 @@ def cmd_apply(q, a) -> None:
     write_jsonl(q.p2_dir / f"rejected_r{a.round}.jsonl", rejected)
     write_jsonl(q.p2_dir / f"conflicts_r{a.round}.jsonl", conflicts)
     s = {"set": q.sid, "round": a.round, "exact_added": sum(r["kind"] == "exact" for r in added),
-         "near_added": sum(r["kind"] == "near" for r in added), "near_rejected": len(rejected),
+         "near_added": sum(r["kind"] == "near" for r in added),
+         "near_by_quote": sum(r["verdict_source"] == "quote" for r in added),
+         "near_judged": sum(r["verdict_source"] == "judged" for r in added), "near_rejected": len(rejected),
+         "no_quote_match": sum(r["reason"] == "no_quote_match" for r in rejected),
          "conflicts": dict(Counter(c["issue"] for c in conflicts)), "pending_unjudged": len(pending),
          "next": f"dups.py --set {q.sid} lookup --round {a.round + 1}"}
     write_json(q.p2_dir / f"apply_r{a.round}_summary.json", s)
@@ -330,8 +389,9 @@ def cmd_build(q, a) -> None:
         rejections += [dict(r, phase=2, provenance=[f"{r['kind']}_dup_of:{r['parent']}"]) for r in rej]
         conflicts += conf
         per_round[str(k)] = {"exact_added": sum(r["kind"] == "exact" for r in added),
-                             "near_added": sum(r["kind"] == "near" for r in added), "near_rejected": len(rej),
-                             "conflicts": len(conf)}
+                             "near_added": sum(r["kind"] == "near" for r in added),
+                             "near_by_quote": sum(r.get("verdict_source") == "quote" for r in added),
+                             "near_rejected": len(rej), "conflicts": len(conf)}
     for r in qrels.values():
         r["qrels"] = sorted(r["qrels"], key=natural_key)
     for h in hops.values():
@@ -358,7 +418,9 @@ def cmd_build(q, a) -> None:
                       "phase1_pairs": sum(len(v) for v in p1_sets.values()),
                       "phase2_pairs": sum(len(r["qrels"]) for r in qrels.values()),
                       "exact_added": sum(e["kind"] == "exact" for e in expansion),
-                      "near_added": sum(e["kind"] == "near" for e in expansion), "conflicts": len(conflicts)}
+                      "near_added": sum(e["kind"] == "near" for e in expansion),
+                      "near_by_quote": sum(e.get("verdict_source") == "quote" for e in expansion),
+                      "conflicts": len(conflicts)}
     write_json(out / "stats.json", s)
     print(json.dumps(s["expansion"]))
 
@@ -372,6 +434,8 @@ def cmd_status(q, a) -> None:
         qr = round_set(q, k)
         st = [qrels_state.state(qr, x) for x in near_qids(qr)] if (q.p2_dir / f"r{k}").exists() else []
         print(json.dumps({"round": k, "pairs": summ["pairs"], "closure": summ["closure"],
+                          "quote_checked": qr.quote_file.exists(),
+                          "routes": dict(Counter(r["route"] for r in qr.quote_check().values())),
                           "chunked": (q.p2_dir / f"r{k}" / "qids.json").exists(),
                           "verified": sum(s["complete"] for s in st), "questions": len(near_qids(qr)),
                           "incomplete": {s["qid"]: s["blocking"] for s in st if not s["complete"]},

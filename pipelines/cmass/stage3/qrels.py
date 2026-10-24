@@ -20,7 +20,8 @@ Every file lives under qrels/<set>/ (README.md has the layout); the judging stan
   qrels.py --set S verify [--phase phase2] every Stage 2 evidence document kept, every live hop grounded, quotes verbatim
 
 --phase2 N points the judging commands (show, chunks, unjudged, check, second, second-check, compare, adj-check) at
-round N of the duplicate expansion (qrels/<set>/phase2/rN/), whose documents are the near duplicates dups.py queued.
+round N of the duplicate expansion (qrels/<set>/phase2/rN/), whose documents are the near duplicates `dups.py chunks`
+left for the agents after its quote check.
 
 Pool: the documents of every live hop's accepted Stage 2 evidence (fixed: kept for the hops they are cited for, never
 re-judged), the documents Stage 1 cited for each hop, every document named in its Stage 2 audit, revision, adversarial and
@@ -49,6 +50,7 @@ from cmass.text import is_verbatim, norm_ws  # noqa: E402
 REASONS = ("no_hop_fact", "wrong_entity", "mention_only", "contradicts", "out_hop_only", "unusable")
 SUPPORTS = ("full", "partial")
 RECALL_MODES = ("all", "no_seed", "none")
+NEAR_DUP_MODES = ("quote_first", "agent", "quote_only")
 
 # Stage 3 settings. Layers, later wins: these defaults, the set's family (below), "qrels" at the top of cmass.json,
 # "qrels" inside the set's entry. "tiers" and "phase2_tiers" merge key by key; phase2_tiers falls back to tiers.
@@ -67,6 +69,7 @@ DEFAULTS = {
     "min_quote_chars": 15,
     "trec_graded": False,         # qrels.trec relevance 2 for a document with full support of some hop, else 1
     "judge_note": "",             # a dataset-specific judging rule, printed by `show` (e.g. a snapshot date)
+    "near_dup_mode": "quote_first",  # phase 2 near duplicates: quote_first | agent | quote_only (dups.py, the quote check)
     "tiers": {
         "keep_rate": 0.10,        # share of full-support keeps the second judge re-judges
         "min_keeps": 3,
@@ -101,6 +104,8 @@ def qrels_config(run: Run, sid: str) -> dict:
     out["phase2_tiers"] = {**out["tiers"], **out["phase2_tiers"]}
     if out["recall"] not in RECALL_MODES:
         raise SystemExit(f"qrels config: recall must be one of {RECALL_MODES}")
+    if out["near_dup_mode"] not in NEAR_DUP_MODES:
+        raise SystemExit(f"qrels config: near_dup_mode must be one of {NEAR_DUP_MODES}")
     return out
 
 
@@ -150,6 +155,7 @@ class QSet:
         self._corpus = None
         self._inv = None
         self._pairs = None
+        self._quote = None
 
     @property
     def p2_dir(self) -> Path:
@@ -231,10 +237,25 @@ class QSet:
     def near_pairs(self, qid: str) -> dict[str, dict]:
         return {x["doc_id"]: x for x in self.pairs() if x["id"] == qid and x["kind"] == "near" and x["status"] == "new"}
 
+    @property
+    def quote_file(self) -> Path:
+        return self.p2_dir / f"quote_r{self.p2}.jsonl"
+
+    def quote_check(self) -> dict[tuple[str, str], dict]:
+        """Phase 2: the quote check `dups.py chunks` ran on this round's new near duplicates (quote_rN.jsonl):
+        {(qid, doc): {"route": quote | agent | no_quote_match | not_in_corpus, "hops": the hops settled by quote}}.
+        Empty before it ran; every near duplicate then counts as one for the agents."""
+        if self._quote is None:
+            self._quote = {(x["id"], x["doc_id"]): x for x in read_jsonl(self.quote_file)}
+        return self._quote
+
+    def for_agents(self, qid: str, doc: str) -> bool:
+        return self.quote_check().get((qid, doc), {}).get("route", "agent") == "agent"
+
     def candidates(self, row: dict) -> list[str]:
         """Documents to judge, before dropping the ones the corpus does not have."""
         if self.p2:
-            return list(self.near_pairs(row["id"]))
+            return [d for d in self.near_pairs(row["id"]) if self.for_agents(row["id"], d)]
         return [d for d in self.full_pool(row) if d not in row["fixed"]]
 
     def missing_path(self, qid: str) -> Path:
@@ -642,7 +663,8 @@ def cmd_show(q: QSet, a) -> None:
         for c in others:
             print(f"  {c.get('name')} ({c.get('role')}, {c.get('status')}; hops {c.get('hops') or []})")
     if q.p2:
-        print(f"\n{len(q.near_pairs(r['id']))} near duplicates to judge in {q.phase_label()}")
+        print(f"\n{len(q.candidates(r))} near duplicates to judge in {q.phase_label()} (of {len(q.near_pairs(r['id']))}; "
+              f"the quote check settled the rest)")
     else:
         pool = q.full_pool(r)
         prov = Counter(p.split(":")[0] for v in pool.values() for p in v)
@@ -763,6 +785,9 @@ def cmd_fetch(q: QSet, a) -> None:
 def cmd_chunks(q: QSet, a) -> dict:
     """Incremental: documents already in a chunk keep it (and its verdicts); new ones get new chunks."""
     r = q.row(a.qid)
+    if q.p2 and not q.quote_file.exists():
+        raise SystemExit(f"no {q.quote_file}: run `dups.py --set {q.sid} chunks --round {q.p2}` (the quote check comes "
+                         f"before rendering)")
     wd = q.work / a.qid
     wd.mkdir(parents=True, exist_ok=True)
     cj = wd / "chunks.json"
@@ -1155,7 +1180,8 @@ def cmd_verify(q: QSet, a) -> None:
                     n_quotes += 1
                     if not is_verbatim(text, qt):
                         bad.append(f"{x}: hop {hid} {d}: quote not verbatim: {qt[:80]!r}")
-                if info.get("source") in ("stage2", "judged", "adjudicated", "near_dup") and not info.get("quotes"):
+                if (info.get("source") in ("stage2", "judged", "adjudicated", "near_dup", "near_dup_quote")
+                        and not info.get("quotes")):
                     bad.append(f"{x}: hop {hid} {d} ({info.get('source')}) has no quote")
                 if info.get("source") == "exact_dup":
                     pt = q.text(info.get("parent") or "")

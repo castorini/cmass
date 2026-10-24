@@ -3,7 +3,8 @@
 For every question Stage 2 accepted, the qrels are the corpus documents that state a fact one of its **live hops**
 needs: the union, over the hops, of the documents supporting each hop. Phase 1 (the precision filter) reads every
 pooled candidate in full and keeps it only for the hops it supports. Phase 2 (duplicate expansion) adds the exact
-duplicates of what phase 1 kept, and the near duplicates that a judge has verified on their own text.
+duplicates of what phase 1 kept, and the near duplicates that still hold their parent's supporting quote verbatim or
+that a judge has verified on their own text.
 
 Every command below is `python3 <pipeline>/stage3/qrels.py --set <set> <command>`, run in the run directory; the
 workflow prompts give the exact prefix. All examples here are invented (the island nation of Oskeria and its demo
@@ -177,11 +178,12 @@ judge's.
 ## Phase 2: near duplicates
 
 Exact duplicates of a kept document (byte-identical) are added without reading, with their parent's hops. Near
-duplicates (5-gram word-shingle Jaccard ≥ 0.7) are verified by a judge, with every command run with `--phase2 N` and
-the files under `qrels/<set>/phase2/rN/`. Each document's header names its parent, the hops the parent is kept for, the
-parent's quotes and whether each is verbatim in the copy. Use it to check whether the copy gives the same supporting
-evidence, but judge the copy on **its own text**, against all live hops, with the same verdict format, reasons and
-quote rules:
+duplicates (5-gram word-shingle Jaccard ≥ 0.7) that hold one of their parent's quotes for a hop verbatim inherit that
+hop without a judge (the quote check, `near_dup_mode` in [`README.md`](README.md)); the others are verified by a judge,
+with every command run with `--phase2 N` and the files under `qrels/<set>/phase2/rN/`. Each document's header names
+its parent, the hops the parent is kept for, the parent's quotes and whether each is verbatim in the copy. Use it to
+check whether the copy gives the same supporting evidence, but judge the copy on **its own text**, against all live
+hops, with the same verdict format, reasons and quote rules:
 
 - A copy that lost the sentence its parent was kept for (a truncated mirror, a different edition) is dropped
   (`no_hop_fact`), however similar it is.

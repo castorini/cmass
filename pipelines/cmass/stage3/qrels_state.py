@@ -17,7 +17,8 @@ Fields
                     due while some judged document is in no round's population (round 1, or a back-fill after the
                     pool grew); a drops-only round when the policy rounds turned escalate_at or more sampled drops into
                     keeps and some drop has not been re-judged
-  complete          nothing is left to do; blocking says what is missing otherwise
+  complete          nothing is left to do; blocking says what is missing otherwise. In phase 2 a question is complete
+                    as soon as no near duplicate is left for the agents (the quote check settled or dropped them all)
 """
 from __future__ import annotations
 
@@ -41,6 +42,7 @@ def _newer(path: Path, files) -> bool:
 def state(q, qid: str) -> dict:
     r = q.row(qid)
     wd, jd = q.work / qid, q.judged / qid
+    none_left = bool(q.p2) and not q.candidates(r)     # phase 2: no near duplicate left for the agents
     std_errs = Q.standard_errors(q, r)
     needs = [] if q.p2 else r["needs_recall"]
     cf = q.recall_file(qid, "candidates")
@@ -56,10 +58,10 @@ def state(q, qid: str) -> dict:
     to_judge = q.to_judge(r)
     out = {"qid": qid, "set": q.sid, "phase": q.phase_label(), "has_standard": not std_errs,
            "std_errors": len(std_errs), "needs_recall": needs, "missing_recall": missing_recall,
-           "has_candidates": not missing_recall, "chunked": chunks is not None and not unchunked,
+           "has_candidates": not missing_recall, "chunked": none_left or (chunks is not None and not unchunked),
            "chunks": list(chunks or {}), "unchunked": len(unchunked), "unjudged": unjudged, "to_judge": len(to_judge),
            "not_in_corpus": len(miss), "rounds": {}, "pending_round": None, "next_round": None}
-    first_done = chunks is not None and not unchunked and not unjudged
+    first_done = (chunks is not None or none_left) and not unchunked and not unjudged
     rounds = q.rounds(qid)
     for rnd, m in rounds.items():
         stem, _ = Q.round_tags(rnd)
@@ -92,8 +94,9 @@ def state(q, qid: str) -> dict:
             left = [d for d in to_judge if not first[d].get("keep") and d not in second_judged]
             if flips >= q.tiers()["escalate_at"] and left:
                 out["next_round"] = {"round": nxt, "flags": "--drops-only"}
-    blocking = ("standard" if std_errs else "recall" if missing_recall else "chunks" if not out["chunked"]
-                else "first judge" if unjudged else f"round {out['pending_round']}" if pending
+    blocking = ("standard" if std_errs and not none_left else "recall" if missing_recall
+                else "chunks" if not out["chunked"] else "first judge" if unjudged
+                else f"round {out['pending_round']}" if pending
                 else f"round {out['next_round']['round']} not rendered" if out["next_round"] else "")
     out["blocking"] = blocking
     out["complete"] = not blocking

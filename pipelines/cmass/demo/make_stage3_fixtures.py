@@ -13,7 +13,9 @@ The verdicts stand in for the judge agents: what a careful judge would decide on
 deliberately over-generous second judge on demo-4 (it keeps every sampled drop), so the escalation round runs.
 
 Stage 3's own documents in demo/corpus.json are demo_doc_101 to demo_doc_106 (exact and near duplicates, a longer
-page and a near miss); the Stage 2 demo uses demo_doc_001 to demo_doc_014. Keep the ranges apart.
+page and a near miss) and demo_doc_150 to demo_doc_199 (near duplicates for the quote check: demo_doc_150 re-punctuates
+demo_doc_002, so one parent quote is no longer verbatim and another still is; demo_doc_151 copies a partial keep); the
+Stage 2 demo uses demo_doc_001 to demo_doc_014. Keep the ranges apart.
 
 SYNTHETIC CONTENT ONLY: every place, person and document is invented (the island nation of Oskeria). Listed as
 [synthetic] in .leak-scan-allow. Never put a real benchmark item here.
@@ -233,12 +235,16 @@ OVERGENEROUS = {"demo-4"}      # round 1: the second judge keeps every sampled d
 ADJUDICATE = {   # where the adjudicator does not side with the first judge
     "demo-1": {"demo_doc_011": SECOND["demo-1"]["demo_doc_011"]},
 }
-PHASE2 = {   # near-duplicate verification
+PHASE2 = {   # near-duplicate verification. With near_dup_mode quote_first (the default) only demo-1's demo_doc_150 and
+             # demo_doc_104 reach a judge; the quote check settles the others (they are judged only with mode agent)
     "demo-1": {"demo_doc_102": keep(("2", "full", "The Ardune rises in the Morrowfen hills and runs through Velmaran "
-                                                   "before reaching the sea at Port Ilse."))},
-    "demo-2": {"demo_doc_102": keep(("1", "full", "The Ardune rises in the Morrowfen hills"))},
+                                                   "before reaching the sea at Port Ilse.")),
+               "demo_doc_150": keep(("2", "full", "The Ardune rises in the Morrowfen hills, and runs through Velmaran"))},
+    "demo-2": {"demo_doc_102": keep(("1", "full", "The Ardune rises in the Morrowfen hills")),
+               "demo_doc_150": keep(("1", "full", "The Ardune rises in the Morrowfen hills"))},
     "demo-3": {"demo_doc_104": drop("no_hop_fact", "This copy lacks the founding sentence its parent was kept for; it gives "
-                                                   "Renvaar's death in 1901, not the founding or the opera.")},
+                                                   "Renvaar's death in 1901, not the founding or the opera."),
+               "demo_doc_151": keep(("2", "partial", "visit the conservatory founded by Ilsa Renvaar"))},
     "demo-4": {"demo_doc_104": drop("no_hop_fact", "This copy lacks the founding year its parent was kept for.")},
 }
 

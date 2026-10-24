@@ -1,6 +1,6 @@
 export const meta = {
   name: 'cmass-stage3-qrels-phase2',
-  description: 'CMASS Stage 3 phase 2 (duplicate expansion): agent verification of the near duplicates (5-gram Jaccard >= 0.7) of kept documents, one round of the expansion. The hop standards exist from phase 1 and dups.py has rendered the chunks; a cheaper model verifies every near duplicate on its own text, a stronger blind second judge re-judges the policy sample, an adjudicator decides each disagreement. Exact duplicates need no agent (dups.py apply adds them). Resumes from disk (qrels_state.py --phase2 N).',
+  description: 'CMASS Stage 3 phase 2 (duplicate expansion): agent verification of the near duplicates (5-gram Jaccard >= 0.7) of kept documents that the quote check left for agents, one round of the expansion. The hop standards exist from phase 1; dups.py chunks has settled by quote every near duplicate holding its parent\'s quote for a hop verbatim (near_dup_mode quote_first, the default) and rendered the rest; a cheaper model verifies each of those on its own text, a stronger blind second judge re-judges the policy sample, an adjudicator decides each disagreement. Exact and quote-settled duplicates need no agent (dups.py apply adds them). Resumes from disk (qrels_state.py --phase2 N).',
   whenToUse: 'After dups.py lookup, fetch and chunks for round N; args {set, round, qids} as dups.py chunks prints them.',
   phases: [
     { title: 'Verify', detail: 'one agent per chunk of near duplicates; a chunk whose verdicts fail the check is re-judged by the stronger model' },
@@ -151,6 +151,7 @@ const finishRound = async (q, rnd, s) => {
 
 const run = async (q) => {
   let s = await state(q)
+  if (s.complete && !s.to_judge) return { qid: q, complete: true, near_duplicates: 0, chunks: 0, rounds: [] }  // settled by quote
   if (!s.has_standard) return { qid: q, error: 'no clean hop standard: phase 1 writes standards/<qid>.json' }
   if (!s.chunked) {
     await route(q, `chunks ${q}`, 'Verify')
