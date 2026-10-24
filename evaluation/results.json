@@ -1,0 +1,429 @@
+{
+  "schema": "cmass-four-dataset-results-v1",
+  "dataset_revision": "09b13bd392f499ab9af21618bcde3284a69cbcbb",
+  "selection": "Latest revised question inputs; accepted prior outputs plus validity-only continuations; no score-based winner selection",
+  "judge_model": "gpt-6.1-sol",
+  "judge_reasoning": "high",
+  "accuracy": [
+    {
+      "dataset": "bcp",
+      "model": "sol",
+      "condition": "closedbook",
+      "questions": 80,
+      "correct": 42,
+      "accuracy_percent": 52.5,
+      "model_unanswered": 0,
+      "completed_answers": 80
+    },
+    {
+      "dataset": "bcp",
+      "model": "sol",
+      "condition": "piika",
+      "questions": 80,
+      "correct": 68,
+      "accuracy_percent": 85.0,
+      "model_unanswered": 0,
+      "completed_answers": 80
+    },
+    {
+      "dataset": "bcp",
+      "model": "gemma",
+      "condition": "closedbook",
+      "questions": 80,
+      "correct": 13,
+      "accuracy_percent": 16.25,
+      "model_unanswered": 0,
+      "completed_answers": 80
+    },
+    {
+      "dataset": "bcp",
+      "model": "gemma",
+      "condition": "piika",
+      "questions": 80,
+      "correct": 22,
+      "accuracy_percent": 27.5,
+      "model_unanswered": 0,
+      "completed_answers": 80
+    },
+    {
+      "dataset": "bcp",
+      "model": "qwen",
+      "condition": "closedbook",
+      "questions": 80,
+      "correct": 4,
+      "accuracy_percent": 5.0,
+      "model_unanswered": 25,
+      "completed_answers": 55
+    },
+    {
+      "dataset": "bcp",
+      "model": "qwen",
+      "condition": "piika",
+      "questions": 80,
+      "correct": 13,
+      "accuracy_percent": 16.25,
+      "model_unanswered": 0,
+      "completed_answers": 80
+    },
+    {
+      "dataset": "trqa",
+      "model": "sol",
+      "condition": "closedbook",
+      "questions": 68,
+      "correct": 59,
+      "accuracy_percent": 86.76470588235294,
+      "model_unanswered": 0,
+      "completed_answers": 68
+    },
+    {
+      "dataset": "trqa",
+      "model": "sol",
+      "condition": "piika",
+      "questions": 68,
+      "correct": 64,
+      "accuracy_percent": 94.11764705882354,
+      "model_unanswered": 0,
+      "completed_answers": 68
+    },
+    {
+      "dataset": "trqa",
+      "model": "gemma",
+      "condition": "closedbook",
+      "questions": 68,
+      "correct": 34,
+      "accuracy_percent": 50.0,
+      "model_unanswered": 0,
+      "completed_answers": 68
+    },
+    {
+      "dataset": "trqa",
+      "model": "gemma",
+      "condition": "piika",
+      "questions": 68,
+      "correct": 45,
+      "accuracy_percent": 66.17647058823529,
+      "model_unanswered": 0,
+      "completed_answers": 68
+    },
+    {
+      "dataset": "trqa",
+      "model": "qwen",
+      "condition": "closedbook",
+      "questions": 68,
+      "correct": 27,
+      "accuracy_percent": 39.705882352941174,
+      "model_unanswered": 0,
+      "completed_answers": 68
+    },
+    {
+      "dataset": "trqa",
+      "model": "qwen",
+      "condition": "piika",
+      "questions": 68,
+      "correct": 39,
+      "accuracy_percent": 57.35294117647059,
+      "model_unanswered": 0,
+      "completed_answers": 68
+    },
+    {
+      "dataset": "hotpotqa",
+      "model": "sol",
+      "condition": "closedbook",
+      "questions": 204,
+      "correct": 183,
+      "accuracy_percent": 89.70588235294117,
+      "model_unanswered": 0,
+      "completed_answers": 204
+    },
+    {
+      "dataset": "hotpotqa",
+      "model": "sol",
+      "condition": "piika",
+      "questions": 204,
+      "correct": 193,
+      "accuracy_percent": 94.6078431372549,
+      "model_unanswered": 0,
+      "completed_answers": 204
+    },
+    {
+      "dataset": "hotpotqa",
+      "model": "gemma",
+      "condition": "closedbook",
+      "questions": 204,
+      "correct": 75,
+      "accuracy_percent": 36.76470588235294,
+      "model_unanswered": 0,
+      "completed_answers": 204
+    },
+    {
+      "dataset": "hotpotqa",
+      "model": "gemma",
+      "condition": "piika",
+      "questions": 204,
+      "correct": 134,
+      "accuracy_percent": 65.68627450980392,
+      "model_unanswered": 0,
+      "completed_answers": 204
+    },
+    {
+      "dataset": "hotpotqa",
+      "model": "qwen",
+      "condition": "closedbook",
+      "questions": 204,
+      "correct": 56,
+      "accuracy_percent": 27.45098039215686,
+      "model_unanswered": 1,
+      "completed_answers": 203
+    },
+    {
+      "dataset": "hotpotqa",
+      "model": "qwen",
+      "condition": "piika",
+      "questions": 204,
+      "correct": 143,
+      "accuracy_percent": 70.09803921568627,
+      "model_unanswered": 0,
+      "completed_answers": 204
+    },
+    {
+      "dataset": "dsqa",
+      "model": "sol",
+      "condition": "closedbook",
+      "questions": 71,
+      "strict_correct": 50,
+      "relaxed_correct": 53,
+      "strict_accuracy_percent": 70.4225352112676,
+      "relaxed_accuracy_percent": 74.64788732394366,
+      "model_unanswered": 0,
+      "completed_answers": 71
+    },
+    {
+      "dataset": "dsqa",
+      "model": "sol",
+      "condition": "piika",
+      "questions": 71,
+      "strict_correct": 64,
+      "relaxed_correct": 66,
+      "strict_accuracy_percent": 90.14084507042253,
+      "relaxed_accuracy_percent": 92.95774647887323,
+      "model_unanswered": 0,
+      "completed_answers": 71
+    },
+    {
+      "dataset": "dsqa",
+      "model": "gemma",
+      "condition": "closedbook",
+      "questions": 71,
+      "strict_correct": 17,
+      "relaxed_correct": 26,
+      "strict_accuracy_percent": 23.943661971830984,
+      "relaxed_accuracy_percent": 36.61971830985915,
+      "model_unanswered": 0,
+      "completed_answers": 71
+    },
+    {
+      "dataset": "dsqa",
+      "model": "gemma",
+      "condition": "piika",
+      "questions": 71,
+      "strict_correct": 27,
+      "relaxed_correct": 38,
+      "strict_accuracy_percent": 38.028169014084504,
+      "relaxed_accuracy_percent": 53.521126760563384,
+      "model_unanswered": 1,
+      "completed_answers": 70
+    },
+    {
+      "dataset": "dsqa",
+      "model": "qwen",
+      "condition": "closedbook",
+      "questions": 71,
+      "strict_correct": 9,
+      "relaxed_correct": 16,
+      "strict_accuracy_percent": 12.67605633802817,
+      "relaxed_accuracy_percent": 22.535211267605632,
+      "model_unanswered": 0,
+      "completed_answers": 71
+    },
+    {
+      "dataset": "dsqa",
+      "model": "qwen",
+      "condition": "piika",
+      "questions": 71,
+      "strict_correct": 28,
+      "relaxed_correct": 38,
+      "strict_accuracy_percent": 39.436619718309856,
+      "relaxed_accuracy_percent": 53.521126760563384,
+      "model_unanswered": 0,
+      "completed_answers": 71
+    }
+  ],
+  "retrieval": [
+    {
+      "dataset": "bcp",
+      "questions": 80,
+      "search_calls": 1249,
+      "read_calls": 469,
+      "total_tool_calls": 1718,
+      "mean_tool_calls": 21.475,
+      "recall_at_all_percent": 10.834995924560085,
+      "model": "sol"
+    },
+    {
+      "dataset": "bcp",
+      "questions": 80,
+      "search_calls": 1862,
+      "read_calls": 17,
+      "total_tool_calls": 1879,
+      "mean_tool_calls": 23.4875,
+      "recall_at_all_percent": 3.395540411243175,
+      "model": "gemma"
+    },
+    {
+      "dataset": "bcp",
+      "questions": 80,
+      "search_calls": 3001,
+      "read_calls": 992,
+      "total_tool_calls": 3993,
+      "mean_tool_calls": 49.9125,
+      "recall_at_all_percent": 3.1662174629395268,
+      "model": "qwen"
+    },
+    {
+      "dataset": "trqa",
+      "questions": 68,
+      "search_calls": 337,
+      "read_calls": 248,
+      "total_tool_calls": 585,
+      "mean_tool_calls": 8.602941176470589,
+      "recall_at_all_percent": 9.93600234857596,
+      "model": "sol"
+    },
+    {
+      "dataset": "trqa",
+      "questions": 68,
+      "search_calls": 816,
+      "read_calls": 28,
+      "total_tool_calls": 844,
+      "mean_tool_calls": 12.411764705882353,
+      "recall_at_all_percent": 14.046462463264522,
+      "model": "gemma"
+    },
+    {
+      "dataset": "trqa",
+      "questions": 68,
+      "search_calls": 840,
+      "read_calls": 499,
+      "total_tool_calls": 1339,
+      "mean_tool_calls": 19.691176470588236,
+      "recall_at_all_percent": 15.729194163498184,
+      "model": "qwen"
+    },
+    {
+      "dataset": "hotpotqa",
+      "questions": 204,
+      "search_calls": 1988,
+      "read_calls": 86,
+      "total_tool_calls": 2074,
+      "mean_tool_calls": 10.166666666666666,
+      "recall_at_all_percent": 16.30467881783003,
+      "model": "gemma"
+    },
+    {
+      "dataset": "hotpotqa",
+      "questions": 204,
+      "search_calls": 2304,
+      "read_calls": 1155,
+      "total_tool_calls": 3459,
+      "mean_tool_calls": 16.955882352941178,
+      "recall_at_all_percent": 17.22396233967496,
+      "model": "qwen"
+    },
+    {
+      "dataset": "hotpotqa",
+      "questions": 204,
+      "search_calls": 829,
+      "read_calls": 533,
+      "total_tool_calls": 1362,
+      "mean_tool_calls": 6.676470588235294,
+      "recall_at_all_percent": 16.58054945180145,
+      "model": "sol"
+    },
+    {
+      "dataset": "dsqa",
+      "questions": 71,
+      "search_calls": 817,
+      "read_calls": 452,
+      "total_tool_calls": 1269,
+      "mean_tool_calls": 17.87323943661972,
+      "recall_at_all_percent": 14.120322626711033,
+      "model": "sol"
+    },
+    {
+      "dataset": "dsqa",
+      "questions": 71,
+      "search_calls": 1438,
+      "read_calls": 88,
+      "total_tool_calls": 1526,
+      "mean_tool_calls": 21.492957746478872,
+      "recall_at_all_percent": 15.463690511968384,
+      "model": "gemma"
+    },
+    {
+      "dataset": "dsqa",
+      "questions": 71,
+      "search_calls": 1759,
+      "read_calls": 877,
+      "total_tool_calls": 2636,
+      "mean_tool_calls": 37.12676056338028,
+      "recall_at_all_percent": 16.661979030432107,
+      "model": "qwen"
+    }
+  ],
+  "qrels_only_sol": [
+    {
+      "dataset": "bcp",
+      "failed_subset": 12,
+      "completed_answers": 12,
+      "correct": 12,
+      "accuracy_percent": 100.0
+    },
+    {
+      "dataset": "trqa",
+      "failed_subset": 4,
+      "completed_answers": 4,
+      "correct": 4,
+      "accuracy_percent": 100.0
+    },
+    {
+      "dataset": "hotpotqa",
+      "failed_subset": 11,
+      "completed_answers": 11,
+      "correct": 10,
+      "accuracy_percent": 90.9090909090909
+    },
+    {
+      "dataset": "dsqa",
+      "failed_subset": 7,
+      "completed_answers": 7,
+      "correct": 6,
+      "accuracy_percent": 85.71428571428571,
+      "relaxed_correct": 6,
+      "relaxed_accuracy_percent": 85.71428571428571
+    }
+  ],
+  "sources": [
+    {
+      "artifact": "all_accuracy.tex",
+      "sha256": "926b57b05ef29a1fa954b9712e834e251441f33686c95613b4da41fb9983e536"
+    },
+    {
+      "artifact": "updated_results.json",
+      "sha256": "1220b6faae1d6e4266c69e08af4c0c47cc3ac40d66d1124d5e25c044447a3b10"
+    },
+    {
+      "artifact": "final_results.json",
+      "sha256": "8019567749036430e0a4331b20d66761472b1d33656eeee707116c54a2791581"
+    }
+  ]
+}
