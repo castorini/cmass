@@ -251,6 +251,85 @@ above, on invented documents (`../demo/scan_corpus/`):
 python3 pipelines/cmass/demo/test_scan.py        # ends with "all scan demo checks passed"
 ```
 
+### Writing the rules (`rules.py`, workflow `rules.js`)
+
+The rules are written per question by an agent following [`RULES.md`](RULES.md): for every hop with qrels, a group of
+rules (`<set>/<qid>/<hop>`) that matches **100%** of the hop's established qrels documents and stays as specific as it
+can, at most `max_est` documents estimated over the corpus (default 20,000) unless the rules record why the fact is
+genuinely that common (`"meta": {"broad_ok": "<reason>"}`). A good rule has a clause of the subject's names and
+aliases and one or more clauses of the fact's key terms; a known document the general rule cannot reach gets a narrower
+rule of its own instead of a looser general rule. `rules.py` (stdlib + pyarrow; it imports `scan.py`'s loader, matcher,
+shard scanner and `check`) prepares the agent's work, checks it, measures it and decides the state from disk; the
+format details are in its docstring.
+
+| option (flag, or key of the `--config` JSON) | what |
+|---|---|
+| `qrels_hops` | `qrels_hops.jsonl` (phase 1 or 2 output): per question `id`, `hops` [{`id`, `kind` or `type`, `clue`, `docs`: {doc id: `full` / `partial` / `audit`, or {`supports`, `quotes`, ...}}}]; derivation hops, dropped hops and hops without documents get no rules |
+| `qrels`, `standards`, `quotes` | optional: `qrels.jsonl` (question and answer for the packet), `standards/` (hop standards), a JSONL of `{id, hop, doc_id, quote}` for formats whose hops carry no quotes |
+| `corpus`, `id_scheme` | the corpus as `scan.py` reads it (ClimbMix parquet shards, or JSONL); every text is read locally |
+| `set`, `out` | groups are `<set>/<qid>/<hop>`; files live under `<out>/<set>/` |
+| `max_est`, `breadth_sample`, `breadth_shards` | the breadth cap per group (20,000) and the standard sample (24 shards spread evenly over the corpus, or a shard range) |
+| `breadth_workers`, `breadth_parallel`, `matcher` | worker processes per breadth run (24), breadth runs at once under `out` (2; others wait for a slot), `scan.py` matcher |
+
+```json
+{"qrels_hops": "qrels/set_a/phase2/qrels_hops.jsonl", "qrels": "qrels/set_a/phase2/qrels.jsonl",
+ "standards": "qrels/set_a/standards", "corpus": "/data/climbmix", "set": "set_a", "out": "scan_rules"}
+```
+
+Relative paths in the config file are relative to the file. Per question, under `<out>/<set>/`:
+`<qid>.rules.jsonl` (the agent's rules, the only file it writes), `<qid>.known.jsonl` (`{group, doc_id}` per known
+document: `scan.py check --known`), `work/<qid>.md` (the packet), `work/<qid>.check.json`, `work/<qid>.breadth.json`
+(and `breadth_custom.json` for a non-standard sample); `collect/summary.json` for the set.
+
+```bash
+R="python3 <checkout>/pipelines/cmass/stage3/rules.py --config rules_config.json"
+$R state --todo                  # per question: the next action (below)
+$R packet QID                    # work/QID.md: each hop (clue, standard) and each known document with an excerpt
+                                 #   (its recorded quotes in context, else the window around the clue's rarest terms,
+                                 #   else the start), plus QID.known.jsonl
+$R doc QID DOCID --grep PHRASE   # a document's text, or the normalised text around phrases, with boundary counts
+$R check QID                     # scan.py check of the question's groups: per hop matched/known, missed ids, why
+$R breadth QID                   # the question's rules on the shard sample: matches and corpus-wide estimates
+# workflow rules.js, args {"run": "<run dir>", "tools": "<checkout>/pipelines/cmass/stage3", "set": "<set>",
+#                          "qids": [...], "config": "rules_config.json"}: one agent per question until done
+$R collect --out-rules passing.jsonl   # the done questions' rules, re-checked together: the --rules of scan.py scan
+```
+
+**State** (`rules.py state [QID ...] [--json] [--brief] [--todo]`), from disk only and deterministic. The check and
+breadth reports carry the `scan.py` rules digest (rule ids, groups, `all`, `none`; not `meta`) and the known documents'
+digest, so any change to a rule makes them stale, and adding a `broad_ok` reason does not.
+
+| next | when | then |
+|---|---|---|
+| `packet` | no packet, or the known documents changed since it was written | `packet` |
+| `write` | no rules file, or it does not validate: `scan.py`'s format, a group that is not one of the question's hops, a `rule_id` not under its group, a hop without a rule, a `broad_ok` reason under 10 characters | write or fix the rules |
+| `check` | no check report for these rules and these known documents | `check` |
+| `fix_coverage` | a hop's group misses known documents (or one cannot be read) | add a variant or a rule of its own |
+| `breadth` | no standard-sample breadth report for these rules | `breadth` |
+| `narrow` | a group's estimate is over `max_est`, and not every over-cap rule of it carries `broad_ok` | narrow the group |
+| `done` | rules valid, every hop at 100%, every group within the cap or `broad_ok` | `collect` |
+| `skip` / `error` | no hop with qrels documents / the question is unknown or its ids cannot name a group | nothing / fix the inputs |
+
+**The workflow** (`rules.js`) runs one agent per question (a pipeline over the questions, the session's model), each
+reading `RULES.md` and its packet, writing the rules and running `check` and `breadth` until `state` says done; at most
+three agents per question, and the result lists every question that is not done with the misses and estimates the state
+reports. Every decision comes from `rules.py state`, read by a mechanical agent, never from an agent's report.
+
+**Breadth cost.** On ClimbMix the standard sample is every 272nd of the 6,543 shards: 24 shards, 2,027,520 documents,
+so an estimate is the sample count x 272.6 (one sample match is worth about 273 documents; the 20,000 cap is about 73).
+Measured on the 96-core host with pyahocorasick, 24 workers and two invented rules: 5.9 s to scan the sample (6.8 s
+wall with start-up), 6.8 s on a repeat; another 25-shard sample took 9.6 s. `collect` re-reads every known document
+once, as `scan.py check` does.
+
+[`../demo/test_rules.py`](../demo/test_rules.py) runs packet, doc, check, breadth (on a two-shard parquet corpus built
+in a temporary directory), every state transition and collect on invented questions over invented documents
+(`../demo/rules_corpus/`): hops whose known documents need two rules or an alias, a hop that starts too broad, a
+genuinely broad hop with `broad_ok`, and invalid rule files:
+
+```bash
+python3 pipelines/cmass/demo/test_rules.py       # ends with "all rules demo checks passed"
+```
+
 ## Demo and tests
 
 [`../demo/test_stage3.py`](../demo/test_stage3.py) runs every deterministic step above on the invented demo corpus,
