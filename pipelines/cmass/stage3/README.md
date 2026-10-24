@@ -63,7 +63,7 @@ Layers, later wins: the defaults below, the set's family, the top-level block, t
 | `recall` | `all` (`bcp`: `no_seed`) | which live factual hops get a recall pass: `all`, `no_seed` (hops Stage 1 cited nothing for, typically the audit's added hops), `none` |
 | `recall_k` | 20 (`bcp`: 40) | candidates kept per recall hop (after the anchor filter) |
 | `recall_hits`, `rrf_k`, `recall_min_queries` | 100, 60, 3 | hits per recall query; reciprocal rank fusion constant; queries per hop |
-| `searchlog_top` | `null` | pool only the top N results of each logged search (`null`: all) |
+| `searchlog_top` | 0 | pool the top N results of each logged search (0: none, as the CMASS run did; `null`: all, which can be a thousand documents per question) |
 | `keep_seed_docs` | `false` | keep a live hop's Stage 1 cited documents even when the judges drop them (labelled `partial`, source `seed`) |
 | `chunk_chars`, `chunk_docs`, `part_chars` | 80,000, 15, 50,000 | one judge agent's chunk; one file an agent reads at once (a long document gets its own part) |
 | `min_quote_chars` | 15 | shortest accepted quote |

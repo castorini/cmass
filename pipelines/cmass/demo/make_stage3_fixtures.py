@@ -118,7 +118,8 @@ SEARCHLOGS = {
                ("Velmaran Conservatory", ["demo_doc_007", "demo_doc_103", "demo_doc_106", "demo_doc_011"])],
 }
 
-QRELS_CONFIG = {"recall": "no_seed", "recall_k": 4, "recall_hits": 20, "tiers": {"drop_rate": 0.2, "min_drops": 2}}
+QRELS_CONFIG = {"recall": "no_seed", "recall_k": 4, "recall_hits": 20, "searchlog_top": None,   # the demo also pools its search logs
+                "tiers": {"drop_rate": 0.2, "min_drops": 2}}
 
 
 def std(subject, full, partial=(), reject=()):

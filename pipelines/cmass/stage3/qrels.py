@@ -23,8 +23,8 @@ Every file lives under qrels/<set>/ (README.md has the layout); the judging stan
 round N of the duplicate expansion (qrels/<set>/phase2/rN/), whose documents are the near duplicates dups.py queued.
 
 Pool: the documents of every live hop's accepted Stage 2 evidence (fixed: kept for the hops they are cited for, never
-re-judged), the documents Stage 1 cited for each hop, every document in the question's search logs and in its Stage 2
-audit, revision, adversarial and final-check files, and the recall candidates. Every candidate that is not fixed is read
+re-judged), the documents Stage 1 cited for each hop, every document named in its Stage 2 audit, revision, adversarial and
+final-check files, the recall candidates, and (only with "searchlog_top" set) the results of its logged searches. Every candidate that is not fixed is read
 in full and judged against all live hops; it stays if it supports at least one. Stdlib only.
 """
 from __future__ import annotations
@@ -58,7 +58,7 @@ DEFAULTS = {
     "recall_hits": 100,           # hits per recall query
     "recall_min_queries": 3,
     "rrf_k": 60,
-    "searchlog_top": None,        # pool only the top N results of each logged search (None: all)
+    "searchlog_top": 0,           # pool the top N results of each logged search (0: none, as the CMASS run did; None: all)
     "keep_seed_docs": False,      # keep Stage 1 cited documents of live hops even when the judges drop them
     "chunk_chars": 80_000,        # one judge agent
     "chunk_docs": 15,
