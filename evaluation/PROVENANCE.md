@@ -68,3 +68,19 @@ macro recall with repeated IDs, and aggregate consistency. Input preparation
 was checked on the pinned four-dataset release without exposing decoded items
 in public logs. No fresh generation or GPT judgment was performed for this PR,
 and this check does not claim a new independent full raw-trace audit.
+
+## Hop-groundedness and system-run extension (October 24)
+
+All 1,269 selected artifact JSON files were copied read-only and matched to the
+SHA-256 pins in the archived `projection-hop-coverage-20261012/input/source_map.json`.
+Their question text matches the pinned release after whitespace normalization.
+The new evaluator reproduced all twelve archived hop summaries from 2,708
+retained-hop mappings. The exact archived result/source-map and phase-2 hop
+file hashes are in [hop_groundedness_results.json](hop_groundedness_results.json).
+
+The [retrieval export](SYSTEM_RUNS.md) uses that same selection, including the
+single Gemma DSQA model-unanswered attempt. It is built with an explicit field
+allowlist and contains no benchmark text or raw trajectories. Cross-model pool
+labels are derived from the unchanged phase-2 qrels; no new relevance judgment
+or score-based attempt selection is performed. This additional check verifies
+artifact integrity and metric arithmetic, not a new full event-stream audit.

@@ -147,10 +147,17 @@ The DSQA complete-set generation instruction and its single-call, two-verdict
 judge apply to both closed-book and retrieval-enabled runs. Terminal unanswered
 outcomes count as failures; the result denominators remain the full revised sets.
 
+The [hop-groundedness evaluator](evaluation/HOP_GROUNDEDNESS.md) measures the
+fraction of each question's hops covered by at least one retrieved document,
+then averages over questions. [System-run retrieval exports and candidate
+pools](evaluation/SYSTEM_RUNS.md) for all three models are available on watgpu
+for relevance assessment and qrel expansion; unjudged candidates are not new qrels.
+
 ## Repository
 
 - [`evaluation/`](evaluation/): four-dataset Piika evaluation prompts, input preparation,
-  settings, aggregate results, DSQA verdict validation and metric helpers.
+  settings, aggregate results, DSQA verdict validation, hop-groundedness evaluation
+  and retrieval-pool export helpers.
 - [`pipelines/bcp_climbmix/`](pipelines/bcp_climbmix/): the BrowseComp-Plus projection (stage 1) and
   the first qrels construction ([`qrels/`](pipelines/bcp_climbmix/qrels/)).
 - [`review_site/`](review_site/): the human-in-the-loop review site used in stage 2, with an invented

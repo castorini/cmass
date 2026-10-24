@@ -79,7 +79,10 @@ histories differ across backbones. Closed-book scores are a memorization proxy;
 they do not prove that an answer was literally memorized. Recall and hop coverage
 show which evidence was retrieved, not which evidence caused an answer.
 
-The [main README](../README.md#results) additionally reports archived hop coverage.
-Recomputing that metric requires withheld per-hop mappings; public question-level
-qrels alone are insufficient. See the [metric definitions](../REPRODUCING.md#5-compute-metrics)
-and [source provenance](PROVENANCE.md).
+The [hop-groundedness evaluator and results](HOP_GROUNDEDNESS.md) reproduce all
+twelve dataset/model summaries from the selected artifacts and frozen per-hop
+mappings. Public question-level qrels alone are insufficient to recompute it.
+[Retrieval-only system runs and cross-model candidate pools](SYSTEM_RUNS.md)
+are also available for qrel expansion. See the
+[metric definitions](../REPRODUCING.md#5-compute-metrics) and
+[source provenance](PROVENANCE.md).

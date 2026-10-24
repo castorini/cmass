@@ -230,6 +230,9 @@ averages `covered_hops / total_hops` per question, where a hop is covered if at
 least one retrieved ID belongs to its supporting set. The per-hop mapping is
 withheld, so hop coverage cannot be recomputed from public question-level qrels
 alone. It measures retrieved support, not causal use of evidence.
+The [hop-groundedness guide](evaluation/HOP_GROUNDEDNESS.md) provides the exact
+evaluator, input schema and twelve results. The [system-run sharing guide](evaluation/SYSTEM_RUNS.md)
+provides retrieval-ID exports and cross-model candidate pools for qrel expansion.
 
 ## Separate qrels-only diagnostic
 
