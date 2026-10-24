@@ -503,8 +503,9 @@ def _collect_doc_ids(obj, out: set) -> None:
         for k, v in obj.items():
             if k == "doc_id" and isinstance(v, str) and v:
                 out.add(v)
-            elif k in ("doc_ids", "supporting_doc_ids") and isinstance(v, list):
-                out |= {x for x in v if isinstance(x, str) and x}
+            elif isinstance(v, list) and (k in ("doc_ids", "supporting_doc_ids") or k.startswith("docs")):
+                out |= {x for x in v if isinstance(x, str) and x}     # e.g. a verifier's "docs_read"
+                _collect_doc_ids([x for x in v if not isinstance(x, str)], out)
             else:
                 _collect_doc_ids(v, out)
     elif isinstance(obj, list):
