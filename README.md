@@ -150,8 +150,9 @@ outcomes count as failures; the result denominators remain the full revised sets
 The [hop-groundedness evaluator](evaluation/HOP_GROUNDEDNESS.md) measures the
 fraction of each question's hops covered by at least one retrieved document,
 then averages over questions. [System-run retrieval exports and candidate
-pools](evaluation/SYSTEM_RUNS.md) for all three models are available on watgpu
-for relevance assessment and qrel expansion; unjudged candidates are not new qrels.
+pools](evaluation/SYSTEM_RUNS.md) for all three models are available from the
+authors on request for relevance assessment and qrel expansion. These exports
+remain private; unjudged candidates are not new qrels.
 
 ## Repository
 

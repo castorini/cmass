@@ -1,29 +1,24 @@
 # Retrieval runs for qrel pooling
 
 The selected Piika retrieval runs for **Sol, Gemma and Qwen on all four
-datasets** are available to users with watgpu filesystem access:
+datasets** are **available from the authors on request**. The exports remain
+private and are not committed to GitHub or published on Hugging Face. Access
+arrangements are provided privately, not through public internal-host paths.
 
-```text
-/u201/l39gu/experiments/cmass-system-runs-public-20261024/
-```
+**Document IDs and relevance labels are sensitive benchmark material too.**
+In particular, plaintext query-document pairs labeled `existing_positive`
+expose released qrels and would bypass the public release's obfuscation.
+Omitting question text, answers and reasoning does not make these exports
+safe for public distribution. Recipients must keep decoded exports private;
+any future public release requires a separately reviewed obfuscation step
+consistent with the benchmark release policy. Removing the relevance label
+alone is not sufficient to make per-query retrieval IDs public.
 
-The export directory has traversable/readable directories and read-only access
-for other users to the files. It is **not an anonymous HTTP download**: a
-watgpu account or mounted filesystem access is still needed. No original run
-permissions were changed. The files are not committed to GitHub and have not
-been uploaded to Hugging Face.
+This repository publishes only the exporter, schema and aggregate counts.
+The private bundle's `README.md` and `manifest.json` describe its fields and
+pin every payload file's hash.
 
-```bash
-scp -r watgpu:/u201/l39gu/experiments/cmass-system-runs-public-20261024 \
-  /absolute/private/cmass-system-runs
-cd /absolute/private/cmass-system-runs
-shasum -a 256 -c SHA256SUMS
-```
-
-Use your own SSH host configuration for watgpu. The top-level `README.md` and
-`manifest.json` describe the fields and pin every payload file's hash.
-
-## What is shared
+## Private export contents
 
 - `runs/<dataset>/<model>.jsonl`: twelve files; dataset is `bcp`, `trqa`,
   `hotpotqa`, or `dsqa`, and model is `gpt`, `gemma`, or `qwen`. There is one
@@ -75,7 +70,7 @@ The exact run summaries are in [pooling_results.json](pooling_results.json).
    Preserve the phase-2 release and its reported scores. Recompute every system's
    metrics consistently against any expanded judgment set.
 
-This is a candidate-pooling release, not a claim that 43,261 new relevant pairs
+This is a private candidate pool, not a claim that 43,261 new relevant pairs
 have been found. It is also a pool of these three selected systems, not an
 exhaustive corpus judgment. No new relevance judgments were run for this update.
 
@@ -97,5 +92,8 @@ python3 evaluation/export_system_runs.py \
 ```
 
 The exporter refuses overwrites and destinations inside this public checkout.
-Its allowlist copies only retrieval metadata; it does not redo selection or a
-full raw-trace audit. Sharing/permission changes are a separate, deliberate step.
+On POSIX systems it creates the export directory with mode `0700` and files
+with mode `0600`, regardless of a permissive process umask. Its allowlist copies
+only retrieval metadata, but the resulting IDs and labels still require private
+handling. It does not redo selection or a full raw-trace audit. Do not make
+decoded exports world-readable or place them in a publicly served directory.

@@ -1,6 +1,7 @@
 """Offline tests use placeholders, never benchmark questions or document IDs."""
 import hashlib
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -91,6 +92,29 @@ class ExportTests(unittest.TestCase):
     def test_public_repo_output_is_rejected(self):
         with self.assertRaises(ValueError):
             exporter.export({'sources':[]},[],Path(exporter.__file__).resolve().parent/'do-not-create')
+
+    @unittest.skipUnless(os.name == 'posix', 'POSIX permissions')
+    def test_export_is_owner_only_even_with_permissive_umask(self):
+        with tempfile.TemporaryDirectory() as temp, patch.dict(exporter.MODELS,{'gpt':'example-model'},clear=True), patch.dict(exporter.COUNTS,{'bcp':1},clear=True):
+            root=Path(temp);source,qrels=self.make_source(root)
+            previous=os.umask(0)
+            try:
+                exporter.export({'sources':[source]},qrels,root/'out')
+            finally:
+                os.umask(previous)
+            self.assertEqual((root/'out').stat().st_mode & 0o777,0o700)
+            for path in (root/'out').rglob('*'):
+                if path.is_file():
+                    self.assertEqual(path.stat().st_mode & 0o777,0o600)
+                elif path.is_dir():
+                    self.assertEqual(path.stat().st_mode & 0o777,0o700)
+
+    def test_public_docs_have_no_internal_access_instructions(self):
+        root=Path(__file__).resolve().parents[1]
+        for name in ('README.md','evaluation/SYSTEM_RUNS.md'):
+            text=(root/name).read_text()
+            for marker in ('/u201/','/u801/','/mnt/users/','scp ', 'watgpu'):
+                self.assertNotIn(marker,text)
 
     def test_published_aggregate_coverage_and_pool_arithmetic(self):
         root=Path(__file__).resolve().parent

@@ -233,6 +233,7 @@ alone. It measures retrieved support, not causal use of evidence.
 The [hop-groundedness guide](evaluation/HOP_GROUNDEDNESS.md) provides the exact
 evaluator, input schema and twelve results. The [system-run sharing guide](evaluation/SYSTEM_RUNS.md)
 provides retrieval-ID exports and cross-model candidate pools for qrel expansion.
+Those exports remain private and are available from the authors on request.
 
 ## Separate qrels-only diagnostic
 

@@ -65,7 +65,7 @@ hop evidence or a full raw-event-stream audit.
 - Hops: `dataset`, released `query_id`, `hop_id`, `role` (`inclusion` or
   `exclusion`), and `doc_ids` (a list, possibly empty).
 
-The run files in the [sharing bundle](SYSTEM_RUNS.md) have the required fields;
+The run files in the [private bundle, available from the authors on request](SYSTEM_RUNS.md), have the required fields;
 extra fields are ignored. Concatenate the desired dataset/model files into a
 private input file. The full hop catalog must include every retained hop,
 including ones with no supporting documents. IDs are strings, scoped by dataset.
@@ -85,4 +85,4 @@ role-specific denominators and malformed inputs.
 **Public question-level qrels do not contain the hop-to-document mapping.**
 That mapping remains a private evaluation input; it cannot be inferred from
 membership in the question's qrels. Hop clues, answers and evidence text are
-not included in the system-run sharing bundle or this GitHub repository.
+not included in the private system-run bundle or this GitHub repository.

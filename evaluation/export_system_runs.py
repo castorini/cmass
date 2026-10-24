@@ -6,13 +6,15 @@ query_id is the released ID, not an experiment's local sequential ID.
 outcome is completed or model_unanswered, selected before running this tool.
 Decoded qrels: JSONL dataset/query_id/doc_id/relevance.
 No question, answer, reasoning, search query, snippet or document text is copied.
-Output must be outside the public repository; publishing is a separate action.
+IDs and relevance labels are still sensitive benchmark material. Output must
+remain private, outside the public repository; public release needs obfuscation.
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import os
 from collections import defaultdict
 from pathlib import Path
 
@@ -24,6 +26,13 @@ COUNTS = {'bcp': 80, 'trqa': 68, 'hotpotqa': 204, 'dsqa': 71}
 
 def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def private_write(path: Path, payload: bytes) -> None:
+    """Create a new owner-only file, including under umask 000."""
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    with os.fdopen(fd, 'wb') as stream:
+        stream.write(payload)
 
 
 def export(manifest: dict, qrels: list[dict], output: Path) -> dict:
@@ -85,13 +94,16 @@ def export(manifest: dict, qrels: list[dict], output: Path) -> dict:
         ids = [r['query_id'] for r in rows]
         if len(ids) != COUNTS[ds] or len(set(ids)) != len(ids) or set(ids) != {q for d, q in gold if d == ds}:
             raise ValueError("Missing or duplicate selected questions")
-    output.mkdir(parents=True)
+    output.mkdir(parents=True, mode=0o700)
     files = {}
     def save(name, rows):
         path = output / name
-        path.parent.mkdir(parents=True, exist_ok=True)
+        directory = output
+        for part in Path(name).parts[:-1]:
+            directory = directory / part
+            directory.mkdir(exist_ok=True, mode=0o700)
         payload = ''.join(json.dumps(r, sort_keys=True) + '\n' for r in rows).encode()
-        path.write_bytes(payload)
+        private_write(path, payload)
         files[name] = dict(sha256=sha(payload), bytes=len(payload), rows=len(rows))
     summaries = []
     for (ds, model), rows in sorted(groups.items()):
@@ -119,7 +131,7 @@ def export(manifest: dict, qrels: list[dict], output: Path) -> dict:
     receipt = dict(schema_version=1, input_manifest_sha256=sha(json.dumps(manifest, sort_keys=True).encode()),
                    source_selection='Frozen final revised retrieval attempts; not selected by correctness',
                    run_summaries=summaries, pool_summaries=pool_summary, files=files)
-    (output/'manifest.json').write_text(json.dumps(receipt, indent=2)+'\n')
+    private_write(output/'manifest.json', (json.dumps(receipt, indent=2)+'\n').encode())
     return receipt
 
 

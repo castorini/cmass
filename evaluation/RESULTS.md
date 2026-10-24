@@ -83,6 +83,6 @@ The [hop-groundedness evaluator and results](HOP_GROUNDEDNESS.md) reproduce all
 twelve dataset/model summaries from the selected artifacts and frozen per-hop
 mappings. Public question-level qrels alone are insufficient to recompute it.
 [Retrieval-only system runs and cross-model candidate pools](SYSTEM_RUNS.md)
-are also available for qrel expansion. See the
+remain private and are available from the authors on request for qrel expansion. See the
 [metric definitions](../REPRODUCING.md#5-compute-metrics) and
 [source provenance](PROVENANCE.md).

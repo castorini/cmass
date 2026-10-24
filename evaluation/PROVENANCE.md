@@ -78,9 +78,13 @@ The new evaluator reproduced all twelve archived hop summaries from 2,708
 retained-hop mappings. The exact archived result/source-map and phase-2 hop
 file hashes are in [hop_groundedness_results.json](hop_groundedness_results.json).
 
-The [retrieval export](SYSTEM_RUNS.md) uses that same selection, including the
+The [private retrieval export](SYSTEM_RUNS.md), available from the authors on
+request, uses that same selection, including the
 single Gemma DSQA model-unanswered attempt. It is built with an explicit field
 allowlist and contains no benchmark text or raw trajectories. Cross-model pool
 labels are derived from the unchanged phase-2 qrels; no new relevance judgment
 or score-based attempt selection is performed. This additional check verifies
 artifact integrity and metric arithmetic, not a new full event-stream audit.
+Plaintext document IDs and relevance labels remain sensitive even without
+benchmark text. The export is owner-only, and neither its data nor internal
+access paths are part of the current public documentation.
