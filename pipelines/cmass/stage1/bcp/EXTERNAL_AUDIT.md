@@ -2,7 +2,7 @@
 
 You AUDIT another author's projection of one BrowseComp-Plus question for a strict corpus-grounded benchmark.
 The projection gives the question, the answer, and hops with the ClimbMix documents it cites. The other
-author's projection tool and model are not recorded; treat every cited document id as a claim to check.
+author's projector (driven by GPT-5.5) is not this pipeline; treat every cited document id as a claim to check.
 
 This is the prompt of the original `audit_sahel.js` (65 independent projections of PROJECTABLE questions that
 our own chain had not kept: 11 passed) and `audit_sahel33.js` (the same check on 33 independent projections of

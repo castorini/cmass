@@ -44,7 +44,7 @@ commit history records: the original workflows set no `model`, so their agents i
 | 6 | all hops grounded | `bcp_build.py all-hops` | `all_grounded.jsonl` | 63 of 326 |
 | 7 | coverage audit | `coverage.js` (Opus 4.8 session), `bcp_build.py coverage-final` | `coverage_final.jsonl` | 63 -> 58 |
 | 8 | manual review | a person (`manual/review.json`), `bcp_build.py review` | `reviewed.jsonl` | 58 -> 50 |
-| 9 | independent projections | another author's projections (tool and model not recorded); `external_audit.js` (Opus 4.8 session) | `external_verified.jsonl` | 65 audited -> 11; 33 more audited -> 0 |
+| 9 | independent projections | another author's projections (a separate tool-using projector driven by GPT-5.5); `external_audit.js` (Opus 4.8 session) | `external_verified.jsonl` | 65 audited -> 11; 33 more audited -> 0 |
 | 10 | near-miss repair | `repair.js` (Opus 4.8 session), the operator's verification, `coverage.js` | `repaired.jsonl` | phase A 65 -> 5 claimed -> 4 verified; phase B 84 -> 1 -> 0 |
 | 11 | deep audit, temporal policy | manual (`manual/repairs.json`, `manual/overrides.json`) | | the 4 removed, then restored; 1 record's hops rewritten |
 | 12 | candidates | `bcp_build.py candidates` | `inputs/bcp.jsonl` | **65** = 50 + 11 + 4 |
@@ -115,7 +115,8 @@ A person removed 8 of the 58 by hand (**58 -> 50**); no criteria were recorded (
 
 ### 9. Independent projections
 
-Another author projected BCP questions with a separate pipeline; its tool and model are not recorded. Of those
+Another author projected and grounded BCP questions over ClimbMix with a separate tool-using projector driven by
+GPT-5.5. Of those
 projections with status success (131), 98 were PROJECTABLE here (33 already among the 50, 65 not) and 33 were
 PARTIAL or NOT here. One agent per projection (`EXTERNAL_AUDIT.md`) judged whether its hops cover the question
 and chain to the answer, and fetched every cited document to confirm it supports its hop. Of the 65, **11** passed

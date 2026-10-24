@@ -25,7 +25,7 @@ without a second numbering scheme. This directory also includes a convenience in
 corresponding to **Task construction** in **Stage 0: Dataset and corpus preparation**.
 
 The Stage 1 output was 65 questions: 50 that passed the union of two grounding passes, a coverage audit and an
-author review; 11 from an independent projection, checked by a separate retrieval-verified audit; and 4 near
+author review; 11 projected independently with GPT-5.5 and checked by a separate retrieval-verified audit; and 4 near
 misses repaired and accepted under a relaxed temporal-qualifier policy (see `pipelines/cmass/stage1/bcp/`).
 
 The `.js` workflows are agentic (Claude Code Workflow scripts): one agent per question, one output

@@ -9,7 +9,7 @@ data. No question, answer, hop, document or benchmark identifier is included.
 
 | dataset | answer | directory | answerability label | filters after projection | Stage 2 input |
 |---|---|---|---|---|---|
-| BrowseComp-Plus | single | [`bcp/`](bcp/) | PROJECTABLE / PARTIAL / NOT | two hop-scrutiny passes (union), a coverage audit without tools, an author review; plus an audit of independently projected questions and near-miss repairs | 65 candidates + 55 near misses (8 also candidates) |
+| BrowseComp-Plus | single | [`bcp/`](bcp/) | PROJECTABLE / PARTIAL / NOT | two hop-scrutiny passes (union), a coverage audit without tools, an author review; plus an audit of questions projected independently with GPT-5.5, and near-miss repairs | 65 candidates + 55 near misses (8 also candidates) |
 | Total Recall QA | aggregate | [`trqa/`](trqa/) | SUPPORTED / PARTIAL / NOT | a strict audit, then four agent gates: extreme, completeness, coherence, annotator | 50 candidates + 37 near misses; 172 expansion candidates |
 | DeepSearchQA | set | [`dsqa/`](dsqa/) | SUPPORTED / PARTIAL / NOT (a set passes on one grounded member) | a consistency check, a strict audit, an extreme audit (required hops only), coherence and annotator gates, an operator's flags with adjudication; snippets re-chosen and repaired along the way | 64 candidates + 20 near misses; 57 expansion candidates |
 | HotpotQA | single | [`hotpotqa/`](hotpotqa/) | none | a contamination screen, bridge questions only, then four agent gates: extreme, uniqueness, coherence, annotator | 157 candidates + 103 near misses |
