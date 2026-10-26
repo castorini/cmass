@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""De-obfuscate the CMASS BrowseComp-plus -> ClimbMix release.
+"""De-obfuscate the four-dataset CMASS release.
 
 Obfuscated fields (``id``, ``question``, ``answer`` in the queries config; ``query_id``, ``doc_id`` in the qrels config)
 are base64( plaintext XOR keystream ), where the keystream is the SHA-256 digest of the row's
@@ -24,7 +24,7 @@ import hashlib
 import json
 import sys
 
-OBFUSCATED_FIELDS = ("id", "question", "answer", "query_id", "doc_id")
+OBFUSCATED_FIELDS = ("id", "question", "answer", "query_id", "doc_id", "answer_set")
 
 
 def decode_field(value: str, canary: str) -> str:
@@ -41,6 +41,10 @@ def decode_row(row: dict) -> dict:
     for field in OBFUSCATED_FIELDS:
         if field in out and isinstance(out[field], str):
             out[field] = decode_field(out[field], canary)
+            if field == "answer_set":
+                out[field] = json.loads(out[field])
+                if not isinstance(out[field], list):
+                    raise ValueError("Decoded answer_set must be a list")
     return out
 
 

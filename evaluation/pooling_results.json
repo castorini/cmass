@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "input_manifest_sha256": "e99cdeff2ec6f61789bd71cf06b8682aa3cdcd7426bbef52ebec299a3dce459e",
+  "source_selection": "Frozen final revised retrieval attempts; not selected by correctness",
+  "run_summaries": [
+    {
+      "dataset": "bcp",
+      "model": "gemma",
+      "questions": 80,
+      "surfaced_query_doc_pairs": 6730,
+      "opened_query_doc_pairs": 14,
+      "relevant_surfaced_pairs": 281,
+      "zero_search_result_questions": 0
+    },
+    {
+      "dataset": "bcp",
+      "model": "gpt",
+      "questions": 80,
+      "surfaced_query_doc_pairs": 5128,
+      "opened_query_doc_pairs": 461,
+      "relevant_surfaced_pairs": 801,
+      "zero_search_result_questions": 0
+    },
+    {
+      "dataset": "bcp",
+      "model": "qwen",
+      "questions": 80,
+      "surfaced_query_doc_pairs": 10716,
+      "opened_query_doc_pairs": 800,
+      "relevant_surfaced_pairs": 346,
+      "zero_search_result_questions": 0
+    },
+    {
+      "dataset": "dsqa",
+      "model": "gemma",
+      "questions": 71,
+      "surfaced_query_doc_pairs": 4084,
+      "opened_query_doc_pairs": 78,
+      "relevant_surfaced_pairs": 756,
+      "zero_search_result_questions": 0
+    },
+    {
+      "dataset": "dsqa",
+      "model": "gpt",
+      "questions": 71,
+      "surfaced_query_doc_pairs": 3001,
+      "opened_query_doc_pairs": 434,
+      "relevant_surfaced_pairs": 746,
+      "zero_search_result_questions": 0
+    },
+    {
+      "dataset": "dsqa",
+      "model": "qwen",
+      "questions": 71,
+      "surfaced_query_doc_pairs": 5236,
+      "opened_query_doc_pairs": 643,
+      "relevant_surfaced_pairs": 1016,
+      "zero_search_result_questions": 0
+    },
+    {
+      "dataset": "hotpotqa",
+      "model": "gemma",
+      "questions": 204,
+      "surfaced_query_doc_pairs": 6024,
+      "opened_query_doc_pairs": 86,
+      "relevant_surfaced_pairs": 1288,
+      "zero_search_result_questions": 0
+    },
+    {
+      "dataset": "hotpotqa",
+      "model": "gpt",
+      "questions": 204,
+      "surfaced_query_doc_pairs": 3302,
+      "opened_query_doc_pairs": 525,
+      "relevant_surfaced_pairs": 1211,
+      "zero_search_result_questions": 0
+    },
+    {
+      "dataset": "hotpotqa",
+      "model": "qwen",
+      "questions": 204,
+      "surfaced_query_doc_pairs": 7561,
+      "opened_query_doc_pairs": 937,
+      "relevant_surfaced_pairs": 1366,
+      "zero_search_result_questions": 0
+    },
+    {
+      "dataset": "trqa",
+      "model": "gemma",
+      "questions": 68,
+      "surfaced_query_doc_pairs": 2376,
+      "opened_query_doc_pairs": 28,
+      "relevant_surfaced_pairs": 790,
+      "zero_search_result_questions": 0
+    },
+    {
+      "dataset": "trqa",
+      "model": "gpt",
+      "questions": 68,
+      "surfaced_query_doc_pairs": 1282,
+      "opened_query_doc_pairs": 232,
+      "relevant_surfaced_pairs": 560,
+      "zero_search_result_questions": 0
+    },
+    {
+      "dataset": "trqa",
+      "model": "qwen",
+      "questions": 68,
+      "surfaced_query_doc_pairs": 2515,
+      "opened_query_doc_pairs": 399,
+      "relevant_surfaced_pairs": 860,
+      "zero_search_result_questions": 0
+    }
+  ],
+  "pool_summaries": [
+    {
+      "dataset": "bcp",
+      "questions": 80,
+      "candidate_pairs": 21397,
+      "existing_positive_pairs": 1178,
+      "unjudged_pairs": 20219
+    },
+    {
+      "dataset": "trqa",
+      "questions": 68,
+      "candidate_pairs": 4909,
+      "existing_positive_pairs": 1457,
+      "unjudged_pairs": 3452
+    },
+    {
+      "dataset": "hotpotqa",
+      "questions": 204,
+      "candidate_pairs": 13314,
+      "existing_positive_pairs": 2281,
+      "unjudged_pairs": 11033
+    },
+    {
+      "dataset": "dsqa",
+      "questions": 71,
+      "candidate_pairs": 10265,
+      "existing_positive_pairs": 1708,
+      "unjudged_pairs": 8557
+    }
+  ]
+}

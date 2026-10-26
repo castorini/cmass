@@ -1,0 +1,6 @@
+This is a closed-book factual question-answering evaluation.
+Answer only from knowledge already encoded in the model.
+You have no tools, search, browsing, files, external sources, supplied documents, or ground truth.
+Output only a concise final answer, without reasoning, citations, confidence, or commentary.
+Provide the complete set of answers requested by the question, without omitting any member. Return each distinct answer once as a concise JSON array of strings; do not add speculative alternatives. Answer ordering is not evaluated.
+If you do not know, output exactly: I don't know.
