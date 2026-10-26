@@ -1,7 +1,7 @@
 export const meta = {
   name: 'cmass-stage3-qrels-phase2',
   description: 'CMASS Stage 3 phase 2 (duplicate expansion): agent verification of the near duplicates (5-gram Jaccard >= 0.7) of kept documents that the quote check left for agents, one round of the expansion. The hop standards exist from phase 1; dups.py chunks has settled by quote every near duplicate holding its parent\'s quote for a hop verbatim (near_dup_mode quote_first, the default) and rendered the rest; a cheaper model verifies each of those on its own text, a stronger blind second judge re-judges the policy sample, an adjudicator decides each disagreement. Exact and quote-settled duplicates need no agent (dups.py apply adds them). Resumes from disk (qrels_state.py --phase2 N).',
-  whenToUse: 'After dups.py lookup, fetch and chunks for round N; args {set, round, qids} as dups.py chunks prints them.',
+  whenToUse: 'After dups.py lookup, fetch and chunks for round N; args {set, round, qids} (and layer, for the system pool\'s duplicates) as dups.py chunks prints them.',
   phases: [
     { title: 'Verify', detail: 'one agent per chunk of near duplicates; a chunk whose verdicts fail the check is re-judged by the stronger model' },
     { title: 'Second judge', detail: 'blind, one agent per sample set; rounds and escalation come from qrels_state.py' },
@@ -20,20 +20,23 @@ const MODEL_ADJUDICATE = 'sonnet'  // decides each disagreement
 const MODEL_HELPER = 'haiku'       // runs one deterministic command and reports what it printed
 const MAX_ROUNDS = 6
 
-// args: {set: "<set>", round: N, qids: ["<qid>", ...], run?: RUN_DIR, pipeline?: PIPELINE}; `dups.py chunks --round N`
-// prints them as workflow_args. The tiering parameters come from the run config ("phase2_tiers", else "tiers").
+// args: {set: "<set>", round: N, qids: ["<qid>", ...], layer?: "phase3_pool_dups", run?: RUN_DIR, pipeline?: PIPELINE};
+// `dups.py chunks --round N` prints them as workflow_args. layer phase3_pool_dups verifies the near duplicates of the
+// system pool's additions (phase 3). The tiering parameters come from the run config ("phase2_tiers", else "tiers").
 const A = typeof args === 'string' ? JSON.parse(args) : (args || {})
 const SET = A.set
 const ROUND = Number(A.round || 1)
 const QIDS = A.qids || []
 const PIPE = A.pipeline || PIPELINE
 const RUN = A.run || RUN_DIR
-const T = `cd ${RUN} && python3 ${PIPE}/stage3/qrels.py --set ${SET} --phase2 ${ROUND}`
-const STATE = `cd ${RUN} && python3 ${PIPE}/stage3/qrels_state.py --set ${SET} --phase2 ${ROUND}`
+const LAYER = A.layer || 'phase2'
+const LF = LAYER === 'phase2' ? '' : ` --layer ${LAYER}`
+const T = `cd ${RUN} && python3 ${PIPE}/stage3/qrels.py --set ${SET} --phase2 ${ROUND}${LF}`
+const STATE = `cd ${RUN} && python3 ${PIPE}/stage3/qrels_state.py --set ${SET} --phase2 ${ROUND}${LF}`
 const GUIDE = `${PIPE}/stage3/QRELS.md`
 const QD = `${RUN}/qrels/${SET}`
-const WK = `${QD}/phase2/r${ROUND}/work`
-const JD = `${QD}/phase2/r${ROUND}/judged`
+const WK = `${QD}/${LAYER}/r${ROUND}/work`
+const JD = `${QD}/${LAYER}/r${ROUND}/judged`
 const RULES = 'If any tool call is refused or fails so that you cannot finish, stop and report failure: set check_errors to -1 (never 0 for unfinished work) and say in note what failed. Never report success for work you did not finish. Do not kill any process.'
 
 const JUDGE = {
@@ -184,9 +187,9 @@ const run = async (q) => {
 
 if (!SET || !QIDS.length) { log('Pass args {set, round, qids} (dups.py chunks prints them): nothing to do.'); return { complete: 0 } }
 if (RUN.startsWith('/path/to') || PIPE.startsWith('/path/to')) { log('Set PIPELINE and RUN_DIR at the top of the script (or pass {run, pipeline} in args).'); return { complete: 0 } }
-log(`Stage 3 phase 2, expansion round ${ROUND}: near duplicates of ${QIDS.length} questions of set ${SET}; resuming from disk`)
+log(`Stage 3 duplicate expansion (${LAYER}), round ${ROUND}: near duplicates of ${QIDS.length} questions of set ${SET}; resuming from disk`)
 const out = (await pipeline(QIDS, (q) => run(q).catch((e) => ({ qid: q, error: String(e) })))).filter(Boolean)
 const failed = out.filter((r) => !r.complete)
 log(`complete ${out.length - failed.length} of ${QIDS.length}${failed.length ? '; not complete: ' + failed.map((r) => r.qid).join(', ') : ''}`)
-log(`next: cd ${RUN} && python3 ${PIPE}/stage3/dups.py --set ${SET} apply --round ${ROUND} && python3 ${PIPE}/stage3/dups.py --set ${SET} lookup --round ${ROUND + 1}`)
+log(`next: cd ${RUN} && python3 ${PIPE}/stage3/dups.py --set ${SET}${LF} apply --round ${ROUND} && python3 ${PIPE}/stage3/dups.py --set ${SET}${LF} lookup --round ${ROUND + 1}`)
 return out

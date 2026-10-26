@@ -21,7 +21,9 @@ Every file lives under qrels/<set>/ (README.md has the layout); the judging stan
 
 --phase2 N points the judging commands (show, chunks, unjudged, check, second, second-check, compare, adj-check) at
 round N of the duplicate expansion (qrels/<set>/phase2/rN/), whose documents are the near duplicates `dups.py chunks`
-left for the agents after its quote check.
+left for the agents after its quote check; with --layer phase3_pool_dups, at round N of the expansion of the system
+pool's additions (qrels/<set>/phase3_pool_dups/rN/). --pool points them at phase 3, the system pool
+(qrels/<set>/phase3_pool/), whose documents are the pooled candidates `pool.py candidates` listed.
 
 Pool: the documents of every live hop's accepted Stage 2 evidence (fixed: kept for the hops they are cited for, never
 re-judged), the documents Stage 1 cited for each hop, every document named in its Stage 2 audit, revision, adversarial and
@@ -51,9 +53,14 @@ REASONS = ("no_hop_fact", "wrong_entity", "mention_only", "contradicts", "out_ho
 SUPPORTS = ("full", "partial")
 RECALL_MODES = ("all", "no_seed", "none")
 NEAR_DUP_MODES = ("quote_first", "agent", "quote_only")
+POOL = "phase3_pool"                                               # phase 3: the system pool's judging and output
+DUP_LAYERS = {"phase2": "phase1", "phase3_pool_dups": POOL}        # duplicate-expansion layer -> the layer it expands
+LAYERS = ("phase1", "phase2", POOL, "phase3_pool_dups")            # output layers, in build order
+TIER_KEYS = ("tiers", "phase2_tiers", "pool_tiers")
 
 # Stage 3 settings. Layers, later wins: these defaults, the set's family (below), "qrels" at the top of cmass.json,
-# "qrels" inside the set's entry. "tiers" and "phase2_tiers" merge key by key; phase2_tiers falls back to tiers.
+# "qrels" inside the set's entry. "tiers", "phase2_tiers" and "pool_tiers" merge key by key; phase2_tiers and
+# pool_tiers fall back to tiers.
 DEFAULTS = {
     "recall": "all",              # which live hops get a recall pass: all | no_seed (hops Stage 1 cited nothing for) | none
     "recall_k": 20,               # candidates kept per recall hop
@@ -79,6 +86,7 @@ DEFAULTS = {
         "escalate_at": 2,         # this many sampled drops turned into keeps -> every remaining drop is re-judged
     },                            # every partial-only keep is always re-judged
     "phase2_tiers": {},
+    "pool_tiers": {},             # phase 3, the system pool's candidates; falls back to tiers, as the CMASS run did
 }
 FAMILY_DEFAULTS = {
     "bcp": {"recall": "no_seed", "recall_k": 40, "tiers": {"drop_rate": 1.0}},
@@ -94,7 +102,7 @@ def qrels_config(run: Run, sid: str) -> dict:
         for k, v in layer.items():
             if k not in DEFAULTS:
                 raise SystemExit(f"qrels config: unknown key {k!r}; known: {sorted(DEFAULTS)}")
-            if k in ("tiers", "phase2_tiers"):
+            if k in TIER_KEYS:
                 bad = set(v) - set(DEFAULTS["tiers"])
                 if bad:
                     raise SystemExit(f"qrels config: unknown {k} keys {sorted(bad)}")
@@ -102,6 +110,7 @@ def qrels_config(run: Run, sid: str) -> dict:
             else:
                 out[k] = v
     out["phase2_tiers"] = {**out["tiers"], **out["phase2_tiers"]}
+    out["pool_tiers"] = {**out["tiers"], **out["pool_tiers"]}
     if out["recall"] not in RECALL_MODES:
         raise SystemExit(f"qrels config: recall must be one of {RECALL_MODES}")
     if out["near_dup_mode"] not in NEAR_DUP_MODES:
@@ -139,9 +148,16 @@ def sha(s: str) -> str:
 
 # ----------------------------------------------------------------------------- the set being built
 class QSet:
-    """One set's Stage 3 files. phase2_round=N points the judging directories at round N of the duplicate expansion."""
+    """One set's Stage 3 files. phase2_round=N points the judging directories at round N of a duplicate expansion
+    (`layer`: phase2, the expansion of phase 1, or phase3_pool_dups, the expansion of the system pool's additions);
+    pool=True points them at phase 3, the system pool's candidates."""
 
-    def __init__(self, run: Run, sid: str, phase2_round: int | None = None):
+    def __init__(self, run: Run, sid: str, phase2_round: int | None = None, layer: str = "phase2", pool: bool = False):
+        if layer not in DUP_LAYERS:
+            raise SystemExit(f"--layer must be one of {sorted(DUP_LAYERS)}")
+        if pool and phase2_round is not None:
+            raise SystemExit("--pool and --phase2 do not go together: the system pool's duplicates are --phase2 N "
+                             "--layer phase3_pool_dups")
         self.run, self.sid = run, sid
         self.cfg = qrels_config(run, sid)
         self.dir = run.qrels_dir(sid)
@@ -149,17 +165,34 @@ class QSet:
         self.standards = self.dir / "standards"
         self.recall_dir = self.dir / "recall"
         self.p2 = phase2_round
-        base = self.dir if phase2_round is None else self.p2_dir / f"r{phase2_round}"
+        self.layer = layer
+        self.pool = pool
+        base = self.pool_dir if pool else self.dir if phase2_round is None else self.p2_dir / f"r{phase2_round}"
         self.work = base / "work"
         self.judged = base / "judged"
         self._corpus = None
         self._inv = None
         self._pairs = None
         self._quote = None
+        self._pool_cands = None
 
     @property
     def p2_dir(self) -> Path:
-        return self.dir / "phase2"
+        """The duplicate-expansion layer's directory (phase2/ or phase3_pool_dups/)."""
+        return self.dir / self.layer
+
+    @property
+    def base_dir(self) -> Path:
+        """The output layer the duplicate expansion expands (phase1/ for phase2, phase3_pool/ for phase3_pool_dups)."""
+        return self.dir / DUP_LAYERS[self.layer]
+
+    @property
+    def pool_dir(self) -> Path:
+        return self.dir / POOL
+
+    @property
+    def layer_flag(self) -> str:
+        return "" if self.layer == "phase2" else f" --layer {self.layer}"
 
     @property
     def corpus(self) -> Corpus:
@@ -172,10 +205,15 @@ class QSet:
         return t if t is not None else self.corpus.get_document(d)
 
     def tiers(self) -> dict:
-        return self.cfg["phase2_tiers" if self.p2 else "tiers"]
+        return self.cfg["phase2_tiers" if self.p2 else "pool_tiers" if self.pool else "tiers"]
 
     def phase_label(self) -> str:
-        return f"phase2 round {self.p2}" if self.p2 else "phase1"
+        return (f"{self.layer} round {self.p2}" if self.p2 else "phase3 system pool" if self.pool else "phase1")
+
+    @property
+    def later(self) -> bool:
+        """A judging pass after phase 1 (duplicate rounds, the system pool): standards exist, no recall, no fixed docs."""
+        return bool(self.p2) or self.pool
 
     # ------------------------------------------------------------------ inputs
     def final_records(self) -> list[dict]:
@@ -230,7 +268,7 @@ class QSet:
         if self._pairs is None:
             p = self.p2_dir / f"pairs_r{self.p2}.jsonl"
             if not p.exists():
-                raise SystemExit(f"no {p}: run `dups.py --set {self.sid} lookup --round {self.p2}` first")
+                raise SystemExit(f"no {p}: run `dups.py --set {self.sid}{self.layer_flag} lookup --round {self.p2}` first")
             self._pairs = read_jsonl(p)
         return self._pairs
 
@@ -252,10 +290,24 @@ class QSet:
     def for_agents(self, qid: str, doc: str) -> bool:
         return self.quote_check().get((qid, doc), {}).get("route", "agent") == "agent"
 
+    def pool_candidates(self) -> dict[str, dict[str, dict]]:
+        """Phase 3: {qid: {doc: candidate row}} of phase3_pool/candidates.jsonl (`pool.py candidates`), in file order."""
+        if self._pool_cands is None:
+            p = self.pool_dir / "candidates.jsonl"
+            if not p.exists():
+                raise SystemExit(f"no {p}: run `pool.py --set {self.sid} candidates` first")
+            out = defaultdict(dict)
+            for r in read_jsonl(p):
+                out[r["id"]][r["doc_id"]] = r
+            self._pool_cands = dict(out)
+        return self._pool_cands
+
     def candidates(self, row: dict) -> list[str]:
         """Documents to judge, before dropping the ones the corpus does not have."""
         if self.p2:
             return [d for d in self.near_pairs(row["id"]) if self.for_agents(row["id"], d)]
+        if self.pool:
+            return list(self.pool_candidates().get(row["id"], {}))
         return [d for d in self.full_pool(row) if d not in row["fixed"]]
 
     def missing_path(self, qid: str) -> Path:
@@ -639,14 +691,14 @@ def cmd_pool(q: QSet, a) -> None:
 def cmd_show(q: QSet, a) -> None:
     r = q.row(a.qid)
     ans = " | ".join(map(str, r["answer"])) if isinstance(r["answer"], list) else r["answer"]
-    print(f"# {r['id']} (set {r['set']}, {r['answer_type']} answer){'  [' + q.phase_label() + ']' if q.p2 else ''}")
+    print(f"# {r['id']} (set {r['set']}, {r['answer_type']} answer){'  [' + q.phase_label() + ']' if q.later else ''}")
     print(f"Question: {r['question']}\nAnswer: {ans}")
     if q.cfg["judge_note"]:
         print(f"Dataset rule: {q.cfg['judge_note']}")
     print()
     for h in r["hops"]:
         tags = [h["type"], h["role"]] + ([f"candidate: {h['candidate']}"] if h.get("candidate") else [])
-        flag = "  (needs recall)" if h["id"] in r["needs_recall"] and not q.p2 else ""
+        flag = "  (needs recall)" if h["id"] in r["needs_recall"] and not q.later else ""
         print(f"## hop {h['id']} [{', '.join(tags)}]{flag}\n  clue: {h['clue']}")
         if h["derivation"]:
             print(f"  derivation: not judged; its documents are those of its inputs {h['inputs'] or '(not listed)'}. "
@@ -665,6 +717,8 @@ def cmd_show(q: QSet, a) -> None:
     if q.p2:
         print(f"\n{len(q.candidates(r))} near duplicates to judge in {q.phase_label()} (of {len(q.near_pairs(r['id']))}; "
               f"the quote check settled the rest)")
+    elif q.pool:     # the judges are not told which systems retrieved a document or which hop rule it matched
+        print(f"\n{len(q.candidates(r))} documents to judge in {q.phase_label()}")
     else:
         pool = q.full_pool(r)
         prov = Counter(p.split(":")[0] for v in pool.values() for p in v)
@@ -761,6 +815,8 @@ def fetch_list(q: QSet, row: dict) -> list[str]:
         exact = [x for x in q.pairs() if x["id"] == row["id"] and x["kind"] == "exact" and x["status"] == "new"]
         return list(dict.fromkeys(list(pairs) + [x["parent"] for x in pairs.values()]
                                   + [d for x in exact for d in (x["doc_id"], x["parent"])]))
+    if q.pool:
+        return q.candidates(row)
     return list(q.full_pool(row))
 
 
@@ -768,7 +824,7 @@ def cmd_fetch(q: QSet, a) -> None:
     """Cache every document of the pool, question by question (smallest remainder first), printing "ready QID" as each
     question's pool is complete, so judging can start before the whole fetch ends."""
     inv = q.inventory()
-    qids = a.qids or ([x["id"] for x in q.pairs()] if q.p2 else list(inv))
+    qids = a.qids or ([x["id"] for x in q.pairs()] if q.p2 else list(q.pool_candidates()) if q.pool else list(inv))
     qids = list(dict.fromkeys(qids))
     todo = {x: [d for d in fetch_list(q, inv[x]) if q.corpus.cached_doc(d) is None] for x in qids}
     print(f"{sum(len(v) for v in todo.values())} documents to fetch for {len(qids)} questions", flush=True)
@@ -786,8 +842,8 @@ def cmd_chunks(q: QSet, a) -> dict:
     """Incremental: documents already in a chunk keep it (and its verdicts); new ones get new chunks."""
     r = q.row(a.qid)
     if q.p2 and not q.quote_file.exists():
-        raise SystemExit(f"no {q.quote_file}: run `dups.py --set {q.sid} chunks --round {q.p2}` (the quote check comes "
-                         f"before rendering)")
+        raise SystemExit(f"no {q.quote_file}: run `dups.py --set {q.sid}{q.layer_flag} chunks --round {q.p2}` (the quote "
+                         f"check comes before rendering)")
     wd = q.work / a.qid
     wd.mkdir(parents=True, exist_ok=True)
     cj = wd / "chunks.json"
@@ -814,7 +870,7 @@ def cmd_chunks(q: QSet, a) -> dict:
                                              f"{q.judged / a.qid / f'chunk_{c}.json'} (QRELS.md, step 3).",
                     phase2_notes(q, r, ch))
     write_json(cj, old | new)
-    res = {"qid": a.qid, "to_judge": len(docs), "already_chunked": len(done), "fixed": 0 if q.p2 else len(r["fixed"]),
+    res = {"qid": a.qid, "to_judge": len(docs), "already_chunked": len(done), "fixed": 0 if q.later else len(r["fixed"]),
            "not_in_corpus": len(miss) + len(new_missing), "n_chunks": len(new), "chunks": list(new),
            "all_chunks": list(old | new)}
     print(json.dumps(res))
@@ -1180,7 +1236,7 @@ def cmd_verify(q: QSet, a) -> None:
                     n_quotes += 1
                     if not is_verbatim(text, qt):
                         bad.append(f"{x}: hop {hid} {d}: quote not verbatim: {qt[:80]!r}")
-                if (info.get("source") in ("stage2", "judged", "adjudicated", "near_dup", "near_dup_quote")
+                if (info.get("source") in ("stage2", "judged", "adjudicated", "near_dup", "near_dup_quote", "system_pool")
                         and not info.get("quotes")):
                     bad.append(f"{x}: hop {hid} {d} ({info.get('source')}) has no quote")
                 if info.get("source") == "exact_dup":
@@ -1226,6 +1282,10 @@ def parser() -> argparse.ArgumentParser:
     ap.add_argument("--run", help="run directory (default: $CMASS_RUN or the current directory)")
     ap.add_argument("--set", dest="sid", help="the set whose final/<set>_final.jsonl is built")
     ap.add_argument("--phase2", type=int, metavar="N", help="judge round N of the duplicate expansion")
+    ap.add_argument("--layer", default="phase2", choices=sorted(DUP_LAYERS),
+                    help="with --phase2: the duplicate expansion of phase 1 (phase2) or of the system pool "
+                         "(phase3_pool_dups)")
+    ap.add_argument("--pool", action="store_true", help="judge phase 3, the system pool's candidates (pool.py)")
     sp = ap.add_subparsers(dest="cmd", required=True)
     s = sp.add_parser("pool"); s.add_argument("qids", nargs="*")
     s = sp.add_parser("show"); s.add_argument("qid")
@@ -1242,19 +1302,21 @@ def parser() -> argparse.ArgumentParser:
     s = sp.add_parser("compare"); s.add_argument("qid"); s.add_argument("--round", type=int, required=True)
     s = sp.add_parser("adj-check"); s.add_argument("qid"); s.add_argument("part")
     s = sp.add_parser("build"); s.add_argument("qids", nargs="*"); s.add_argument("--skip-incomplete", action="store_true")
-    s = sp.add_parser("verify"); s.add_argument("--phase", default="phase1", choices=("phase1", "phase2"))
+    s = sp.add_parser("verify"); s.add_argument("--phase", default="phase1", choices=LAYERS)
     return ap
 
 
-PHASE2_OK = {"show", "chunks", "unjudged", "check", "second", "second-check", "compare", "adj-check", "fetch", "std-check"}
+LATER_OK = {"show", "chunks", "unjudged", "check", "second", "second-check", "compare", "adj-check", "fetch", "std-check"}
 
 
 def main(argv=None) -> None:
     a = parser().parse_args(argv)
     run = Run(a.run)
-    if a.phase2 is not None and a.cmd not in PHASE2_OK:
-        raise SystemExit(f"--phase2 does not apply to {a.cmd}")
-    q = QSet(run, a.sid or default_set(run), a.phase2)
+    if (a.phase2 is not None or a.pool) and a.cmd not in LATER_OK:
+        raise SystemExit(f"--{'pool' if a.pool else 'phase2'} does not apply to {a.cmd}")
+    if a.layer != "phase2" and a.phase2 is None:
+        raise SystemExit("--layer goes with --phase2 N")
+    q = QSet(run, a.sid or default_set(run), a.phase2, a.layer, a.pool)
     {"pool": cmd_pool, "show": cmd_show, "std-check": cmd_std_check, "recall": cmd_recall, "fetch": cmd_fetch,
      "chunks": cmd_chunks, "unjudged": cmd_unjudged, "check": cmd_check, "second": cmd_second,
      "second-check": cmd_second_check, "compare": cmd_compare, "adj-check": cmd_adj_check, "build": cmd_build,

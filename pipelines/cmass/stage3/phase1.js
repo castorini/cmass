@@ -1,7 +1,7 @@
 export const meta = {
   name: 'cmass-stage3-qrels-phase1',
   description: 'CMASS Stage 3 phase 1 (precision filter), one question per pipeline item: a strong model writes the hop standards and recall query families, a cheaper model judges every candidate chunk, a stronger blind second judge re-judges a policy sample (every partial-only keep, a share of the full keeps and drops, every dropped Stage 1 document; every drop when sampled drops flip), an adjudicator decides each disagreement. Resumes from disk (qrels_state.py), never from agent reports; one output file per unit of work.',
-  whenToUse: 'After qrels.py pool (and fetch) for a set; args {set, qids}.',
+  whenToUse: 'After qrels.py pool (and fetch) for a set; args {set, qids}. Phase 3 (the system pool): after pool.py candidates, fetch and chunks; args {set, qids, pool: true} as pool.py chunks prints them.',
   phases: [
     { title: 'Prepare', detail: 'one agent per question: hop standards, recall query families, recall, chunks' },
     { title: 'Judge', detail: 'one agent per chunk; a chunk whose verdicts fail the check is re-judged by the stronger model' },
@@ -22,19 +22,22 @@ const MODEL_ADJUDICATE = 'sonnet'  // decides each disagreement
 const MODEL_HELPER = 'haiku'       // runs one deterministic command and reports what it printed
 const MAX_ROUNDS = 6               // second-judge round steps per question (round 1, escalation, back-fills)
 
-// args: {set: "<set>", qids: ["<qid>", ...], run?: RUN_DIR, pipeline?: PIPELINE}. The tiering parameters (sample
-// rates, escalation threshold) are read from the run config by qrels.py and qrels_state.py, not passed here.
+// args: {set: "<set>", qids: ["<qid>", ...], pool?: true, run?: RUN_DIR, pipeline?: PIPELINE}. The tiering parameters
+// (sample rates, escalation threshold) are read from the run config by qrels.py and qrels_state.py, not passed here.
+// pool: true judges phase 3, the system pool's candidates (pool.py): the standards exist from phase 1, there is no
+// recall, and the judges are not told which systems retrieved a document.
 const A = typeof args === 'string' ? JSON.parse(args) : (args || {})
 const SET = A.set
 const QIDS = A.qids || []
 const PIPE = A.pipeline || PIPELINE
 const RUN = A.run || RUN_DIR
-const T = `cd ${RUN} && python3 ${PIPE}/stage3/qrels.py --set ${SET}`
-const STATE = `cd ${RUN} && python3 ${PIPE}/stage3/qrels_state.py --set ${SET}`
+const POOL = Boolean(A.pool)
+const T = `cd ${RUN} && python3 ${PIPE}/stage3/qrels.py --set ${SET}${POOL ? ' --pool' : ''}`
+const STATE = `cd ${RUN} && python3 ${PIPE}/stage3/qrels_state.py --set ${SET}${POOL ? ' --pool' : ''}`
 const GUIDE = `${PIPE}/stage3/QRELS.md`
 const QD = `${RUN}/qrels/${SET}`
-const WK = `${QD}/work`
-const JD = `${QD}/judged`
+const WK = POOL ? `${QD}/phase3_pool/work` : `${QD}/work`
+const JD = POOL ? `${QD}/phase3_pool/judged` : `${QD}/judged`
 const RULES = 'If any tool call is refused or fails so that you cannot finish, stop and report failure: set check_errors to -1 (never 0 for unfinished work) and say in note what failed. Never report success for work you did not finish. Do not kill any process.'
 
 const PREP = {
@@ -204,9 +207,9 @@ const run = async (q) => {
 
 if (!SET || !QIDS.length) { log('Pass args {set, qids}: nothing to do.'); return { complete: 0 } }
 if (RUN.startsWith('/path/to') || PIPE.startsWith('/path/to')) { log('Set PIPELINE and RUN_DIR at the top of the script (or pass {run, pipeline} in args).'); return { complete: 0 } }
-log(`Stage 3 phase 1: ${QIDS.length} questions of set ${SET}; resuming from disk`)
+log(`Stage 3 ${POOL ? 'phase 3 (system pool)' : 'phase 1'}: ${QIDS.length} questions of set ${SET}; resuming from disk`)
 const out = (await pipeline(QIDS, (q) => run(q).catch((e) => ({ qid: q, error: String(e) })))).filter(Boolean)
 const failed = out.filter((r) => !r.complete)
 log(`complete ${out.length - failed.length} of ${QIDS.length}${failed.length ? '; not complete: ' + failed.map((r) => r.qid).join(', ') : ''}`)
-log(`next: ${T} build && ${T} verify`)
+log(POOL ? `next: cd ${RUN} && python3 ${PIPE}/stage3/pool.py --set ${SET} build, then dups.py --layer phase3_pool_dups` : `next: ${T} build && ${T} verify`)
 return out

@@ -111,7 +111,8 @@ If the Hugging Face release requires authentication, run `hf auth login` first. 
   [review site](review_site/); a fresh checker agent verifies the final answer and evidence.
 - **Stage 3, qrels:** a candidate pool per question (the accepted evidence plus an agent-written recall
   pass), tiered judge agents that keep documents supporting at least one hop, and expansion over exact and
-  near duplicates of the kept documents.
+  near duplicates of the kept documents; then, TREC-style, the documents the evaluated agents retrieved that
+  match a hop rule are judged the same way and added, with their duplicates.
 
 ![Hops per question and relevant documents per question](assets/projection-stats.png)
 

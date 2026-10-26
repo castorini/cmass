@@ -11,7 +11,7 @@ judgments (qrels).
 | Stage 0: dataset and corpus preparation | duplicate detection in [`corpus_analysis/`](../../corpus_analysis/); task construction per dataset in [`stage1/<dataset>/`](stage1/) |
 | Stage 1: projection (hop/clue decomposition, grounding, answerability check, filters) | [`stage1/`](stage1/): the procedure as run for each dataset ([`bcp/`](stage1/bcp/), [`trqa/`](stage1/trqa/), [`dsqa/`](stage1/dsqa/), [`hotpotqa/`](stage1/hotpotqa/)) |
 | **Stage 2: audit, revision and human review** (steps C1-C6) | [`stage2/`](stage2/) and [`tools/`](tools/); human review in [`review_site/`](../../review_site/) |
-| **Stage 3: qrels construction** (candidate pooling, precision filter, duplicate expansion) | [`stage3/`](stage3/) |
+| **Stage 3: qrels construction** (candidate pooling, precision filter, duplicate expansion; then system pooling) | [`stage3/`](stage3/) |
 
 ![Projecting QA benchmarks onto ClimbMix](../../assets/projection-pipeline.png)
 
@@ -23,7 +23,7 @@ judgments (qrels).
 | `tools/` | `cm.py` (the agents' corpus CLI: search, doc, quote, verify, history), `validate.py` (audit schema and verbatim quotes), `packets.py`, `assemble.py`, `check_records.py`, `stage2_state.py`, `finalize.py`, `check_workflows.js` (Workflow syntax check) |
 | `stage2/` | agent guides (`AUDIT.md`, `REVISION.md`, `ADVERSARIAL.md`, `FINAL_CHECK.md`), record formats (`SCHEMA.md`), Workflow scripts (`audit.js`, `adversarial.js`, `revision.js`, `final_check.js`) |
 | `stage1/` | Stage 0 task construction and Stage 1 projection for each dataset: Workflow scripts, agent guides, builders, manual decisions, offline demos |
-| `stage3/` | the judging standard (`QRELS.md`), `qrels.py` (phase 1), `dups.py` (phase 2), `qrels_state.py`, Workflow scripts (`phase1.js`, `phase2.js`) |
+| `stage3/` | the judging standard (`QRELS.md`), `qrels.py` (phase 1), `dups.py` (phase 2), `pool.py` (phase 3, system pooling), `rules.py` and `scan.py` (hop match rules, `RULES.md`), `release.py` (the obfuscated release format), `qrels_state.py`, Workflow scripts (`phase1.js`, `phase2.js`, `rules.js`) |
 | `demo/` | an invented corpus and offline corpus CLI, and generators that run every deterministic step end to end |
 
 Agentic steps are Claude Code Workflow scripts: one agent per question (or per chunk of documents), one
@@ -83,6 +83,8 @@ python3 .../tools/finalize.py                      # final/<set>_final.jsonl, fi
 python3 .../stage3/qrels.py --set SET pool         # Stage 3, phase 1 (then Workflow stage3/phase1.js)
 python3 .../stage3/qrels.py --set SET build && python3 .../stage3/qrels.py --set SET verify
 # Stage 3, phase 2: stage3/dups.py and Workflow stage3/phase2.js
+# Stage 3, phase 3 (after evaluating systems): stage3/pool.py, Workflow stage3/phase1.js {"pool": true}, then
+#   stage3/dups.py --layer phase3_pool_dups and Workflow stage3/phase2.js {"layer": "phase3_pool_dups"}
 ```
 
 `tools/stage2_state.py` and `stage3/qrels_state.py` say where every question stands at any point.
@@ -95,6 +97,7 @@ corpus service and holds no benchmark content:
 ```bash
 python3 pipelines/cmass/stage1/bcp/demo/make_demo.py  # Stage 0 and Stage 1 for one dataset (also trqa, dsqa, hotpotqa)
 python3 pipelines/cmass/demo/test_stage3.py           # Stage 3 phase 1 and phase 2, end to end
+python3 pipelines/cmass/demo/test_pool.py             # Stage 3 phase 3 (system pooling) and the release format
 python3 pipelines/cmass/demo/make_stage2_demo.py      # Stage 2 records for every path of the flow
 cd pipelines/cmass/demo/run
 python3 ../../tools/validate.py && python3 ../../tools/check_records.py && python3 ../../tools/stage2_state.py

@@ -4,7 +4,10 @@ For every question Stage 2 accepted, the qrels are the corpus documents that sta
 needs: the union, over the hops, of the documents supporting each hop. Phase 1 (the precision filter) reads every
 pooled candidate in full and keeps it only for the hops it supports. Phase 2 (duplicate expansion) adds the exact
 duplicates of what phase 1 kept, and the near duplicates that still hold their parent's supporting quote verbatim or
-that a judge has verified on their own text.
+that a judge has verified on their own text. Phase 3 (system pooling) judges, exactly as in phase 1 (Step 3 and the
+second judge), documents that evaluated retrieval systems found; its commands run with `--pool` and its files are
+under `qrels/<set>/phase3_pool/`. Phase 3's duplicates are verified like phase 2's, with `--phase2 N --layer
+phase3_pool_dups`.
 
 Every command below is `python3 <pipeline>/stage3/qrels.py --set <set> <command>`, run in the run directory; the
 workflow prompts give the exact prefix. All examples here are invented (the island nation of Oskeria and its demo

@@ -14,6 +14,11 @@ should not be scored as wrong because the copy's id was never pooled.
                                        conflicts.jsonl, stats.json, qrels.trec}; then `qrels.py verify --phase phase2`
   dups.py --set S status               where each round stands
 
+--layer phase3_pool_dups runs the same expansion on the system pool's additions (phase 3, pool.py): it reads
+phase3_pool/ instead of phase1/, its round 1 looks up the duplicates of the documents phase 3 added (phase 2 has
+already expanded the rest), and it writes qrels/S/phase3_pool_dups/ (pairs_rN, quote_rN, rN/, the outputs); judge its
+rounds with `qrels.py --phase2 N --layer phase3_pool_dups`, then `qrels.py verify --phase phase3_pool_dups`.
+
 Rules:
   exact duplicate  byte-identical to a kept document (the map groups texts by SHA-256 over text.strip(); apply checks
                    the two texts are equal): added without reading, with exactly its parent's hops and support labels.
@@ -29,9 +34,10 @@ Rules:
                      agent                  no quote check: every near duplicate goes to the agents
                      quote_only             matches added as in quote_first; the rest dropped without an agent
                                             (rejected, reason no_quote_match)
-                   The CMASS release: near duplicates were first matched by the parent's verbatim quotes; in the first
-                   BrowseComp-Plus expansion round the ones that matched no quote were judged by an agent (quote_first),
-                   in the other datasets and in later rounds they were dropped without an agent check (quote_only).
+                   The CMASS release: near duplicates were first matched by the parent's verbatim quotes; the ones that
+                   matched no quote were judged by agents (quote_first) in the first BrowseComp-Plus round, for HotpotQA
+                   and in the expansion of the system pool's additions (phase3_pool_dups), and dropped without an agent
+                   check (quote_only) in the other phase-2 rounds of BrowseComp-Plus, TRQA and DeepSearchQA.
   closure          round N+1 looks up the duplicates of what round N added.
 A duplicate already in the question's qrels is `already_kept`; one dropped for that question (by the judges in phase 1
 or an earlier round, or as no_quote_match) is `judged_dropped` and stays dropped; a duplicate reachable from several
@@ -122,10 +128,12 @@ class DupMap:
 
 
 # ----------------------------------------------------------------------------- state across rounds
-def p1_out(q) -> Path:
-    out = q.dir / "phase1"
+def base_out(q) -> Path:
+    """The output layer this expansion expands: phase1/ (layer phase2) or phase3_pool/ (layer phase3_pool_dups)."""
+    out = q.base_dir
     if not (out / "qrels_hops.jsonl").exists():
-        raise SystemExit(f"no phase-1 qrels in {out}: run `qrels.py --set {q.sid} build` first")
+        how = f"qrels.py --set {q.sid} build" if q.layer == "phase2" else f"pool.py --set {q.sid} build"
+        raise SystemExit(f"no {out.name} qrels in {out}: run `{how}` first")
     return out
 
 
@@ -135,13 +143,13 @@ def rounds_on_disk(q) -> list[int]:
 
 
 def kept_so_far(q, upto: int) -> dict[str, dict[str, dict]]:
-    """{qid: {doc: {hop: info}}}: phase-1 hop maps plus every document added in rounds before `upto`."""
+    """{qid: {doc: {hop: info}}}: the base layer's hop maps plus every document added in rounds before `upto`."""
     kept = defaultdict(lambda: defaultdict(dict))
-    for r in read_jsonl(p1_out(q) / "qrels_hops.jsonl"):
+    for r in read_jsonl(base_out(q) / "qrels_hops.jsonl"):
         for h in r["hops"]:
             for d, info in h["docs"].items():
                 kept[r["id"]][d][h["id"]] = info
-    for r in read_jsonl(p1_out(q) / "qrels.jsonl"):
+    for r in read_jsonl(base_out(q) / "qrels.jsonl"):
         for d in r["qrels"]:
             kept[r["id"]].setdefault(d, {})
     for k in range(1, upto):
@@ -152,9 +160,11 @@ def kept_so_far(q, upto: int) -> dict[str, dict[str, dict]]:
 
 
 def settled_elsewhere(q, upto: int) -> tuple[set, set]:
-    """(question, doc) pairs judged and dropped (phase 1 and earlier rounds), and earlier conflicts."""
-    dropped = {(r["id"], r["doc_id"]) for r in read_jsonl(p1_out(q) / "rejections.jsonl")}
-    conflicts = set()
+    """(question, doc) pairs judged and dropped (the base layer, which carries every earlier layer's rejections, and
+    earlier rounds), and conflicts (the base layer's, when it carries any, and earlier rounds')."""
+    base = base_out(q)
+    dropped = {(r["id"], r["doc_id"]) for r in read_jsonl(base / "rejections.jsonl")}
+    conflicts = {(r["id"], r["doc_id"]) for r in read_jsonl(base / "conflicts.jsonl")}
     for k in range(1, upto):
         dropped |= {(r["id"], r["doc_id"]) for r in read_jsonl(q.p2_dir / f"rejected_r{k}.jsonl")}
         conflicts |= {(r["id"], r["doc_id"]) for r in read_jsonl(q.p2_dir / f"conflicts_r{k}.jsonl")}
@@ -173,8 +183,10 @@ def cmd_lookup(q, a) -> None:
     dm = DupMap(q.run)
     kept = kept_so_far(q, a.round)
     dropped, conflicts = settled_elsewhere(q, a.round)
-    if a.round == 1:
+    if a.round == 1 and q.layer == "phase2":
         parents = [(x, d) for x, docs in kept.items() for d in docs]
+    elif a.round == 1:      # the system pool's additions: phase 2 has expanded every other document of the base
+        parents = [(r["id"], r["doc_id"]) for r in read_jsonl(base_out(q) / "expansion.jsonl")]
     else:
         parents = [(r["id"], r["doc_id"]) for r in read_jsonl(q.p2_dir / f"added_r{a.round - 1}.jsonl")]
     rows = dm.rows({d for _, d in parents})
@@ -195,12 +207,12 @@ def cmd_lookup(q, a) -> None:
                       else "conflict" if key in conflicts else "new")
             best[key] = (rank, {"id": x, "doc_id": dup, "parent": d, "kind": kind, "jaccard": jac, "status": status,
                                 "parent_hops": parent_hops(kept[x][d])})
-    pos = {r["id"]: i for i, r in enumerate(read_jsonl(p1_out(q) / "qrels.jsonl"))}
+    pos = {r["id"]: i for i, r in enumerate(read_jsonl(base_out(q) / "qrels.jsonl"))}
     out = sorted((v for _, v in best.values()),
                  key=lambda r: (pos.get(r["id"], len(pos)), r["kind"], natural_key(r["doc_id"])))
     write_jsonl(q.p2_dir / f"pairs_r{a.round}.jsonl", out)
     summ = Counter(f"{r['kind']}_{r['status']}" for r in out)
-    s = {"set": q.sid, "round": a.round, "parents": len(parents), "parents_with_duplicates": len(rows),
+    s = {"set": q.sid, "layer": q.layer, "round": a.round, "parents": len(parents), "parents_with_duplicates": len(rows),
          "pairs": dict(sorted(summ.items())), "new_exact": summ["exact_new"], "new_near": summ["near_new"],
          "questions_with_new_pairs": len({r["id"] for r in out if r["status"] == "new"}),
          "closure": not (summ["exact_new"] or summ["near_new"])}
@@ -210,7 +222,7 @@ def cmd_lookup(q, a) -> None:
 
 # ----------------------------------------------------------------------------- fetch, chunks
 def round_set(q, rnd: int):
-    return Q.QSet(q.run, q.sid, rnd)
+    return Q.QSet(q.run, q.sid, rnd, q.layer)
 
 
 def near_qids(qr) -> list[str]:
@@ -259,12 +271,13 @@ def cmd_chunks(q, a) -> None:
             print(f"warning: {x} has no clean standard (standards/{x}.json); its judges need one", file=sys.stderr)
         res.append(Q.cmd_chunks(qr, argparse.Namespace(qid=x)))
     write_json(q.p2_dir / f"r{a.round}" / "qids.json", qids)
-    print(json.dumps({"set": q.sid, "round": a.round, "near_dup_mode": mode, "near_new": len(checked),
+    wf = {"set": q.sid, "round": a.round, "qids": qids} | ({"layer": q.layer} if q.layer != "phase2" else {})
+    print(json.dumps({"set": q.sid, "layer": q.layer, "round": a.round, "near_dup_mode": mode, "near_new": len(checked),
                       "settled_by_quote": routes["quote"], "no_quote_match": routes["no_quote_match"], "questions": qids,
                       "near_docs": sum(r["to_judge"] + r["already_chunked"] for r in res),
                       "new_chunks": sum(r["n_chunks"] for r in res),
                       "not_in_corpus": sum(r["not_in_corpus"] for r in res) + routes["not_in_corpus"],
-                      "workflow_args": {"set": q.sid, "round": a.round, "qids": qids}}))
+                      "workflow_args": wf}))
 
 
 # ----------------------------------------------------------------------------- apply
@@ -345,7 +358,7 @@ def cmd_apply(q, a) -> None:
          "near_judged": sum(r["verdict_source"] == "judged" for r in added), "near_rejected": len(rejected),
          "no_quote_match": sum(r["reason"] == "no_quote_match" for r in rejected),
          "conflicts": dict(Counter(c["issue"] for c in conflicts)), "pending_unjudged": len(pending),
-         "next": f"dups.py --set {q.sid} lookup --round {a.round + 1}"}
+         "next": f"dups.py --set {q.sid}{q.layer_flag} lookup --round {a.round + 1}"}
     write_json(q.p2_dir / f"apply_r{a.round}_summary.json", s)
     print(json.dumps(s))
 
@@ -363,13 +376,17 @@ def cmd_build(q, a) -> None:
         nxt = (f"apply --round {last}" if last not in applied else f"lookup --round {last + 1}")
         raise SystemExit(f"closure not reached: round {last} has {len(last_new)} new pairs; run `{nxt}` "
                          f"(or build with --allow-open)")
-    p1 = p1_out(q)
+    p1 = base_out(q)
     order = [r["id"] for r in read_jsonl(p1 / "qrels.jsonl")]
     qrels = {r["id"]: dict(r, qrels=list(r["qrels"])) for r in read_jsonl(p1 / "qrels.jsonl")}
     hops = {r["id"]: r for r in read_jsonl(p1 / "qrels_hops.jsonl")}
     p1_sets = {x: set(r["qrels"]) for x, r in qrels.items()}
-    expansion, rejections = [], [dict(r, phase=1) for r in read_jsonl(p1 / "rejections.jsonl")]
-    conflicts = []
+    # every rejection keeps the phase that decided it: 1 and 2 for phase 1 and its expansion, 3 for the system pool
+    # and its expansion (with "layer"); the base layer's rows already carry theirs
+    phase = 2 if q.layer == "phase2" else 3
+    expansion = []
+    rejections = [dict(r) if "phase" in r else dict(r, phase=1) for r in read_jsonl(p1 / "rejections.jsonl")]
+    conflicts = read_jsonl(p1 / "conflicts.jsonl")       # the base layer's (phase3_pool carries phase 2's)
     per_round = {}
     for k in applied:
         added = read_jsonl(q.p2_dir / f"added_r{k}.jsonl")
@@ -377,7 +394,7 @@ def cmd_build(q, a) -> None:
         conf = read_jsonl(q.p2_dir / f"conflicts_r{k}.jsonl")
         for x in added:
             if x["id"] not in qrels:
-                raise SystemExit(f"round {k}: {x['id']} is not in the phase-1 qrels")
+                raise SystemExit(f"round {k}: {x['id']} is not in the {p1.name} qrels")
             if x["doc_id"] not in qrels[x["id"]]["qrels"]:
                 qrels[x["id"]]["qrels"].append(x["doc_id"])
             hm = {h["id"]: h for h in hops[x["id"]]["hops"]}
@@ -386,7 +403,8 @@ def cmd_build(q, a) -> None:
                     raise SystemExit(f"round {k}: {x['id']} {x['doc_id']} names hop {hid}, not a live hop")
                 hm[hid]["docs"].setdefault(x["doc_id"], info)
             expansion.append({kk: v for kk, v in x.items() if kk != "hops"} | {"hops": sorted(x["hops"], key=natural_key)})
-        rejections += [dict(r, phase=2, provenance=[f"{r['kind']}_dup_of:{r['parent']}"]) for r in rej]
+        rejections += [dict(r, phase=phase, provenance=[f"{r['kind']}_dup_of:{r['parent']}"],
+                            **({"layer": q.layer} if phase == 3 else {})) for r in rej]
         conflicts += conf
         per_round[str(k)] = {"exact_added": sum(r["kind"] == "exact" for r in added),
                              "near_added": sum(r["kind"] == "near" for r in added),
@@ -399,13 +417,14 @@ def cmd_build(q, a) -> None:
             hop["docs"] = dict(sorted(hop["docs"].items(), key=lambda kv: natural_key(kv[0])))
     not_superset = [x for x in p1_sets if not p1_sets[x] <= set(qrels[x]["qrels"])]
     if not_superset:
-        raise SystemExit(f"phase 2 is not a superset of phase 1 for {not_superset}")
+        raise SystemExit(f"{q.layer} is not a superset of {p1.name} for {not_superset}")
     out = q.p2_dir
     old_stats = json.loads((p1 / "stats.json").read_text()).get("questions", {}) if (p1 / "stats.json").exists() else {}
     stats = {}
+    base_key = "phase1" if q.layer == "phase2" else "base"
     for x, r in qrels.items():
         add = [e for e in expansion if e["id"] == x]
-        stats[x] = {"phase1": len(p1_sets[x]), "kept": len(r["qrels"]), "exact_added": sum(e["kind"] == "exact" for e in add),
+        stats[x] = {base_key: len(p1_sets[x]), "kept": len(r["qrels"]), "exact_added": sum(e["kind"] == "exact" for e in add),
                     "near_added": sum(e["kind"] == "near" for e in add),
                     "uncovered_hops": (old_stats.get(x) or {}).get("uncovered_hops", [])}
     for f in ("qrels.jsonl", "qrels_hops.jsonl", "rejections.jsonl"):
@@ -414,9 +433,10 @@ def cmd_build(q, a) -> None:
     write_jsonl(out / "expansion.jsonl", expansion)
     write_jsonl(out / "conflicts.jsonl", conflicts)
     s = json.loads((out / "stats.json").read_text())
-    s["expansion"] = {"rounds": rnds, "applied": applied, "closure": closure, "per_round": per_round,
-                      "phase1_pairs": sum(len(v) for v in p1_sets.values()),
-                      "phase2_pairs": sum(len(r["qrels"]) for r in qrels.values()),
+    n_base, n_out = sum(len(v) for v in p1_sets.values()), sum(len(r["qrels"]) for r in qrels.values())
+    s["expansion"] = {"layer": q.layer, "base": p1.name, "rounds": rnds, "applied": applied, "closure": closure,
+                      "per_round": per_round, "base_pairs": n_base, "pairs": n_out,
+                      **({"phase1_pairs": n_base, "phase2_pairs": n_out} if q.layer == "phase2" else {}),
                       "exact_added": sum(e["kind"] == "exact" for e in expansion),
                       "near_added": sum(e["kind"] == "near" for e in expansion),
                       "near_by_quote": sum(e.get("verdict_source") == "quote" for e in expansion),
@@ -455,9 +475,11 @@ def main() -> None:
     s = sp.add_parser("build")
     s.add_argument("--allow-open", action="store_true", help="build although the last round still has new pairs")
     sp.add_parser("status")
+    ap.add_argument("--layer", default="phase2", choices=sorted(Q.DUP_LAYERS),
+                    help="phase2 (expand phase 1, the default) or phase3_pool_dups (expand the system pool's additions)")
     a = ap.parse_args()
     run = Q.Run(a.run)
-    q = Q.QSet(run, a.sid or Q.default_set(run))
+    q = Q.QSet(run, a.sid or Q.default_set(run), layer=a.layer)
     {"lookup": cmd_lookup, "fetch": cmd_fetch, "chunks": cmd_chunks, "apply": cmd_apply, "build": cmd_build,
      "status": cmd_status}[a.cmd](q, a)
 

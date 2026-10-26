@@ -1,13 +1,18 @@
 # Stage 3: qrels construction
 
 Turns the questions Stage 2 accepted into relevance judgments: for each question, the union of the corpus documents
-that support its reasoning hops, per hop and per question. Two phases, as in the paper's Stage 3 paragraph:
+that support its reasoning hops, per hop and per question. Three phases, as in the paper's Stage 3 paragraph:
 
 - **Phase 1, the precision filter** (`qrels.py`, workflow `phase1.js`): pool every document retrieved for the question
   during projection, audit and revision, read each in full, and keep it only for the hops it supports.
 - **Phase 2, duplicate expansion** (`dups.py`, workflow `phase2.js`): add the exact duplicates of every kept document,
   and the near duplicates (5-gram Jaccard ≥ 0.7) that hold their parent's supporting quote verbatim (the
   [quote check](#near-duplicates-the-quote-check)) or that an agent has verified on their own text.
+- **Phase 3, system pooling** (`pool.py`; workflows `phase1.js` with `pool: true`, then `phase2.js` with
+  `layer: phase3_pool_dups`): once retrieval systems have been evaluated, pool the documents they surfaced or opened,
+  as TREC pools participants' runs; judge the ones never judged whose text matches a hop rule ([`RULES.md`](RULES.md)),
+  with the same tiered review; add the kept ones to a new qrels version and expand their duplicates as in phase 2.
+  See [System pooling](#phase-3-system-pooling-poolpy).
 
 The judging standard every agent follows is [`QRELS.md`](QRELS.md). Everything is per question and resumable: each
 unit of work writes one file, every write is atomic, and `qrels_state.py` reports what exists on disk so a workflow
@@ -31,6 +36,11 @@ duplicates never inherited on similarity alone).
 | add missing exact duplicates | `dups.py lookup`, `apply` | byte-identical copies (checked against the corpus text) inherit their parent's hops and support labels |
 | near duplicates at 5-gram Jaccard ≥ 0.7 that repeat a supporting quote of the original, the rest verified by agents | `dups.py chunks`, `phase2.js`, `dups.py apply` | the [quote check](#near-duplicates-the-quote-check) first: a near duplicate holding its parent's quote for a hop verbatim inherits that hop; by default the rest are judged on their own text, with the parent's evidence shown, by the same tiered review |
 | (closure) | `dups.py lookup --round N+1` | duplicates of newly added documents are looked up in turn until a round finds nothing new |
+| documents retrieved by the evaluated agents, pooled as in TREC | `pool.py candidates` | the system pool (one row per question and document any system surfaced or opened), minus the pairs already qrels or judged before |
+| judged only if its text matches one of the question's hop rules | `rules.py` ([`RULES.md`](RULES.md)), `pool.py candidates` | per hop, literal phrase rules that match every established qrel of the hop; a pooled document matching no rule of its question is not judged |
+| the same tiered judging, blind to the systems | `phase1.js` (`pool: true`), `qrels.py --pool`, `pool.py build` | the judges read each candidate against all live hops with the phase-1 standards; neither the systems nor the matched rule is shown |
+| duplicates of the additions | `dups.py --layer phase3_pool_dups` | phase 2's procedure on the documents phase 3 added |
+| which systems the new qrels came from | `pool.py stats` | every added qrel credited to the systems that retrieved it; a duplicate to those of the pooled document it copies |
 
 Stage 0's duplicate detection (exact groups by SHA-256, near pairs by MinHash then exact 5-gram Jaccard) produced the
 duplicate map phase 2 reads: the `corpus_duplicates` config of the Hugging Face dataset `castorini/cmass`
@@ -72,7 +82,8 @@ Layers, later wins: the defaults below, the set's family, the top-level block, t
 | `judge_note` | `""` (`hotpotqa`: read hops as of the source snapshot) | a dataset rule `show` prints for the judges |
 | `near_dup_mode` | `quote_first` | phase 2, after the [quote check](#near-duplicates-the-quote-check): `quote_first` (matches added, the rest to the agents), `agent` (no quote check, every near duplicate to the agents), `quote_only` (matches added, the rest dropped as `no_quote_match` without an agent) |
 | `tiers` | see below | the second-judge policy of phase 1 |
-| `phase2_tiers` | `{}` | overrides of `tiers` for near-duplicate verification |
+| `phase2_tiers` | `{}` | overrides of `tiers` for near-duplicate verification (both duplicate expansions) |
+| `pool_tiers` | `{}` | overrides of `tiers` for the system pool's candidates (phase 3) |
 
 ```json
 {"qrels": {"tiers": {"drop_rate": 0.2}},
@@ -133,9 +144,15 @@ lookup chose (exact first, then highest Jaccard) is checked. The route of every 
 are rendered; `dups.py chunks` prints the questions left for `phase2.js`, and a question with none left is complete
 at once (`qrels_state.py --phase2 N`). The mode is read when `chunks` runs, so it can differ between rounds and sets.
 
-**What the CMASS release used.** Near duplicates were first matched by their parent's verbatim supporting quotes. In the
-first BrowseComp-Plus expansion round, the near duplicates that matched no quote were judged by an agent (`quote_first`);
-in the other datasets and in later rounds, they were dropped without an agent check (`quote_only`).
+**What the CMASS release used.** Near duplicates were first matched by their parent's verbatim supporting quotes. The
+near duplicates that matched no quote were judged by agents (`quote_first`) in the first BrowseComp-Plus round, for
+HotpotQA (whose expansion was redone after a re-judge) and in the expansion of the system pool's additions (phase 3,
+every dataset); in the other phase-2 rounds of BrowseComp-Plus, TRQA and DeepSearchQA they were dropped without an
+agent check (`quote_only`). In that run, the near duplicates of phase 3 and of HotpotQA's redone phase 2 were rendered
+for the agents before the quote check ran, so 54 copies (32 and 22) were both settled by quote and judged (and dropped)
+by the agents; a blind adjudicator re-read each
+copy and its parent against the hop and decided both, and the decisions were applied to the qrels. `dups.py chunks`
+runs the quote check before rendering, so a copy here is either settled by quote or judged, never both.
 
 ## Commands, in order
 
@@ -171,10 +188,75 @@ $D build                      # qrels/<set>/phase2/ (refuses until closure)
 $Q verify --phase phase2
 ```
 
+**Phase 3** (after the systems are evaluated; `P=python3 <checkout>/pipelines/cmass/stage3/pool.py --set <set>`): see
+[below](#phase-3-system-pooling-poolpy).
+
+## Phase 3: system pooling (`pool.py`)
+
+Phases 1 and 2 judge what the pipeline's own agents found. Once retrieval systems have been evaluated on the questions,
+the documents they surfaced or opened and the qrels never judged are a second source of evidence, the pool TREC builds
+from participants' runs ([`evaluation/SYSTEM_RUNS.md`](../../../evaluation/SYSTEM_RUNS.md) exports it). Judging every
+pooled document is costly and mostly wasted on off-topic pages, so a pooled document is judged only if its text
+matches one of its question's **hop rules**: per hop, conjunctions of literal phrases written by `rules.py`'s agent
+under [`RULES.md`](RULES.md)'s coverage contract (the rules of a hop match every document already established for it).
+The judges then read each candidate against all live hops with the phase-1 standards, by the same tiered review,
+without being told which systems retrieved it or which rule it matched. The kept documents are added to the phase-2
+qrels as a new version (`phase3_pool/`), and their duplicates are expanded as in phase 2 (`phase3_pool_dups/`, the
+final qrels).
+
+```bash
+$P candidates --pool pools/<dataset>.jsonl --rules passing.jsonl [--corpus /data/climbmix]
+                              # phase3_pool/pool_pairs.jsonl (every pooled pair and its status),
+                              # candidates.jsonl (never judged, matching a hop rule), candidates_summary.json
+$P fetch                      # cache the candidates' text (already cached when --corpus read them)
+$P chunks                     # phase3_pool/work/QID/chunk_NN_*.md; prints workflow_args
+# workflow phase1.js, args {"set": "<set>", "qids": [...], "pool": true}: judge -> second judge -> adjudicate
+#   (by hand: qrels.py --pool show|check|second|second-check|compare|adj-check; state: qrels_state.py --pool)
+$P status                     # every question complete?
+$P build                      # phase3_pool/: phase 2 plus the kept candidates
+$Q verify --phase phase3_pool
+D3="$D --layer phase3_pool_dups"
+$D3 lookup --round 1          # duplicates of the documents phase 3 added (phase 2 expanded the rest)
+$D3 fetch --round 1 && $D3 chunks --round 1
+# workflow phase2.js, args {"set": "<set>", "round": 1, "qids": [...], "layer": "phase3_pool_dups"}
+$D3 apply --round 1           # then lookup --round 2 ... until "closure": true
+$D3 build                     # phase3_pool_dups/: the final qrels
+$Q verify --phase phase3_pool_dups
+$P stats                      # phase3_pool/systems_phase3_pool_dups.json: funnel and credit per system combination
+```
+
+- **Inputs.** The pool is JSONL, one row per question and document: `query_id`, `doc_id`, `systems` as
+  `{name: {"surfaced": bool, "opened": bool}}` (the export's format) or a list of names. The rules are `rules.py
+  collect`'s output, groups `<set>/<qid>/<hop>`; a question without rules contributes no candidate, and a rule naming
+  a hop that is not live is an error. `--corpus` reads the texts from a local copy of the corpus, as `scan.py` does,
+  and stores them in the run's document cache, so the judges read exactly the text the rules matched. Without it the
+  texts come from the corpus service.
+- **Statuses** of a pooled pair:
+  - `already_qrel`: a phase-2 qrel.
+  - `judged_before`: a verdict in phase 1 or a phase-2 round, or a phase-2 rejection.
+  - `no_rules`, `not_in_corpus`, `unmatched`, `candidate`.
+  `candidates` refuses to replace a list that judging has started on.
+- **Tiers.** `pool_tiers`, which falls back to `tiers`, so a family keeps its phase-1 policy (BrowseComp-Plus
+  re-judges every drop).
+- **Credit** (`stats`). Every qrel the final layer adds over phase 2 is credited to the combination of systems that
+  retrieved it. A duplicate is credited to the systems of the pooled document it copies, traced through earlier rounds
+  and kept even when that original was later dropped. `unattributed` counts the rest (0 when every addition traces
+  back).
+
+**What the CMASS release ran.** The pools were those of the three agents the paper evaluates (GPT-6.1 Sol, Gemma 4 31B
+and Qwen 3.5 9B over BM25):
+- **Pool:** 49,885 question-document pairs, of which 41,312 were neither qrels nor judged before.
+- **Rules:** 6,036 rules over 2,693 hops, with a breadth cap of 20,000 estimated documents.
+- **Judged:** 4,403 rule-matched candidates.
+- **Kept:** 3,102 judged candidates, plus 354 of their duplicates.
+
+The released qrels, `v2026.10.25` of `castorini/cmass`, are `phase3_pool_dups`. The pool favours the three pooled
+systems: their finds were judged, while a new system's unjudged finds still count as misses.
+
 ## Outputs
 
-`qrels/<set>/phase1/` and `qrels/<set>/phase2/` hold the same files (derived benchmark data: keep them in the run
-directory, never in this repository):
+`qrels/<set>/phase1/`, `phase2/`, `phase3_pool/` and `phase3_pool_dups/` hold the same files, each layer a superset of
+the one before (derived benchmark data: keep them in the run directory, never in this repository):
 
 | file | one line / entry per | fields |
 |---|---|---|
@@ -183,11 +265,16 @@ directory, never in this repository):
 | `rejections.jsonl` | dropped (question, document) | `reason`, `note`, `provenance`, `adjudicated`, `second_judged` (phase 2 adds the near duplicates verification dropped and, under `quote_only`, those that matched no quote: reason `no_quote_match`) |
 | `qrels.trec` | (question, document) | `<qid> 0 <doc id> <relevance>` |
 | `stats.json` | set | totals, per question: pool, fixed, judged, kept and dropped by source, provenance and reason, second-judge and adjudication counts, uncovered hops, recall depth per hop |
-| `expansion.jsonl`, `conflicts.jsonl` | added duplicate; exact duplicate not added | phase 2 only: parent, kind, Jaccard, round, `verdict_source` (`exact`, `quote` or `judged`, with `adjudicated`), hops; conflicts list exact duplicates that were judged and dropped or whose text differs from the parent's, for a reviewer |
+| `expansion.jsonl`, `conflicts.jsonl` | added duplicate or pooled document; exact duplicate not added | phase 2 and phase3_pool_dups: parent, kind, Jaccard, round, `verdict_source` (`exact`, `quote` or `judged`, with `adjudicated`), hops; phase3_pool: `source` `system_pool`, `systems`, `surfaced`, `opened`, the matched rule `groups`, `verdict_source` (`judged` / `adjudicated`), hops with support and quote. Conflicts list exact duplicates that were judged and dropped or whose text differs from the parent's, for a reviewer, and are carried into later layers |
+
+A hop map entry of a pooled document has `source` `system_pool` and its `systems`; its rejections carry `phase` 3 and
+`layer`.
 
 Working files: `inventory.jsonl`, `standards/`, `recall/`, `work/<qid>/` (rendered chunks, `chunks.json`, sample
 manifests `second*.json`, `adj_*.md`), `judged/<qid>/` (verdicts), and per expansion round `phase2/pairs_rN.jsonl`,
-`phase2/quote_rN.jsonl`, `phase2/rN/{work,judged}/`, `added_rN.jsonl`, `rejected_rN.jsonl`, `conflicts_rN.jsonl`.
+`phase2/quote_rN.jsonl`, `phase2/rN/{work,judged}/`, `added_rN.jsonl`, `rejected_rN.jsonl`, `conflicts_rN.jsonl`
+(the same under `phase3_pool_dups/` for the pool's duplicates). Phase 3 adds `phase3_pool/pool_pairs.jsonl`,
+`candidates.jsonl`, `candidates_summary.json`, `work/`, `judged/` and `systems_<layer>.json`.
 
 `verify` reads the Stage 2 records and the output files independently of the inventory and fails when: a question has
 no qrels; an accepted evidence document of a live hop is missing from the question's qrels or from that hop's
@@ -201,6 +288,11 @@ Recall takes the BM25 top `recall_k` per hop, an arbitrary slice of a broad hop 
 `scan.py` reads every document of the corpus once and returns, for each hop, every document its match rules accept, so
 the hop's candidate set is complete with respect to its rules. One pass serves all hops of all questions. The format,
 matching semantics and outputs are in the module docstring.
+
+The same rules filter the system pool in phase 3 (`pool.py candidates` matches them against the pooled documents
+only). In the CMASS release the full scan served to measure and check the rules: every pooled document a rule matched
+was also among the scan's matches. Its candidates outside the system pool (2.64 M hop-document pairs) were **not**
+judged, so the broad hops' qrels are complete only for what the pipeline's agents and the three systems retrieved.
 
 - **A rule** is a JSON line `{"rule_id", "group", "all": [[alt, ...], ...], "none": [alt, ...]}`. A document matches
   when every clause of `all` has one of its phrases and no phrase of `none` occurs. Phrases are literal and
@@ -330,7 +422,37 @@ genuinely broad hop with `broad_ok`, and invalid rule files:
 python3 pipelines/cmass/demo/test_rules.py       # ends with "all rules demo checks passed"
 ```
 
+## Releasing the qrels (`release.py`)
+
+`release.py` writes a layer's qrels in the obfuscated format of the Hugging Face dataset, the one
+[`scripts/deobfuscate.py`](../../../scripts/deobfuscate.py) decodes: `qrels.jsonl`, `qrel_roles.jsonl`,
+`qrels_inclusion.jsonl` and `qrels_exclusion.jsonl`. The document ids and question ids are XOR-encoded with the
+repeated SHA-256 of the split's canary. A document is `exclusion` only if every hop it supports is an exclusion hop,
+so the two views partition the qrels. It decodes what it wrote and checks it against the layer before exiting.
+
+```bash
+python3 <checkout>/pipelines/cmass/stage3/release.py --set <set> --layer phase3_pool_dups --out /private/release/<split> \
+    --queries <released split>/queries.jsonl        # the canary and the question order of the released queries
+#   or --canary "<text>" for a new split; --hop-roles ROLES.jsonl ({id, hop, role}) overrides the hops' roles
+```
+
+`v2026.10.25` was written this way, with the hop roles of the paper's role analysis. Applied to the phase-2 qrels,
+the same procedure reproduces every qrel file of `v2026.10.20` byte for byte. The output is benchmark data: write it
+outside this repository.
+
 ## Demo and tests
+
+[`../demo/test_pool.py`](../demo/test_pool.py) runs phase 3 end to end on top of the demo run that `test_stage3.py`
+builds. It uses three invented systems' pool and invented phase-3 documents, served by a wrapper around the demo corpus
+so the shared corpus is unchanged. The pool covers pairs already in the qrels, judged before, of a question without
+rules, matching no rule, and matching a hop rule, read once through the corpus service and once from a local JSONL
+corpus. Judging includes a disagreement settled by the adjudicator. The pool's duplicates include an exact copy, a
+near copy settled by quote, and one that lost the quoted sentence. The test ends with the per-system credit and
+`release.py`, decoded with `scripts/deobfuscate.py`:
+
+```bash
+python3 pipelines/cmass/demo/test_pool.py        # ends with "all system-pool demo checks passed"
+```
 
 [`../demo/test_stage3.py`](../demo/test_stage3.py) runs every deterministic step above on the invented demo corpus,
 offline, with [`../demo/make_stage3_fixtures.py`](../demo/make_stage3_fixtures.py) standing in for the agents (the

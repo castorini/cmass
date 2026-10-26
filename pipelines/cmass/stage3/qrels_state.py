@@ -2,8 +2,11 @@
 """What exists on disk for one question's Stage 3 judging, so a workflow resumes from disk and never trusts an agent's
 report: a judge whose file reads were refused can still answer "0 check errors" without having written a verdict.
 
-  qrels_state.py --set S QID [--phase2 N]       one JSON line for the question
-  qrels_state.py --set S --all [--phase2 N]     one line per question, then a summary line
+  qrels_state.py --set S QID [--phase2 N [--layer L] | --pool]     one JSON line for the question
+  qrels_state.py --set S --all [--phase2 N [--layer L] | --pool]   one line per question, then a summary line
+
+--phase2 N: round N of a duplicate expansion (--layer phase2, the default, or phase3_pool_dups); --pool: phase 3, the
+system pool's candidates (pool.py).
 
 Fields
   has_standard      standards/QID.json exists and passes std-check
@@ -18,7 +21,8 @@ Fields
                     pool grew); a drops-only round when the policy rounds turned escalate_at or more sampled drops into
                     keeps and some drop has not been re-judged
   complete          nothing is left to do; blocking says what is missing otherwise. In phase 2 a question is complete
-                    as soon as no near duplicate is left for the agents (the quote check settled or dropped them all)
+                    as soon as no near duplicate is left for the agents (the quote check settled or dropped them all);
+                    in phase 3 a question without pooled candidates is complete
 """
 from __future__ import annotations
 
@@ -42,9 +46,9 @@ def _newer(path: Path, files) -> bool:
 def state(q, qid: str) -> dict:
     r = q.row(qid)
     wd, jd = q.work / qid, q.judged / qid
-    none_left = bool(q.p2) and not q.candidates(r)     # phase 2: no near duplicate left for the agents
+    none_left = q.later and not q.candidates(r)     # phase 2: no near duplicate left for the agents; phase 3: none pooled
     std_errs = Q.standard_errors(q, r)
-    needs = [] if q.p2 else r["needs_recall"]
+    needs = [] if q.later else r["needs_recall"]
     cf = q.recall_file(qid, "candidates")
     have = set(json.loads(cf.read_text())["hops"]) if cf.exists() else set()
     missing_recall = [h for h in needs if h not in have]
@@ -108,14 +112,18 @@ def main() -> None:
     ap.add_argument("--run")
     ap.add_argument("--set", dest="sid")
     ap.add_argument("--phase2", type=int, metavar="N")
+    ap.add_argument("--layer", default="phase2", choices=sorted(Q.DUP_LAYERS))
+    ap.add_argument("--pool", action="store_true")
     ap.add_argument("qid", nargs="?")
     ap.add_argument("--all", action="store_true")
     a = ap.parse_args()
     run = Q.Run(a.run)
-    q = Q.QSet(run, a.sid or Q.default_set(run), a.phase2)
+    if a.layer != "phase2" and a.phase2 is None:
+        ap.error("--layer goes with --phase2 N")
+    q = Q.QSet(run, a.sid or Q.default_set(run), a.phase2, a.layer, a.pool)
     if a.all:
         qids = (list(dict.fromkeys(x["id"] for x in q.pairs() if x["kind"] == "near" and x["status"] == "new"))
-                if q.p2 else list(q.inventory()))
+                if q.p2 else list(q.pool_candidates()) if q.pool else list(q.inventory()))
         rows = [state(q, x) for x in qids]
         for s in rows:
             print(json.dumps(s))

@@ -1,13 +1,15 @@
-# Writing corpus-scan rules (Stage 3)
+# Writing hop match rules (Stage 3)
 
-The corpus scan (`scan.py`) reads every document of the corpus once and lists, for each hop, every document its
-**match rules** accept. Those documents become the hop's judging candidates. You write the rules of one question:
-one **group** of rules per hop that has qrels, so that
+A hop's **match rules** decide which documents are worth judging for it. They are used two ways. Phase 3
+(`pool.py candidates`) matches them against the documents evaluated systems retrieved, and only a pooled document
+that matches a rule of its question is judged; this is how the CMASS release used them. The corpus scan (`scan.py`)
+reads every document of the corpus once and lists, for each hop, every document its rules accept, as that hop's
+judging candidates. You write the rules of one question: one **group** of rules per hop that has qrels, so that
 
 1. **coverage (hard requirement):** each hop's group matches **100%** of the hop's known qrels documents (every one of
    them, no exceptions), and
-2. **specificity:** each group matches as few other documents as it can. The scan's matches are read by judges; a
-   group matching hundreds of thousands of documents is useless. Each group must stay within the **breadth cap**
+2. **specificity:** each group matches as few other documents as it can. Whatever the rules match is read by judges;
+   a group matching hundreds of thousands of documents is useless. Each group must stay within the **breadth cap**
    (default 20,000 documents, estimated over the whole corpus), unless the hop's fact is genuinely stated in that
    many documents (`broad_ok`, below).
 
