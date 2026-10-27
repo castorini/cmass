@@ -442,11 +442,14 @@ table.board td.num.best { color: var(--ink); }
   .wide-only { display: none; }
   .narrow-only { display: inline; }
   table.board { min-width: 0; }
-  table.board th, table.board td { padding-inline: .3rem; }
-  table.board .rank { width: 1.25rem; }
-  table.board .model a { font-size: .875rem; }
-  table.board .cell-sub { font-size: .75rem; }
-  table.board td.num { font-size: .8125rem; }
+  table.board th, table.board td { padding-inline: .15rem; }
+  table.board .rank { width: 1rem; }
+  table.board .model a { font-size: .8125rem; }
+  table.board .cell-sub { font-size: .6875rem; }
+  table.board .tag { white-space: normal; }
+  table.board thead tr.grp th { letter-spacing: 0; }
+  table.board thead tr.grp th.span + th.span { border-left-width: .4rem; }
+  table.board td.num { font-size: .75rem; }
   table.board thead tr:not(.grp) th, table.board thead tr.grp th { font-size: .6875rem; }
 }
 
@@ -455,5 +458,21 @@ table.board td.num.best { color: var(--ink); }
 figure { margin: 0; }
 .code-stack { display: grid; gap: 1rem; margin-top: 1.5rem; }
 code { font: 500 .875em/1 var(--mono); background: var(--sunken); border: 1px solid var(--line); border-radius: .3rem; padding: .1em .35em; }
+
+/* Pipeline figure and review screenshot */
+
+.shot { display: grid; gap: .65rem; min-width: 0; }
+.shot a { display: block; }
+.shot img { display: block; width: 100%; border: 1px solid var(--line); border-radius: .6rem; background: var(--sunken); }
+.shot figcaption { color: var(--muted); font-size: .875rem; }
+.pipeline-fig { max-width: 60rem; margin: 2.5rem auto 0; }
+.review-block { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 2.5rem; align-items: center; margin-top: 3rem; }
+.review-text { min-width: 0; }
+.review-text h3 { margin: 0 0 .6rem; font: 600 1.375rem/1.3 var(--serif); }
+.review-text p { margin: 0 0 1rem; color: var(--ink-2); }
+.review-text p:last-child { margin-bottom: 0; }
+@media (max-width: 960px) {
+  .review-block { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+}
 
 [hidden] { display: none !important; }

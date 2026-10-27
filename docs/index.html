@@ -229,6 +229,21 @@
         <p>Judge agents keep the pooled documents that support a hop and add their duplicates; documents the evaluated agents retrieved are then judged the same way, TREC-style.</p>
       </li>
     </ol>
+    <figure class="shot pipeline-fig">
+      <a href="assets/projection-pipeline.webp"><img src="assets/projection-pipeline.webp" width="2400" height="2890" loading="lazy" decoding="async" alt="Flowchart of the projection pipeline for BrowseComp-Plus. Stage 0 prepares the corpus and one task per question. Stage 1 decomposes each of the 830 questions into hops and grounds them in ClimbMix; 326 are labeled projectable, and 65 verified candidates plus 47 near misses, 112 in all, go on. Stage 2 audits them, checks for rival answers, sends them to human review and a final check, and accepts 80. Stage 3 builds 11,450 qrels by candidate pooling, a precision filter and duplicate expansion."></a>
+      <figcaption>The projection pipeline, with the BrowseComp-Plus counts: 80 of 830 source questions are released, with 11,450 qrels. Open the image for full size.</figcaption>
+    </figure>
+    <div class="review-block">
+      <div class="review-text">
+        <h3>Human review</h3>
+        <p>In Stage 2 the authors review every question in a review site. It shows each question with its constraints, the audit, and every hop's verbatim evidence in the full documents, and records the reviewer's decision, per-hop checks and comments. Accepting with fixes sends a question back through revision, audit and review.</p>
+        <p class="note">The site and its offline demo: <a href="https://github.com/castorini/cmass/tree/main/review_site">review_site/</a>.</p>
+      </div>
+      <figure class="shot">
+        <a href="assets/review-site.webp"><img src="assets/review-site.webp" width="1280" height="900" loading="lazy" decoding="async" alt="The review site: a question with its constraints highlighted, the gold answer, the audit verdict and second-reader check, buttons to accept, accept with fixes, reject or mark unsure, and a constraint-coverage table with agree and disagree checks."></a>
+        <figcaption>The review site, on its invented demo dataset.</figcaption>
+      </figure>
+    </div>
     <p class="more note">The pipeline is dataset- and corpus-agnostic. Code, prompts and offline demos: <a href="https://github.com/castorini/cmass/tree/main/pipelines/cmass">pipelines/cmass</a>.</p>
   </div>
 </section>

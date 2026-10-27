@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CMASS Leaderboard</title>
-<meta name="description" content="Answer accuracy, Recall@all, hop groundedness and tool calls of search agents on CMASS, with closed-book accuracy.">
+<meta name="description" content="Answer accuracy, precision@all, Recall@all, hop groundedness and tool calls of search agents on CMASS, with closed-book accuracy.">
 <link rel="canonical" href="https://cmass.tech/leaderboard/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="CMASS Leaderboard">
@@ -61,11 +61,12 @@
           <tr class="grp">
             <th scope="col" rowspan="2" class="rank">#</th>
             <th scope="col" rowspan="2">Model</th>
-            <th scope="colgroup" colspan="4" class="span">With retrieval tools</th>
+            <th scope="colgroup" colspan="5" class="span">With retrieval tools</th>
             <th scope="colgroup" class="span">Closed-book</th>
           </tr>
           <tr>
             <th scope="col" class="num key">Acc.</th>
+            <th scope="col" class="num">P@all</th>
             <th scope="col" class="num">R@all</th>
             <th scope="col" class="num">H.G.</th>
             <th scope="col" class="num">T.C.</th>
@@ -74,33 +75,33 @@
         </thead>
           <!-- rows:start -->
           <tbody data-set="bcp">
-            <tr class="set-row"><th scope="rowgroup" colspan="7">BCP<span>80 questions &middot; 11,450 qrels</span></th></tr>
-            <tr><td class="rank">1</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1&nbsp;Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span></td><td class="num key best">85.0</td><td class="num best">12.1</td><td class="num best">75.5</td><td class="num">21.5</td><td class="num best">52.5</td></tr>
-            <tr><td class="rank">2</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma&nbsp;4&nbsp;31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span></td><td class="num key">27.5</td><td class="num">4.2</td><td class="num">31.4</td><td class="num">23.5</td><td class="num">16.3</td></tr>
-            <tr><td class="rank">3</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen&nbsp;3.5&nbsp;9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span></td><td class="num key">16.3</td><td class="num">4.4</td><td class="num">31.4</td><td class="num">49.9</td><td class="num">5.0</td></tr>
+            <tr class="set-row"><th scope="rowgroup" colspan="8">BCP<span>80 questions &middot; 11,450 qrels</span></th></tr>
+            <tr><td class="rank">1</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1&nbsp;Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span></td><td class="num key best">85.0</td><td class="num best">38.2</td><td class="num best">12.1</td><td class="num best">75.5</td><td class="num">21.5</td><td class="num best">52.5</td></tr>
+            <tr><td class="rank">2</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma&nbsp;4&nbsp;31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span></td><td class="num key">27.5</td><td class="num">10.9</td><td class="num">4.2</td><td class="num">31.4</td><td class="num">23.5</td><td class="num">16.3</td></tr>
+            <tr><td class="rank">3</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen&nbsp;3.5&nbsp;9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span></td><td class="num key">16.3</td><td class="num">9.2</td><td class="num">4.4</td><td class="num">31.4</td><td class="num">49.9</td><td class="num">5.0</td></tr>
           </tbody>
           <tbody data-set="trqa">
-            <tr class="set-row"><th scope="rowgroup" colspan="7">TRQA<span>68 questions &middot; 8,307 qrels</span></th></tr>
-            <tr><td class="rank">1</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1&nbsp;Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span></td><td class="num key best">94.1</td><td class="num">10.6</td><td class="num">79.7</td><td class="num">8.6</td><td class="num best">86.8</td></tr>
-            <tr><td class="rank">2</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma&nbsp;4&nbsp;31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span></td><td class="num key">66.2</td><td class="num">17.0</td><td class="num">82.7</td><td class="num">12.4</td><td class="num">50.0</td></tr>
-            <tr><td class="rank">3</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen&nbsp;3.5&nbsp;9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span></td><td class="num key">57.4</td><td class="num best">18.6</td><td class="num best">85.8</td><td class="num">19.7</td><td class="num">39.7</td></tr>
+            <tr class="set-row"><th scope="rowgroup" colspan="8">TRQA<span>68 questions &middot; 8,307 qrels</span></th></tr>
+            <tr><td class="rank">1</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1&nbsp;Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span></td><td class="num key best">94.1</td><td class="num best">70.9</td><td class="num">10.6</td><td class="num">79.7</td><td class="num">8.6</td><td class="num best">86.8</td></tr>
+            <tr><td class="rank">2</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma&nbsp;4&nbsp;31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span></td><td class="num key">66.2</td><td class="num">59.2</td><td class="num">17.0</td><td class="num">82.7</td><td class="num">12.4</td><td class="num">50.0</td></tr>
+            <tr><td class="rank">3</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen&nbsp;3.5&nbsp;9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span></td><td class="num key">57.4</td><td class="num">59.4</td><td class="num best">18.6</td><td class="num best">85.8</td><td class="num">19.7</td><td class="num">39.7</td></tr>
           </tbody>
           <tbody data-set="dsqa">
-            <tr class="set-row"><th scope="rowgroup" colspan="7">DSQA<span>71 questions &middot; 9,889 qrels</span></th></tr>
-            <tr><td class="rank">1</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1&nbsp;Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span></td><td class="num key best">90.1</td><td class="num">15.0</td><td class="num best">75.7</td><td class="num">17.9</td><td class="num best">70.4</td></tr>
-            <tr><td class="rank">2</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen&nbsp;3.5&nbsp;9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span></td><td class="num key">39.4</td><td class="num best">19.8</td><td class="num">72.0</td><td class="num">37.1</td><td class="num">12.7</td></tr>
-            <tr><td class="rank">3</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma&nbsp;4&nbsp;31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span></td><td class="num key">38.0</td><td class="num">17.4</td><td class="num">68.1</td><td class="num">21.5</td><td class="num">23.9</td></tr>
+            <tr class="set-row"><th scope="rowgroup" colspan="8">DSQA<span>71 questions &middot; 9,889 qrels</span></th></tr>
+            <tr><td class="rank">1</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1&nbsp;Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span></td><td class="num key best">90.1</td><td class="num best">50.5</td><td class="num">15.0</td><td class="num best">75.7</td><td class="num">17.9</td><td class="num best">70.4</td></tr>
+            <tr><td class="rank">2</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen&nbsp;3.5&nbsp;9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span></td><td class="num key">39.4</td><td class="num">35.3</td><td class="num best">19.8</td><td class="num">72.0</td><td class="num">37.1</td><td class="num">12.7</td></tr>
+            <tr><td class="rank">3</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma&nbsp;4&nbsp;31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span></td><td class="num key">38.0</td><td class="num">33.2</td><td class="num">17.4</td><td class="num">68.1</td><td class="num">21.5</td><td class="num">23.9</td></tr>
           </tbody>
           <tbody data-set="hotpotqa">
-            <tr class="set-row"><th scope="rowgroup" colspan="7">HotpotQA<span>204 questions &middot; 11,090 qrels</span></th></tr>
-            <tr><td class="rank">1</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1&nbsp;Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span></td><td class="num key best">94.6</td><td class="num">17.2</td><td class="num best">90.2</td><td class="num">6.7</td><td class="num best">89.7</td></tr>
-            <tr><td class="rank">2</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen&nbsp;3.5&nbsp;9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span></td><td class="num key">70.1</td><td class="num best">19.7</td><td class="num">83.9</td><td class="num">17.0</td><td class="num">27.5</td></tr>
-            <tr><td class="rank">3</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma&nbsp;4&nbsp;31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span></td><td class="num key">65.7</td><td class="num">18.1</td><td class="num">78.4</td><td class="num">10.2</td><td class="num">36.8</td></tr>
+            <tr class="set-row"><th scope="rowgroup" colspan="8">HotpotQA<span>204 questions &middot; 11,090 qrels</span></th></tr>
+            <tr><td class="rank">1</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1&nbsp;Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span></td><td class="num key best">94.6</td><td class="num best">57.9</td><td class="num">17.2</td><td class="num best">90.2</td><td class="num">6.7</td><td class="num best">89.7</td></tr>
+            <tr><td class="rank">2</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen&nbsp;3.5&nbsp;9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span></td><td class="num key">70.1</td><td class="num">44.4</td><td class="num best">19.7</td><td class="num">83.9</td><td class="num">17.0</td><td class="num">27.5</td></tr>
+            <tr><td class="rank">3</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma&nbsp;4&nbsp;31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span></td><td class="num key">65.7</td><td class="num">44.4</td><td class="num">18.1</td><td class="num">78.4</td><td class="num">10.2</td><td class="num">36.8</td></tr>
           </tbody>
           <!-- rows:end -->
       </table>
     </div>
-    <p class="note table-note">Table 3 of the CMASS paper, scored with the v2026.10.25 qrels. All values are percentages except T.C., a mean count. Bold marks the best value per dataset; tool calls are not ranked. One run per model, dataset and condition.</p>
+    <p class="note table-note">Table 3 of the CMASS paper plus P@all, scored with the v2026.10.25 qrels. All values are percentages except T.C., a mean count. Bold marks the best value per dataset; tool calls are not ranked. One run per model, dataset and condition.</p>
   </div>
 </section>
 
@@ -114,6 +115,8 @@
       <dl class="defs">
         <dt>Acc.</dt>
         <dd>Percentage of all questions answered correctly; unanswered questions count as failures. DSQA uses strict exact-set equality: every gold member and no incorrect additions, in any order.</dd>
+        <dt>P@all</dt>
+        <dd>Precision@all: the percentage of the distinct documents in a question's search results that are qrels, averaged over questions. Unjudged documents count as non-relevant, so it is a lower bound.</dd>
         <dt>R@all</dt>
         <dd>Recall@all: the percentage of a question's qrel documents that appear in any of its search results, each counted once, averaged over questions.</dd>
         <dt>H.G.</dt>
@@ -139,7 +142,7 @@
         <dt>Models</dt>
         <dd>GPT-6.1 Sol with high reasoning effort; Gemma&nbsp;4 31B IT and Qwen&nbsp;3.5 9B with thinking enabled, served with vLLM.</dd>
         <dt>Qrels</dt>
-        <dd>Release <code>v2026.10.25</code>. R@all and H.G. depend on the qrels release, so report the tag you used.</dd>
+        <dd>Release <code>v2026.10.25</code>. P@all, R@all and H.G. depend on the qrels release, so report the tag you used.</dd>
       </dl>
       <p class="note more">Prompts, settings and scripts: <a href="https://github.com/castorini/cmass/blob/main/REPRODUCING.md">REPRODUCING.md</a> and <a href="https://github.com/castorini/cmass/tree/main/evaluation">evaluation/</a>.</p>
     </div>
@@ -153,7 +156,8 @@
       <h2>Add your system</h2>
     </div>
     <div class="prose">
-      <p>To add a system, open an issue in the <a href="https://github.com/castorini/cmass/issues">GitHub repository</a> with your answers, the document ids each search returned, and your settings. We score hop groundedness, since its hop-level judgments are not released.</p>
+      <!-- TODO: submission process (where to send runs, which files, who scores hop groundedness). -->
+      <p>Submission instructions are coming soon.</p>
     </div>
   </div>
 </section>
