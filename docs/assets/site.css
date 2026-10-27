@@ -14,6 +14,9 @@
   --warm: #9c4a19;
   --code-bg: #f1f0ea;
   --shadow: 0 1px 2px rgba(27, 34, 32, .05), 0 6px 20px rgba(27, 34, 32, .05);
+  --logo-github: #181717;
+  --logo-arxiv-mark: #aa142d;
+  --logo-arxiv-grey: #7c7469;
 
   --serif: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
   --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -41,6 +44,8 @@
     --warm: #e39a63;
     --code-bg: #121917;
     --shadow: none;
+    --logo-github: #ffffff;
+    --logo-arxiv-mark: #a5d6fe;
     color-scheme: dark;
   }
 }
@@ -174,6 +179,10 @@ a:hover { color: var(--accent-hover); }
 }
 .btn:hover { border-color: var(--accent); color: var(--accent); }
 .btn svg { width: 1.05rem; height: 1.05rem; flex: none; }
+.btn svg.logo { width: 1.2rem; height: 1.2rem; }
+.logo-github path { fill: var(--logo-github); }
+.logo-arxiv .ax-red { fill: var(--logo-arxiv-mark); }
+.logo-arxiv .ax-grey { fill: var(--logo-arxiv-grey); }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: var(--accent-ink); }
 
