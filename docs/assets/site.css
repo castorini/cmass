@@ -457,7 +457,8 @@ table.board .model .harness-sub a { color: var(--accent); font-weight: 400; font
 @media (max-width: 560px) {
   body { font-size: 1rem; }
   .header-row { flex-wrap: wrap; padding-block: .6rem; }
-  .site-nav { justify-content: flex-start; gap: .25rem 1rem; }
+  .site-nav { justify-content: flex-start; gap: .25rem .85rem; }
+  .site-nav a { font-size: .875rem; }
   .facts-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .fact { padding: 1.1rem .75rem 1.1rem 0; }
   .fact:nth-child(n) { padding-left: 0; border-left: none; }
