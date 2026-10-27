@@ -386,6 +386,13 @@ table.board .key { background: var(--accent-soft); }
 table.board .best { font-weight: 600; color: var(--ink); }
 table.board td.num { color: var(--ink-2); }
 table.board td.num.best { color: var(--ink); }
+table.board td.harness { font-size: .9375rem; white-space: nowrap; }
+table.board .harness-sub { display: none; }
+table.board .model .harness-sub a { color: var(--accent); font-weight: 400; font-size: inherit; text-decoration: underline; }
+@media (max-width: 720px) {
+  table.board .harness { display: none; }
+  table.board .harness-sub { display: block; margin-top: .15rem; }
+}
 .tag {
   display: inline-block;
   margin-right: .25rem;
