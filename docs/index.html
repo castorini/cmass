@@ -39,7 +39,7 @@
 <section class="hero">
   <div class="wrap hero-grid">
     <div class="hero-text">
-    <p class="eyebrow">A benchmark suite for agentic search</p>
+    <p class="eyebrow">A benchmark suite for agentic search <span class="version-pill">v1.0 &middot; 25 October 2026</span></p>
     <h1 class="title">
       <span class="title-mark">CMASS</span>
       <span class="title-sub">A ClimbMix Agentic Search Suite for Evaluating Search Agents Across Heterogeneous Tasks</span>
@@ -233,15 +233,15 @@
       <a href="assets/projection-pipeline.webp"><img src="assets/projection-pipeline.webp" width="2400" height="2890" loading="lazy" decoding="async" alt="Flowchart of the projection pipeline for BrowseComp-Plus. Stage 0 prepares the corpus and one task per question. Stage 1 decomposes each of the 830 questions into hops and grounds them in ClimbMix; 326 are labeled projectable, and 65 verified candidates plus 47 near misses, 112 in all, go on. Stage 2 audits them, checks for rival answers, sends them to human review and a final check, and accepts 80. Stage 3 builds 11,450 qrels by candidate pooling, a precision filter and duplicate expansion."></a>
       <figcaption>The projection pipeline, with the BrowseComp-Plus counts: 80 of 830 source questions are released, with 11,450 qrels. Open the image for full size.</figcaption>
     </figure>
-    <div class="review-block">
-      <div class="review-text">
-        <h3>Human review</h3>
-        <p>In Stage 2 the authors review every question in a review site. It shows each question with its constraints, the audit, and every hop's verbatim evidence in the full documents, and records the reviewer's decision, per-hop checks and comments. Accepting with fixes sends a question back through revision, audit and review.</p>
-        <p class="note">The site and its offline demo: <a href="https://github.com/castorini/cmass/tree/main/review_site">review_site/</a>.</p>
+    <div class="audit-block">
+      <div class="audit-text">
+        <h3>Stage 2: audit, revision and human review</h3>
+        <p>An auditor agent checks each question's constraints and hops (D2), then its answer's accuracy and completeness (D3). A question that fails goes to a revision agent for a permitted revision (D4); wording changes need human approval, and revised questions repeat the audit and review. Hunter and verifier agents look for rival answers and omissions, and the authors then accept, accept with fixes, or reject each question (D5). A fresh checker agent and validation scripts produce the final records (D6); HotpotQA skips the checker.</p>
+        <p class="note">The authors' review interface, with an offline demo: <a href="https://github.com/castorini/cmass/tree/main/review_site">review_site/</a>.</p>
       </div>
       <figure class="shot">
-        <a href="assets/review-site.webp"><img src="assets/review-site.webp" width="1280" height="900" loading="lazy" decoding="async" alt="The review site: a question with its constraints highlighted, the gold answer, the audit verdict and second-reader check, buttons to accept, accept with fixes, reject or mark unsure, and a constraint-coverage table with agree and disagree checks."></a>
-        <figcaption>The review site, on its invented demo dataset.</figcaption>
+        <a href="assets/audit-loop.webp"><img src="assets/audit-loop.webp" width="2402" height="2621" loading="lazy" decoding="async" alt="Flowchart of Stage 2. D1: scripts validate the inputs and evidence. D2 and D3: an auditor agent audits constraints and hops, then answer accuracy and completeness. On a failure, D4: a revision agent attempts a permitted revision and the revised question repeats the loop; a failed repair is excluded. D5: hunter and verifier agents look for rivals and omissions, then the authors accept, accept with fixes, or reject. D6: a checker agent re-checks the evidence, and scripts validate and finalize the record, which goes to Stage 3."></a>
+        <figcaption>Stage 2's audit, revision and human review loop; D1 to D6 follow the paper's appendix. Dashed blue arrows route revisions through D4, and red arrows lead to exclusion. Open the image for full size.</figcaption>
       </figure>
     </div>
     <p class="more note">The pipeline is dataset- and corpus-agnostic. Code, prompts and offline demos: <a href="https://github.com/castorini/cmass/tree/main/pipelines/cmass">pipelines/cmass</a>.</p>
@@ -279,7 +279,7 @@
       <h2>Load CMASS from Hugging Face</h2>
     </div>
     <div class="prose">
-      <p>Questions, answers and qrels are obfuscated to discourage accidental training contamination; decode them before evaluation. Pin a release tag for reproducible experiments: results on <code>v2026.10.20</code> and <code>v2026.10.25</code> qrels are not directly comparable. The corpus text is not redistributed; document ids refer to <a href="https://huggingface.co/datasets/karpathy/climbmix-400b-shuffle">ClimbMix</a>.</p>
+      <p>The current version is CMASS v1.0 (25 October 2026), released on Hugging Face as <code>v2026.10.25</code>. Questions, answers and qrels are obfuscated to discourage accidental training contamination; decode them before evaluation. Pin the release tag and report it with your results: results on <code>v2026.10.20</code> and <code>v2026.10.25</code> qrels are not directly comparable. The corpus text is not redistributed; document ids refer to <a href="https://huggingface.co/datasets/karpathy/climbmix-400b-shuffle">ClimbMix</a>.</p>
     </div>
     <div class="code-stack">
       <figure class="code">
