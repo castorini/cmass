@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CMASS Leaderboard</title>
+<meta name="description" content="Answer accuracy, Recall@all, hop groundedness and tool calls of search agents on CMASS, with closed-book accuracy.">
+<link rel="canonical" href="https://cmass.tech/leaderboard/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="CMASS Leaderboard">
+<meta property="og:description" content="Search agents on BrowseComp-Plus, Total Recall QA, DeepSearchQA and HotpotQA projected onto ClimbMix.">
+<meta property="og:url" content="https://cmass.tech/leaderboard/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="wordmark" href="../" aria-label="CMASS home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19 10.5 12.5 14.5 15.5 20 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="19" r="2.3" fill="var(--accent)"/><circle cx="10.5" cy="12.5" r="2.3" fill="var(--accent)"/><circle cx="14.5" cy="15.5" r="2.3" fill="var(--accent)"/><circle cx="20" cy="6" r="2.6" fill="var(--warm)"/></svg>
+      CMASS
+    </a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="./" aria-current="page">Leaderboard</a>
+      <a href="https://huggingface.co/datasets/castorini/cmass">Dataset</a>
+      <a href="https://github.com/castorini/cmass">Code</a>
+      <a href="https://arxiv.org/abs/2608.20317">Paper</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<section class="page-head">
+  <div class="wrap">
+    <p class="eyebrow">Leaderboard &middot; qrels v2026.10.25</p>
+    <h1>Search agents on CMASS</h1>
+    <div class="prose">
+      <p class="lead">Each agent runs in the Piika harness with two tools, <code>search</code> and <code>read_document</code>, over a BM25 index of the 553M ClimbMix documents. Closed-book runs answer the same questions with every tool disabled. Within each dataset, rows are ranked by accuracy with retrieval tools.</p>
+    </div>
+  </div>
+</section>
+
+<section class="board-section">
+  <div class="wrap">
+    <div class="filters" role="group" aria-label="Show dataset">
+      <button class="chip" type="button" data-filter="all" aria-pressed="true">All datasets</button>
+      <button class="chip" type="button" data-filter="bcp" aria-pressed="false">BCP</button>
+      <button class="chip" type="button" data-filter="trqa" aria-pressed="false">TRQA</button>
+      <button class="chip" type="button" data-filter="dsqa" aria-pressed="false">DSQA</button>
+      <button class="chip" type="button" data-filter="hotpotqa" aria-pressed="false">HotpotQA</button>
+    </div>
+    <div class="table-scroll">
+      <table class="data board">
+        <thead>
+          <tr class="grp">
+            <th scope="col" rowspan="2" class="rank">#</th>
+            <th scope="col" rowspan="2">Model</th>
+            <th scope="colgroup" colspan="4" class="span">With retrieval tools</th>
+            <th scope="colgroup" class="span">Closed-book</th>
+          </tr>
+          <tr>
+            <th scope="col" class="num key">Acc.</th>
+            <th scope="col" class="num">R@all</th>
+            <th scope="col" class="num">H.G.</th>
+            <th scope="col" class="num">T.C.</th>
+            <th scope="col" class="num">Acc.</th>
+          </tr>
+        </thead>
+          <!-- rows:start -->
+          <tbody data-set="bcp">
+            <tr class="set-row"><th scope="rowgroup" colspan="7">BCP<span>80 questions &middot; 11,450 qrels</span></th></tr>
+            <tr><td class="rank">1</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1&nbsp;Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span></td><td class="num key best">85.0</td><td class="num best">12.1</td><td class="num best">75.5</td><td class="num">21.5</td><td class="num best">52.5</td></tr>
+            <tr><td class="rank">2</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma&nbsp;4&nbsp;31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span></td><td class="num key">27.5</td><td class="num">4.2</td><td class="num">31.4</td><td class="num">23.5</td><td class="num">16.3</td></tr>
+            <tr><td class="rank">3</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen&nbsp;3.5&nbsp;9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span></td><td class="num key">16.3</td><td class="num">4.4</td><td class="num">31.4</td><td class="num">49.9</td><td class="num">5.0</td></tr>
+          </tbody>
+          <tbody data-set="trqa">
+            <tr class="set-row"><th scope="rowgroup" colspan="7">TRQA<span>68 questions &middot; 8,307 qrels</span></th></tr>
+            <tr><td class="rank">1</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1&nbsp;Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span></td><td class="num key best">94.1</td><td class="num">10.6</td><td class="num">79.7</td><td class="num">8.6</td><td class="num best">86.8</td></tr>
+            <tr><td class="rank">2</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma&nbsp;4&nbsp;31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span></td><td class="num key">66.2</td><td class="num">17.0</td><td class="num">82.7</td><td class="num">12.4</td><td class="num">50.0</td></tr>
+            <tr><td class="rank">3</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen&nbsp;3.5&nbsp;9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span></td><td class="num key">57.4</td><td class="num best">18.6</td><td class="num best">85.8</td><td class="num">19.7</td><td class="num">39.7</td></tr>
+          </tbody>
+          <tbody data-set="dsqa">
+            <tr class="set-row"><th scope="rowgroup" colspan="7">DSQA<span>71 questions &middot; 9,889 qrels</span></th></tr>
+            <tr><td class="rank">1</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1&nbsp;Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span></td><td class="num key best">90.1</td><td class="num">15.0</td><td class="num best">75.7</td><td class="num">17.9</td><td class="num best">70.4</td></tr>
+            <tr><td class="rank">2</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen&nbsp;3.5&nbsp;9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span></td><td class="num key">39.4</td><td class="num best">19.8</td><td class="num">72.0</td><td class="num">37.1</td><td class="num">12.7</td></tr>
+            <tr><td class="rank">3</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma&nbsp;4&nbsp;31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span></td><td class="num key">38.0</td><td class="num">17.4</td><td class="num">68.1</td><td class="num">21.5</td><td class="num">23.9</td></tr>
+          </tbody>
+          <tbody data-set="hotpotqa">
+            <tr class="set-row"><th scope="rowgroup" colspan="7">HotpotQA<span>204 questions &middot; 11,090 qrels</span></th></tr>
+            <tr><td class="rank">1</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1&nbsp;Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span></td><td class="num key best">94.6</td><td class="num">17.2</td><td class="num best">90.2</td><td class="num">6.7</td><td class="num best">89.7</td></tr>
+            <tr><td class="rank">2</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen&nbsp;3.5&nbsp;9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span></td><td class="num key">70.1</td><td class="num best">19.7</td><td class="num">83.9</td><td class="num">17.0</td><td class="num">27.5</td></tr>
+            <tr><td class="rank">3</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma&nbsp;4&nbsp;31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span></td><td class="num key">65.7</td><td class="num">18.1</td><td class="num">78.4</td><td class="num">10.2</td><td class="num">36.8</td></tr>
+          </tbody>
+          <!-- rows:end -->
+      </table>
+    </div>
+    <p class="note table-note">Table 3 of the CMASS paper, scored with the v2026.10.25 qrels. All values are percentages except T.C., a mean count. Bold marks the best value per dataset; tool calls are not ranked. One run per model, dataset and condition.</p>
+  </div>
+</section>
+
+<section class="section" id="metrics">
+  <div class="wrap split">
+    <div>
+      <div class="section-head">
+        <p class="kicker">Metrics</p>
+        <h2>What each column measures</h2>
+      </div>
+      <dl class="defs">
+        <dt>Acc.</dt>
+        <dd>Percentage of all questions answered correctly; unanswered questions count as failures. DSQA uses strict exact-set equality: every gold member and no incorrect additions, in any order.</dd>
+        <dt>R@all</dt>
+        <dd>Recall@all: the percentage of a question's qrel documents that appear in any of its search results, each counted once, averaged over questions.</dd>
+        <dt>H.G.</dt>
+        <dd>Hop groundedness: the percentage of a question's hops supported by at least one retrieved document, averaged over questions. It uses hop-level judgments that are not released.</dd>
+        <dt>T.C.</dt>
+        <dd>Mean tool calls per question: searches plus document reads.</dd>
+        <dt>Closed-book</dt>
+        <dd>Accuracy from the question alone, with all tools disabled at the API level.</dd>
+      </dl>
+    </div>
+    <div>
+      <div class="section-head">
+        <p class="kicker">Setup</p>
+        <h2>How the runs were made</h2>
+      </div>
+      <dl class="defs">
+        <dt>Agent</dt>
+        <dd>Piika, which follows the agent design of Pi-Serini.</dd>
+        <dt>Tools</dt>
+        <dd><code>search</code> returns at most five documents with previews of at most 500 characters; <code>read_document</code> returns the first 200 lines of a document.</dd>
+        <dt>Retriever</dt>
+        <dd>BM25 over ClimbMix through the <a href="https://github.com/castorini/pyserini">Pyserini</a> 2.4.0 REST backend (k<sub>1</sub>&nbsp;=&nbsp;0.9, b&nbsp;=&nbsp;0.4).</dd>
+        <dt>Models</dt>
+        <dd>GPT-6.1 Sol with high reasoning effort; Gemma&nbsp;4 31B IT and Qwen&nbsp;3.5 9B with thinking enabled, served with vLLM.</dd>
+        <dt>Qrels</dt>
+        <dd>Release <code>v2026.10.25</code>. R@all and H.G. depend on the qrels release, so report the tag you used.</dd>
+      </dl>
+      <p class="note more">Prompts, settings and scripts: <a href="https://github.com/castorini/cmass/blob/main/REPRODUCING.md">REPRODUCING.md</a> and <a href="https://github.com/castorini/cmass/tree/main/evaluation">evaluation/</a>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="submit">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="kicker">Submit</p>
+      <h2>Add your system</h2>
+    </div>
+    <div class="prose">
+      <p>To add a system, open an issue in the <a href="https://github.com/castorini/cmass/issues">GitHub repository</a> with your answers, the document ids each search returned, and your settings. We score hop groundedness, since its hop-level judgments are not released.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-row">
+    <p>CMASS &middot; University of Waterloo &middot; Code under Apache&nbsp;2.0; each split keeps its source dataset's license.</p>
+    <nav class="footer-links" aria-label="Project links">
+      <a href="../">Home</a>
+      <a href="https://huggingface.co/datasets/castorini/cmass">Hugging Face</a>
+      <a href="https://github.com/castorini/cmass">GitHub</a>
+      <a href="https://arxiv.org/abs/2608.20317">arXiv</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="../assets/site.js"></script>
+</body>
+</html>
