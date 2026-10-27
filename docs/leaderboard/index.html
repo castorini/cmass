@@ -38,7 +38,7 @@
 
 <section class="page-head">
   <div class="wrap">
-    <p class="eyebrow">Leaderboard &middot; qrels v2026.10.25</p>
+    <p class="eyebrow">Leaderboard <span class="version-pill">CMASS v1.0 &middot; v2026.10.25</span></p>
     <h1>Search agents on CMASS</h1>
     <div class="prose">
       <p class="lead">Each agent runs in the Piika harness with two tools, <code>search</code> and <code>read_document</code>, over a BM25 index of the 553M ClimbMix documents. Closed-book runs answer the same questions with every tool disabled. Within each dataset, rows are ranked by accuracy with retrieval tools.</p>
@@ -101,7 +101,7 @@
           <!-- rows:end -->
       </table>
     </div>
-    <p class="note table-note">Table 3 of the CMASS paper plus P@all, scored with the v2026.10.25 qrels. All values are percentages except T.C., a mean count. Bold marks the best value per dataset; tool calls are not ranked. One run per model, dataset and condition.</p>
+    <p class="note table-note">Table 3 of the CMASS paper plus P@all, on CMASS v1.0 (release v2026.10.25). All values are percentages except T.C., a mean count. Bold marks the best value per dataset; tool calls are not ranked. One run per model, dataset and condition.</p>
   </div>
 </section>
 
@@ -141,8 +141,8 @@
         <dd>BM25 over ClimbMix through the <a href="https://github.com/castorini/pyserini">Pyserini</a> 2.4.0 REST backend (k<sub>1</sub>&nbsp;=&nbsp;0.9, b&nbsp;=&nbsp;0.4).</dd>
         <dt>Models</dt>
         <dd>GPT-6.1 Sol with high reasoning effort; Gemma&nbsp;4 31B IT and Qwen&nbsp;3.5 9B with thinking enabled, served with vLLM.</dd>
-        <dt>Qrels</dt>
-        <dd>Release <code>v2026.10.25</code>. P@all, R@all and H.G. depend on the qrels release, so report the tag you used.</dd>
+        <dt>Version</dt>
+        <dd>CMASS v1.0, released on 25 October 2026 as <code>v2026.10.25</code>. P@all, R@all and H.G. depend on the qrels, so report the version you used.</dd>
       </dl>
       <p class="note more">Prompts, settings and scripts: <a href="https://github.com/castorini/cmass/blob/main/REPRODUCING.md">REPRODUCING.md</a> and <a href="https://github.com/castorini/cmass/tree/main/evaluation">evaluation/</a>.</p>
     </div>
