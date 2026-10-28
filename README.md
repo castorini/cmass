@@ -193,8 +193,8 @@ Every push and pull request also runs the `leak-scan` check
 If you use CMASS, please cite:
 
 ```bibtex
-@misc{sharifymoghaddam2026projectingbrowsecompplusclimbmixrealistic,
-      title={Projecting BrowseComp-Plus onto ClimbMix: Toward More Realistic Corpora for Agentic Search},
+@misc{sharifymoghaddam2026cmassclimbmixagenticsearch,
+      title={CMASS: A ClimbMix Agentic Search Suite for Evaluating Search Agents Across Heterogeneous Tasks},
       author={Sahel Sharifymoghaddam and Lingwei Gu and Yijun Ge and Jimmy Lin},
       year={2026},
       eprint={2608.20317},
