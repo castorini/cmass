@@ -478,6 +478,7 @@ table.board .model .harness-sub a { color: var(--accent); font-weight: 400; font
   table.board thead tr.grp th { letter-spacing: 0; }
   table.board thead tr.grp th.span + th.span { border-left-width: .4rem; }
   table.board td.num { font-size: .75rem; }
+  table.board tbody tr.set-row th span { display: block; margin: .3rem 0 0; }
   table.board thead tr:not(.grp) th, table.board thead tr.grp th { font-size: .6875rem; }
 }
 
