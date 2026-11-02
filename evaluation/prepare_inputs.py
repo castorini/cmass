@@ -15,9 +15,9 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 from scripts.deobfuscate import decode_row
 
-REVISION = "09b13bd392f499ab9af21618bcde3284a69cbcbb"
+REVISION = "b45390693461d948d47fdd835f27b46026b5e2a2"
 COUNTS = {"bcp": 80, "trqa": 68, "hotpotqa": 204, "dsqa": 71}
-QREL_COUNTS = {"bcp": 10968, "trqa": 7512, "hotpotqa": 10033, "dsqa": 8698}
+QREL_COUNTS = {"bcp": 11450, "trqa": 8307, "hotpotqa": 11090, "dsqa": 9889}
 
 
 def fetch(dataset: str, name: str) -> tuple[list[dict], str]:
@@ -67,7 +67,7 @@ def prepare(dataset: str, output: Path) -> None:
         gold.append(row)
     save("evaluation/ground_truth.jsonl", "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in gold))
     save("evaluation/qrels.txt", "".join(f"{i} 0 {doc} 1\n" for i, doc in sorted(pairs)))
-    bid = f"cmass-{dataset}-20261020"
+    bid = f"cmass-{dataset}-20261025"
     definition = dict(id=bid, aliases=[], displayName=f"CMASS {dataset}", datasetId=bid,
                       piSearchPromptVariant="plain_minimal", defaultQuerySetId="final",
                       defaultQueryPath=str(output / "generation/questions.tsv"),

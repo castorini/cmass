@@ -129,25 +129,27 @@ TREC RAG Pyserini tokens work for CMASS as well.
 ## Results
 
 Three models with search and document-reading tools over the ClimbMix BM25 index, and closed-book.
+P@all: share of all retrieved documents that are qrels, with unjudged documents counted as non-relevant;
 R@all: recall of the qrels over all retrieved documents; H.G.: hop groundedness; T.C.: mean search and
-document-read calls per question; Acc.: answer accuracy. R@all, H.G. and accuracy are percentages;
+document-read calls per question; Acc.: answer accuracy. P@all, R@all, H.G. and accuracy are percentages;
 T.C. is a count. GPT-6.1 Sol uses high reasoning
-effort; DSQA uses strict exact-set equality.
+effort; DSQA uses strict exact-set equality. Retrieval scores use the `v2026.10.25` qrels and are not
+directly comparable with scores on `v2026.10.20`.
 
-| Benchmark | Model | R@all | H.G. | T.C. | Acc. | Closed-book Acc. |
-| --- | --- | ---: | ---: | ---: | ---: | ---: |
-| BCP (80) | GPT-6.1 Sol | 10.8 | 73.8 | 21.5 | 85.0 | 52.5 |
-| | Gemma 4 31B | 3.4 | 28.3 | 23.5 | 27.5 | 16.3 |
-| | Qwen 3.5 9B | 3.2 | 27.8 | 49.9 | 16.3 | 5.0 |
-| TRQA (68) | GPT-6.1 Sol | 9.9 | 78.2 | 8.6 | 94.1 | 86.8 |
-| | Gemma 4 31B | 14.1 | 79.1 | 12.4 | 66.2 | 50.0 |
-| | Qwen 3.5 9B | 15.7 | 84.6 | 19.7 | 57.4 | 39.7 |
-| DSQA (71) | GPT-6.1 Sol | 14.1 | 73.2 | 17.9 | 90.1 | 70.4 |
-| | Gemma 4 31B | 15.5 | 63.3 | 21.5 | 38.0 | 23.9 |
-| | Qwen 3.5 9B | 16.7 | 68.2 | 37.1 | 39.4 | 12.7 |
-| HotpotQA (204) | GPT-6.1 Sol | 16.6 | 86.7 | 6.7 | 94.6 | 89.7 |
-| | Gemma 4 31B | 16.3 | 76.0 | 10.2 | 65.7 | 36.8 |
-| | Qwen 3.5 9B | 17.2 | 80.9 | 17.0 | 70.1 | 27.5 |
+| Benchmark | Model | P@all | R@all | H.G. | T.C. | Acc. | Closed-book Acc. |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| BCP (80) | GPT-6.1 Sol | 38.2 | 12.1 | 75.5 | 21.5 | 85.0 | 52.5 |
+| | Gemma 4 31B | 10.9 | 4.2 | 31.4 | 23.5 | 27.5 | 16.3 |
+| | Qwen 3.5 9B | 9.2 | 4.4 | 31.4 | 49.9 | 16.3 | 5.0 |
+| TRQA (68) | GPT-6.1 Sol | 70.9 | 10.6 | 79.7 | 8.6 | 94.1 | 86.8 |
+| | Gemma 4 31B | 59.2 | 17.0 | 82.7 | 12.4 | 66.2 | 50.0 |
+| | Qwen 3.5 9B | 59.4 | 18.6 | 85.8 | 19.7 | 57.4 | 39.7 |
+| DSQA (71) | GPT-6.1 Sol | 50.5 | 15.0 | 75.7 | 17.9 | 90.1 | 70.4 |
+| | Gemma 4 31B | 33.2 | 17.4 | 68.1 | 21.5 | 38.0 | 23.9 |
+| | Qwen 3.5 9B | 35.3 | 19.8 | 72.0 | 37.1 | 39.4 | 12.7 |
+| HotpotQA (204) | GPT-6.1 Sol | 57.9 | 17.2 | 90.2 | 6.7 | 94.6 | 89.7 |
+| | Gemma 4 31B | 44.4 | 18.1 | 78.4 | 10.2 | 65.7 | 36.8 |
+| | Qwen 3.5 9B | 44.4 | 19.7 | 83.9 | 17.0 | 70.1 | 27.5 |
 
 Open-weight agents leave substantial headroom, and high accuracy can coexist with incomplete evidence:
 the strongest model answers most questions while retrieving a small fraction of the relevant documents.
@@ -185,7 +187,8 @@ remain private; unjudged candidates are not new qrels.
   `corpus_duplicates` config of the Hugging Face dataset.
 - [`scripts/deobfuscate.py`](scripts/deobfuscate.py) decodes the obfuscated fields of the Hugging Face
   release using each row's `canary`; [`scripts/leak_scan.py`](scripts/leak_scan.py) keeps benchmark
-  content out of this repository.
+  content out of this repository; [`scripts/build_leaderboard.py`](scripts/build_leaderboard.py) writes
+  the leaderboard rows from the results in `evaluation/`.
 - [The Hugging Face dataset](https://huggingface.co/datasets/castorini/cmass) holds the released
   questions and qrels (obfuscated) and the `corpus_duplicates` config. The documents come from the
   `climbmix-400b` corpus.

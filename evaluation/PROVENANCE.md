@@ -88,3 +88,14 @@ artifact integrity and metric arithmetic, not a new full event-stream audit.
 Plaintext document IDs and relevance labels remain sensitive even without
 benchmark text. The export is owner-only, and neither its data nor internal
 access paths are part of the current public documentation.
+
+## Final qrels update (`v2026.10.25`)
+
+The `v2026.10.25` qrels add documents judged from the evaluated systems' retrievals
+and re-judge part of HotpotQA. The same 1,269 selected artifacts are rescored against
+them; nothing was rerun or reselected. On the `v2026.10.20` inputs, the same code
+reproduces all twelve hop summaries and all twelve recall values published for that
+release, so the changes come from the qrels. Scoring the decoded Hugging Face release
+gives the same recall and precision as the private qrels. Accuracy and tool calls do
+not depend on the qrels. Hop file hashes for both releases are in
+[hop_groundedness_results.json](hop_groundedness_results.json).

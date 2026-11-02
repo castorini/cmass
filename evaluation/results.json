@@ -1,6 +1,8 @@
 {
   "schema": "cmass-four-dataset-results-v1",
-  "dataset_revision": "09b13bd392f499ab9af21618bcde3284a69cbcbb",
+  "dataset_revision": "b45390693461d948d47fdd835f27b46026b5e2a2",
+  "qrels_release": "v2026.10.25",
+  "run_inputs_revision": "09b13bd392f499ab9af21618bcde3284a69cbcbb",
   "selection": "Latest revised question inputs; accepted prior outputs plus validity-only continuations; no score-based winner selection",
   "judge_model": "gpt-6.1-sol",
   "judge_reasoning": "high",
@@ -266,7 +268,8 @@
       "read_calls": 469,
       "total_tool_calls": 1718,
       "mean_tool_calls": 21.475,
-      "recall_at_all_percent": 10.834995924560085,
+      "recall_at_all_percent": 12.067725036139134,
+      "precision_at_all_percent": 38.18191796106446,
       "model": "sol"
     },
     {
@@ -276,7 +279,8 @@
       "read_calls": 17,
       "total_tool_calls": 1879,
       "mean_tool_calls": 23.4875,
-      "recall_at_all_percent": 3.395540411243175,
+      "recall_at_all_percent": 4.225200768509079,
+      "precision_at_all_percent": 10.92398448886706,
       "model": "gemma"
     },
     {
@@ -286,7 +290,8 @@
       "read_calls": 992,
       "total_tool_calls": 3993,
       "mean_tool_calls": 49.9125,
-      "recall_at_all_percent": 3.1662174629395268,
+      "recall_at_all_percent": 4.443224426359965,
+      "precision_at_all_percent": 9.214720615155478,
       "model": "qwen"
     },
     {
@@ -296,7 +301,8 @@
       "read_calls": 248,
       "total_tool_calls": 585,
       "mean_tool_calls": 8.602941176470589,
-      "recall_at_all_percent": 9.93600234857596,
+      "recall_at_all_percent": 10.572073526526331,
+      "precision_at_all_percent": 70.91044766997044,
       "model": "sol"
     },
     {
@@ -306,7 +312,8 @@
       "read_calls": 28,
       "total_tool_calls": 844,
       "mean_tool_calls": 12.411764705882353,
-      "recall_at_all_percent": 14.046462463264522,
+      "recall_at_all_percent": 16.980831873837417,
+      "precision_at_all_percent": 59.184697869271446,
       "model": "gemma"
     },
     {
@@ -316,7 +323,8 @@
       "read_calls": 499,
       "total_tool_calls": 1339,
       "mean_tool_calls": 19.691176470588236,
-      "recall_at_all_percent": 15.729194163498184,
+      "recall_at_all_percent": 18.563194215682497,
+      "precision_at_all_percent": 59.39922700223162,
       "model": "qwen"
     },
     {
@@ -326,7 +334,8 @@
       "read_calls": 86,
       "total_tool_calls": 2074,
       "mean_tool_calls": 10.166666666666666,
-      "recall_at_all_percent": 16.30467881783003,
+      "recall_at_all_percent": 18.093516578330718,
+      "precision_at_all_percent": 44.43121404871164,
       "model": "gemma"
     },
     {
@@ -336,7 +345,8 @@
       "read_calls": 1155,
       "total_tool_calls": 3459,
       "mean_tool_calls": 16.955882352941178,
-      "recall_at_all_percent": 17.22396233967496,
+      "recall_at_all_percent": 19.67048447396361,
+      "precision_at_all_percent": 44.35015654681415,
       "model": "qwen"
     },
     {
@@ -346,7 +356,8 @@
       "read_calls": 533,
       "total_tool_calls": 1362,
       "mean_tool_calls": 6.676470588235294,
-      "recall_at_all_percent": 16.58054945180145,
+      "recall_at_all_percent": 17.242868104748073,
+      "precision_at_all_percent": 57.919750568614816,
       "model": "sol"
     },
     {
@@ -356,7 +367,8 @@
       "read_calls": 452,
       "total_tool_calls": 1269,
       "mean_tool_calls": 17.87323943661972,
-      "recall_at_all_percent": 14.120322626711033,
+      "recall_at_all_percent": 14.99984699016696,
+      "precision_at_all_percent": 50.47269656023245,
       "model": "sol"
     },
     {
@@ -366,7 +378,8 @@
       "read_calls": 88,
       "total_tool_calls": 1526,
       "mean_tool_calls": 21.492957746478872,
-      "recall_at_all_percent": 15.463690511968384,
+      "recall_at_all_percent": 17.37396736705505,
+      "precision_at_all_percent": 33.21030287751283,
       "model": "gemma"
     },
     {
@@ -376,7 +389,8 @@
       "read_calls": 877,
       "total_tool_calls": 2636,
       "mean_tool_calls": 37.12676056338028,
-      "recall_at_all_percent": 16.661979030432107,
+      "recall_at_all_percent": 19.847572782064358,
+      "precision_at_all_percent": 35.33019975053754,
       "model": "qwen"
     }
   ],
@@ -425,5 +439,6 @@
       "artifact": "final_results.json",
       "sha256": "8019567749036430e0a4331b20d66761472b1d33656eeee707116c54a2791581"
     }
-  ]
+  ],
+  "retrieval_note": "recall_at_all_percent and precision_at_all_percent are recomputed from the selected runs against the v2026.10.25 qrels; accuracy and tool calls come from the listed sources. Questions, answers and DSQA answer sets are the same in run_inputs_revision and dataset_revision."
 }

@@ -4,6 +4,8 @@ All scores use the latest revised question sets: BCP 80, TRQA 68, HotpotQA 204,
 and DSQA 71. Accuracy and recall are percentages. The complete-precision
 aggregates and integer counts are in [results.json](results.json).
 These results are separate from the earlier BCP57 and BCP830 experiments.
+Precision, recall and hop groundedness use the `v2026.10.25` qrels and are not
+directly comparable with scores on `v2026.10.20`.
 
 ## Answer accuracy
 
@@ -32,27 +34,31 @@ see [SETTINGS.md](SETTINGS.md).
 
 ## Retrieval
 
-| Dataset | Model | Recall@all | Average tool calls |
-| --- | --- | ---: | ---: |
-| BCP | GPT-6.1 Sol (high) | 10.83 | 21.48 |
-| BCP | Gemma 4 31B IT | 3.40 | 23.49 |
-| BCP | Qwen 3.5 9B | 3.17 | 49.91 |
-| TRQA | GPT-6.1 Sol (high) | 9.94 | 8.60 |
-| TRQA | Gemma 4 31B IT | 14.05 | 12.41 |
-| TRQA | Qwen 3.5 9B | 15.73 | 19.69 |
-| HotpotQA | GPT-6.1 Sol (high) | 16.58 | 6.68 |
-| HotpotQA | Gemma 4 31B IT | 16.30 | 10.17 |
-| HotpotQA | Qwen 3.5 9B | 17.22 | 16.96 |
-| DSQA | GPT-6.1 Sol (high) | 14.12 | 17.87 |
-| DSQA | Gemma 4 31B IT | 15.46 | 21.49 |
-| DSQA | Qwen 3.5 9B | 16.66 | 37.13 |
+| Dataset | Model | Precision@all | Recall@all | Average tool calls |
+| --- | --- | ---: | ---: | ---: |
+| BCP | GPT-6.1 Sol (high) | 38.18 | 12.07 | 21.48 |
+| BCP | Gemma 4 31B IT | 10.92 | 4.23 | 23.49 |
+| BCP | Qwen 3.5 9B | 9.21 | 4.44 | 49.91 |
+| TRQA | GPT-6.1 Sol (high) | 70.91 | 10.57 | 8.60 |
+| TRQA | Gemma 4 31B IT | 59.18 | 16.98 | 12.41 |
+| TRQA | Qwen 3.5 9B | 59.40 | 18.56 | 19.69 |
+| HotpotQA | GPT-6.1 Sol (high) | 57.92 | 17.24 | 6.68 |
+| HotpotQA | Gemma 4 31B IT | 44.43 | 18.09 | 10.17 |
+| HotpotQA | Qwen 3.5 9B | 44.35 | 19.67 | 16.96 |
+| DSQA | GPT-6.1 Sol (high) | 50.47 | 15.00 | 17.87 |
+| DSQA | Gemma 4 31B IT | 33.21 | 17.37 | 21.49 |
+| DSQA | Qwen 3.5 9B | 35.33 | 19.85 | 37.13 |
 
 Recall averages per-question recall of all unique search-returned document IDs
-against final phase-2 qrels. Distinct duplicate-backed IDs remain separate.
+against the `v2026.10.25` qrels. Precision averages the share of those IDs that
+are qrels; unjudged documents count as non-relevant, so it is a lower bound.
+Distinct duplicate-backed IDs remain separate.
 Tool calls average search plus document-read invocations in selected attempts,
 including the selected Gemma DSQA unanswered attempt. Intermediate attempts
-are excluded. These are archived source-hash-checked artifact aggregates; this
-publication update is not a new independent audit of every raw event stream.
+are excluded. Recall and precision are recomputed from the selected runs' document
+IDs; accuracy and tool calls are archived source-hash-checked artifact aggregates,
+and the runs' search and read counts match them. This publication update is not a
+new independent audit of every raw event stream.
 
 ## Qrels-only Sol
 
@@ -79,8 +85,8 @@ histories differ across backbones. Closed-book scores are a memorization proxy;
 they do not prove that an answer was literally memorized. Recall and hop coverage
 show which evidence was retrieved, not which evidence caused an answer.
 
-The [hop-groundedness evaluator and results](HOP_GROUNDEDNESS.md) reproduce all
-twelve dataset/model summaries from the selected artifacts and frozen per-hop
+The [hop-groundedness evaluator and results](HOP_GROUNDEDNESS.md) compute all
+twelve dataset/model summaries from the selected artifacts and per-hop
 mappings. Public question-level qrels alone are insufficient to recompute it.
 [Retrieval-only system runs and cross-model candidate pools](SYSTEM_RUNS.md)
 remain private and are available from the authors on request for qrel expansion. See the
