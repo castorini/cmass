@@ -249,3 +249,6 @@ corpus_analysis/figures/out/*.pdf
 .env
 .env.*
 !.env.example
+
+# Private Pyserini REST authentication header used by the API access guide.
+.curlrc.pyserini-rest

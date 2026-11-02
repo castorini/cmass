@@ -9,6 +9,7 @@ ClimbMix Agentic Search Suite
 <a href="https://arxiv.org/abs/2608.20317"><b>Paper</b></a> |
 <a href="https://huggingface.co/datasets/castorini/cmass"><b>Dataset</b></a> |
 <a href="REPRODUCING.md"><b>Reproduce</b></a> |
+<a href="pyserini-rest-api/README.md"><b>API Access</b></a> |
 <a href="pipelines/bcp_climbmix/README.md"><b>Projection</b></a> |
 <a href="pipelines/bcp_climbmix/qrels/README.md"><b>Qrels</b></a> |
 <a href="review_site/README.md"><b>Review site</b></a> |
@@ -94,6 +95,13 @@ print([row["doc_id"] for row in query_qrels])
 If the Hugging Face release requires authentication, run `hf auth login` first. See
 [`pipelines/bcp_climbmix/`](pipelines/bcp_climbmix/) to reproduce the projection rather than only
 consume the release.
+
+## API Access
+
+Use the hosted Pyserini BM25 API to search ClimbMix without building a local
+index. The [API access guide](pyserini-rest-api/README.md) explains how to request
+a token by email, store it securely, and search or fetch documents. Existing
+TREC RAG Pyserini tokens work for CMASS as well.
 
 ## Projection Pipeline
 
