@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CMASS: ClimbMix Agentic Search Suite</title>
+<meta name="description" content="CMASS projects BrowseComp-Plus, Total Recall QA, DeepSearchQA and HotpotQA onto ClimbMix, a fixed 553M-document corpus, for evaluating search agents across heterogeneous tasks.">
+<link rel="canonical" href="https://cmass.tech/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="CMASS: ClimbMix Agentic Search Suite">
+<meta property="og:description" content="423 verified questions from four benchmarks, projected onto one 553M-document corpus, with 40,736 relevance judgments.">
+<meta property="og:url" content="https://cmass.tech/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="wordmark" href="./" aria-label="CMASS home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19 10.5 12.5 14.5 15.5 20 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="19" r="2.3" fill="var(--accent)"/><circle cx="10.5" cy="12.5" r="2.3" fill="var(--accent)"/><circle cx="14.5" cy="15.5" r="2.3" fill="var(--accent)"/><circle cx="20" cy="6" r="2.6" fill="var(--warm)"/></svg>
+      CMASS
+    </a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="./" aria-current="page">Overview</a>
+      <a href="leaderboard/">Leaderboard</a>
+      <a href="https://huggingface.co/datasets/castorini/cmass">Dataset</a>
+      <a href="https://github.com/castorini/cmass">Code</a>
+      <a href="https://arxiv.org/abs/2608.20317">Paper</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-text">
+    <p class="eyebrow">A benchmark suite for agentic search <span class="version-pill">v1.0 &middot; 25 October 2026</span></p>
+    <h1 class="title">
+      <span class="title-mark">CMASS</span>
+      <span class="title-sub">A ClimbMix Agentic Search Suite for Evaluating Search Agents Across Heterogeneous Tasks</span>
+    </h1>
+    <p class="authors">Sahel Sharifymoghaddam<sup>*</sup>, Lingwei Gu<sup>*</sup>, Yijun Ge, Jimmy Lin</p>
+    <p class="affil">David R. Cheriton School of Computer Science, University of Waterloo<br><sup>*</sup>Equal contribution</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="leaderboard/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16"/><path d="M6 20v-8h4v8"/><path d="M10 20V5h4v15"/><path d="M14 20v-5h4v5"/></svg>
+        Leaderboard
+      </a>
+      <a class="btn" href="https://arxiv.org/abs/2608.20317">
+        <svg class="logo logo-arxiv" viewBox="72.75 0 111.12 111.12" aria-hidden="true"><path class="ax-red" d="M127.98,55.61l-32.74,38.85c-1.29,1.37-2.08,3.78-1.36,5.5.75,1.8,2.46,2.91,4.4,2.91,1.09,0,1.99-.38,3.16-1.56l40.19-42.71c1.6-1.69,1.62-4.33.04-6.04l-13.68,3.05Z"/><path class="ax-grey" d="M127.98,55.61l31.19-38.27c1.49-1.99,2.2-3.03,1.49-4.72-.74-1.77-2.59-3.16-4.48-3.16h0c-1.06,0-1.72.09-3.01,1.11l-38.63,41.76c-1.72,1.84-1.71,4.7.02,6.53l47.79,51.07c1.02,1.05,2.05,1.19,3.14,1.19,1.93,0,3.19-1.14,4.03-2.82.72-1.73-.08-3.44-1.4-5.23l-40.12-47.46"/><path class="ax-red" d="M141.67,52.56L95,2.13S93.29.04,91.48,0s-3.6,1.02-4.34,2.79c-.7,1.69-.2,2.88,1.35,5.1l40.09,48.42"/></svg>
+        Paper (arXiv)
+      </a>
+      <a class="btn" href="https://github.com/castorini/cmass">
+        <svg class="logo logo-github" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+        Code (GitHub)
+      </a>
+      <a class="btn" href="https://huggingface.co/datasets/castorini/cmass">
+        <svg class="logo logo-hf" viewBox="0 0 95 88" fill="none" aria-hidden="true"><path fill="#FFD21E" d="M47.21 76.5a34.75 34.75 0 1 0 0-69.5 34.75 34.75 0 0 0 0 69.5Z"/><path fill="#FF9D0B" d="M81.96 41.75a34.75 34.75 0 1 0-69.5 0 34.75 34.75 0 0 0 69.5 0Zm-73.5 0a38.75 38.75 0 1 1 77.5 0 38.75 38.75 0 0 1-77.5 0Z"/><path fill="#3A3B45" d="M58.5 32.3c1.28.44 1.78 3.06 3.07 2.38a5 5 0 1 0-6.76-2.07c.61 1.15 2.55-.72 3.7-.32ZM34.95 32.3c-1.28.44-1.79 3.06-3.07 2.38a5 5 0 1 1 6.76-2.07c-.61 1.15-2.56-.72-3.7-.32Z"/><path fill="#FF323D" d="M46.96 56.29c9.83 0 13-8.76 13-13.26 0-2.34-1.57-1.6-4.09-.36-2.33 1.15-5.46 2.74-8.9 2.74-7.19 0-13-6.88-13-2.38s3.16 13.26 13 13.26Z"/><path fill="#3A3B45" fill-rule="evenodd" d="M39.43 54a8.7 8.7 0 0 1 5.3-4.49c.4-.12.81.57 1.24 1.28.4.68.82 1.37 1.24 1.37.45 0 .9-.68 1.33-1.35.45-.7.89-1.38 1.32-1.25a8.61 8.61 0 0 1 5 4.17c3.73-2.94 5.1-7.74 5.1-10.7 0-2.34-1.57-1.6-4.09-.36l-.14.07c-2.31 1.15-5.39 2.67-8.77 2.67s-6.45-1.52-8.77-2.67c-2.6-1.29-4.23-2.1-4.23.29 0 3.05 1.46 8.06 5.47 10.97Z" clip-rule="evenodd"/><path fill="#FF9D0B" d="M70.71 37a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5ZM24.21 37a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5ZM17.52 48c-1.62 0-3.06.66-4.07 1.87a5.97 5.97 0 0 0-1.33 3.76 7.1 7.1 0 0 0-1.94-.3c-1.55 0-2.95.59-3.94 1.66a5.8 5.8 0 0 0-.8 7 5.3 5.3 0 0 0-1.79 2.82c-.24.9-.48 2.8.8 4.74a5.22 5.22 0 0 0-.37 5.02c1.02 2.32 3.57 4.14 8.52 6.1 3.07 1.22 5.89 2 5.91 2.01a44.33 44.33 0 0 0 10.93 1.6c5.86 0 10.05-1.8 12.46-5.34 3.88-5.69 3.33-10.9-1.7-15.92-2.77-2.78-4.62-6.87-5-7.77-.78-2.66-2.84-5.62-6.25-5.62a5.7 5.7 0 0 0-4.6 2.46c-1-1.26-1.98-2.25-2.86-2.82A7.4 7.4 0 0 0 17.52 48Zm0 4c.51 0 1.14.22 1.82.65 2.14 1.36 6.25 8.43 7.76 11.18.5.92 1.37 1.31 2.14 1.31 1.55 0 2.75-1.53.15-3.48-3.92-2.93-2.55-7.72-.68-8.01.08-.02.17-.02.24-.02 1.7 0 2.45 2.93 2.45 2.93s2.2 5.52 5.98 9.3c3.77 3.77 3.97 6.8 1.22 10.83-1.88 2.75-5.47 3.58-9.16 3.58-3.81 0-7.73-.9-9.92-1.46-.11-.03-13.45-3.8-11.76-7 .28-.54.75-.76 1.34-.76 2.38 0 6.7 3.54 8.57 3.54.41 0 .7-.17.83-.6.79-2.85-12.06-4.05-10.98-8.17.2-.73.71-1.02 1.44-1.02 3.14 0 10.2 5.53 11.68 5.53.11 0 .2-.03.24-.1.74-1.2.33-2.04-4.9-5.2-5.21-3.16-8.88-5.06-6.8-7.33.24-.26.58-.38 1-.38 3.17 0 10.66 6.82 10.66 6.82s2.02 2.1 3.25 2.1c.28 0 .52-.1.68-.38.86-1.46-8.06-8.22-8.56-11.01-.34-1.9.24-2.85 1.31-2.85Z"/><path fill="#FFD21E" d="M38.6 76.69c2.75-4.04 2.55-7.07-1.22-10.84-3.78-3.77-5.98-9.3-5.98-9.3s-.82-3.2-2.69-2.9c-1.87.3-3.24 5.08.68 8.01 3.91 2.93-.78 4.92-2.29 2.17-1.5-2.75-5.62-9.82-7.76-11.18-2.13-1.35-3.63-.6-3.13 2.2.5 2.79 9.43 9.55 8.56 11-.87 1.47-3.93-1.71-3.93-1.71s-9.57-8.71-11.66-6.44c-2.08 2.27 1.59 4.17 6.8 7.33 5.23 3.16 5.64 4 4.9 5.2-.75 1.2-12.28-8.53-13.36-4.4-1.08 4.11 11.77 5.3 10.98 8.15-.8 2.85-9.06-5.38-10.74-2.18-1.7 3.21 11.65 6.98 11.76 7.01 4.3 1.12 15.25 3.49 19.08-2.12Z"/><path fill="#FF9D0B" d="M77.4 48c1.62 0 3.07.66 4.07 1.87a5.97 5.97 0 0 1 1.33 3.76 7.1 7.1 0 0 1 1.95-.3c1.55 0 2.95.59 3.94 1.66a5.8 5.8 0 0 1 .8 7 5.3 5.3 0 0 1 1.78 2.82c.24.9.48 2.8-.8 4.74a5.22 5.22 0 0 1 .37 5.02c-1.02 2.32-3.57 4.14-8.51 6.1-3.08 1.22-5.9 2-5.92 2.01a44.33 44.33 0 0 1-10.93 1.6c-5.86 0-10.05-1.8-12.46-5.34-3.88-5.69-3.33-10.9 1.7-15.92 2.78-2.78 4.63-6.87 5.01-7.77.78-2.66 2.83-5.62 6.24-5.62a5.7 5.7 0 0 1 4.6 2.46c1-1.26 1.98-2.25 2.87-2.82A7.4 7.4 0 0 1 77.4 48Zm0 4c-.51 0-1.13.22-1.82.65-2.13 1.36-6.25 8.43-7.76 11.18a2.43 2.43 0 0 1-2.14 1.31c-1.54 0-2.75-1.53-.14-3.48 3.91-2.93 2.54-7.72.67-8.01a1.54 1.54 0 0 0-.24-.02c-1.7 0-2.45 2.93-2.45 2.93s-2.2 5.52-5.97 9.3c-3.78 3.77-3.98 6.8-1.22 10.83 1.87 2.75 5.47 3.58 9.15 3.58 3.82 0 7.73-.9 9.93-1.46.1-.03 13.45-3.8 11.76-7-.29-.54-.75-.76-1.34-.76-2.38 0-6.71 3.54-8.57 3.54-.42 0-.71-.17-.83-.6-.8-2.85 12.05-4.05 10.97-8.17-.19-.73-.7-1.02-1.44-1.02-3.14 0-10.2 5.53-11.68 5.53-.1 0-.19-.03-.23-.1-.74-1.2-.34-2.04 4.88-5.2 5.23-3.16 8.9-5.06 6.8-7.33-.23-.26-.57-.38-.98-.38-3.18 0-10.67 6.82-10.67 6.82s-2.02 2.1-3.24 2.1a.74.74 0 0 1-.68-.38c-.87-1.46 8.05-8.22 8.55-11.01.34-1.9-.24-2.85-1.31-2.85Z"/><path fill="#FFD21E" d="M56.33 76.69c-2.75-4.04-2.56-7.07 1.22-10.84 3.77-3.77 5.97-9.3 5.97-9.3s.82-3.2 2.7-2.9c1.86.3 3.23 5.08-.68 8.01-3.92 2.93.78 4.92 2.28 2.17 1.51-2.75 5.63-9.82 7.76-11.18 2.13-1.35 3.64-.6 3.13 2.2-.5 2.79-9.42 9.55-8.55 11 .86 1.47 3.92-1.71 3.92-1.71s9.58-8.71 11.66-6.44c2.08 2.27-1.58 4.17-6.8 7.33-5.23 3.16-5.63 4-4.9 5.2.75 1.2 12.28-8.53 13.36-4.4 1.08 4.11-11.76 5.3-10.97 8.15.8 2.85 9.05-5.38 10.74-2.18 1.69 3.21-11.65 6.98-11.76 7.01-4.31 1.12-15.26 3.49-19.08-2.12Z"/></svg>
+        Dataset (Hugging Face)
+      </a>
+    </div>
+    </div>
+    <figure class="hero-figure">
+<svg class="hero-fig" viewBox="0 0 420 352" role="img" aria-labelledby="fig-title">
+<title id="fig-title">A source question is decomposed into hops; each hop is grounded in ClimbMix documents, and the documents that support a hop are the question's qrels.</title>
+<path d="M210 70 C210 100 70 96 70 118" fill="none" stroke="var(--line-strong)" stroke-width="1.5"/>
+<path d="M70 146 V178" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3 3"/>
+<path d="M210 70 C210 100 210 96 210 118" fill="none" stroke="var(--line-strong)" stroke-width="1.5"/>
+<path d="M210 146 V178" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3 3"/>
+<path d="M210 70 C210 100 350 96 350 118" fill="none" stroke="var(--line-strong)" stroke-width="1.5"/>
+<path d="M350 146 V178" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3 3"/>
+<rect x="95" y="12" width="230" height="58" rx="10" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="210" y="38" text-anchor="middle" class="fig-h">Source question</text>
+<text x="210" y="57" text-anchor="middle" class="fig-s">BCP · TRQA · DSQA · HotpotQA</text>
+<rect x="24" y="118" width="92" height="28" rx="14" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<text x="70" y="136.5" text-anchor="middle" class="fig-hop">hop 1</text>
+<rect x="164" y="118" width="92" height="28" rx="14" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<text x="210" y="136.5" text-anchor="middle" class="fig-hop">hop 2</text>
+<rect x="304" y="118" width="92" height="28" rx="14" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<text x="350" y="136.5" text-anchor="middle" class="fig-hop">hop 3</text>
+<rect x="8" y="178" width="404" height="122" rx="10" fill="var(--sunken)" stroke="var(--line)"/>
+<rect x="22.0" y="196" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="42.9" y="196" width="14" height="18" rx="2" fill="var(--accent)"/>
+<rect x="63.8" y="196" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="84.7" y="196" width="14" height="18" rx="2" fill="var(--accent)"/>
+<rect x="105.6" y="196" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="126.5" y="196" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="147.4" y="196" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="168.3" y="196" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="189.2" y="196" width="14" height="18" rx="2" fill="var(--accent)"/>
+<rect x="210.1" y="196" width="14" height="18" rx="2" fill="var(--accent)"/>
+<rect x="231.0" y="196" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="251.9" y="196" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="272.8" y="196" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="293.7" y="196" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="314.6" y="196" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="335.5" y="196" width="14" height="18" rx="2" fill="var(--accent)"/>
+<rect x="356.4" y="196" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="377.3" y="196" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="22.0" y="222" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="42.9" y="222" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="63.8" y="222" width="14" height="18" rx="2" fill="var(--accent)"/>
+<rect x="84.7" y="222" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="105.6" y="222" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="126.5" y="222" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="147.4" y="222" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="168.3" y="222" width="14" height="18" rx="2" fill="var(--accent)"/>
+<rect x="189.2" y="222" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="210.1" y="222" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="231.0" y="222" width="14" height="18" rx="2" fill="var(--accent)"/>
+<rect x="251.9" y="222" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="272.8" y="222" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="293.7" y="222" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="314.6" y="222" width="14" height="18" rx="2" fill="var(--accent)"/>
+<rect x="335.5" y="222" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="356.4" y="222" width="14" height="18" rx="2" fill="var(--accent)"/>
+<rect x="377.3" y="222" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="22.0" y="248" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="42.9" y="248" width="14" height="18" rx="2" fill="var(--accent)"/>
+<rect x="63.8" y="248" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="84.7" y="248" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="105.6" y="248" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="126.5" y="248" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="147.4" y="248" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="168.3" y="248" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="189.2" y="248" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="210.1" y="248" width="14" height="18" rx="2" fill="var(--accent)"/>
+<rect x="231.0" y="248" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="251.9" y="248" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="272.8" y="248" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="293.7" y="248" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="314.6" y="248" width="14" height="18" rx="2" fill="var(--accent)"/>
+<rect x="335.5" y="248" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="356.4" y="248" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<rect x="377.3" y="248" width="14" height="18" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="22" y="288" class="fig-s">ClimbMix · 553M documents</text>
+<rect x="22" y="318" width="11" height="13" rx="2" fill="var(--accent)"/>
+<text x="40" y="329" class="fig-l">qrel: states a fact a hop needs</text>
+<rect x="250" y="318" width="11" height="13" rx="2" fill="var(--surface)" stroke="var(--line-strong)"/>
+<text x="268" y="329" class="fig-l">other documents</text>
+</svg>
+    </figure>
+  </div>
+</section>
+
+<section class="facts" aria-label="CMASS at a glance">
+  <dl class="wrap facts-grid">
+    <div class="fact"><dt>verified questions</dt><dd>423</dd></div>
+    <div class="fact"><dt>source datasets</dt><dd>4</dd></div>
+    <div class="fact"><dt>ClimbMix documents</dt><dd>553M</dd></div>
+    <div class="fact"><dt>tokens in the corpus</dt><dd>~400B</dd></div>
+    <div class="fact"><dt>qrels (v2026.10.25)</dt><dd>40,736</dd></div>
+    <div class="fact"><dt>BM25 Lucene index</dt><dd>559&nbsp;GB</dd></div>
+  </dl>
+</section>
+
+<section class="section" id="abstract">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="kicker">Abstract</p>
+      <h2>One fixed corpus, four kinds of search task</h2>
+    </div>
+    <div class="prose">
+      <p class="lead">Evaluating advances in agentic search requires testing whether methods generalize across tasks and corpus scale. Changing web search services impede controlled comparisons, while small corpora assembled around benchmark questions provide a limited test of generalization.</p>
+      <p>We introduce CMASS, the ClimbMix Agentic Search Suite, which projects three search benchmarks&mdash;BrowseComp-Plus, Total Recall QA, and DeepSearchQA&mdash;and the multi-hop question-answering dataset HotpotQA onto a shared, fixed corpus. The target, ClimbMix, is a pre-training corpus of 553M documents and approximately 400B tokens, assembled independently of the benchmark questions. Our projection pipeline verifies grounding, answer uniqueness, and set completeness through independent agent audits, controlled revision, and human review. The 423 questions span entity identification, multi-hop reasoning, exhaustive answer sets, and aggregation.</p>
+      <p>Evaluations of three models expose substantial headroom for open-weight agents and show that high answer accuracy can coexist with incomplete evidence coverage. By enabling measurement of accuracy alongside evidence coverage, search effort, and closed-book performance, CMASS supports developing agents that find sufficient evidence and produce complete answers efficiently.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="suite">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="kicker">The suite</p>
+      <h2>Four benchmarks, projected onto ClimbMix</h2>
+    </div>
+    <div class="split">
+      <div class="prose">
+        <p>Each source question is decomposed into atomic reasoning hops and kept only if every hop is grounded in ClimbMix documents, its answer is unique and, for set questions, its answer set is complete. Questions that needed it were revised; wording and answers can differ from their upstream versions.</p>
+        <p>Every question comes with question-level relevance judgments (qrels): the ClimbMix documents that state a fact one of its hops needs, including exact and near duplicates of those documents.</p>
+      </div>
+      <div class="table-scroll">
+        <table class="data">
+          <thead>
+            <tr><th scope="col">Source</th><th scope="col" class="wide-only">Task</th><th scope="col" class="num">Questions</th><th scope="col" class="num">Qrels</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><a href="https://huggingface.co/datasets/Tevatron/browsecomp-plus">BrowseComp-Plus</a><span class="cell-sub">BCP<span class="narrow-only"> &middot; Entity identification</span></span></td><td class="wide-only">Entity identification</td><td class="num">80</td><td class="num">11,450</td></tr>
+            <tr><td><a href="https://github.com/mahta-r/total-recall-qa">Total Recall QA</a><span class="cell-sub">TRQA<span class="narrow-only"> &middot; Aggregation</span></span></td><td class="wide-only">Aggregation</td><td class="num">68</td><td class="num">8,307</td></tr>
+            <tr><td><a href="https://huggingface.co/datasets/google/deepsearchqa">DeepSearchQA</a><span class="cell-sub">DSQA<span class="narrow-only"> &middot; Exhaustive answer sets</span></span></td><td class="wide-only">Exhaustive answer sets</td><td class="num">71</td><td class="num">9,889</td></tr>
+            <tr><td><a href="https://hotpotqa.github.io/">HotpotQA</a><span class="cell-sub"><span class="narrow-only">Multi-hop reasoning</span><span class="wide-only">&nbsp;</span></span></td><td class="wide-only">Multi-hop reasoning</td><td class="num">204</td><td class="num">11,090</td></tr>
+          </tbody>
+          <tfoot>
+            <tr><td>Total</td><td class="wide-only"></td><td class="num">423</td><td class="num">40,736</td></tr>
+          </tfoot>
+          <caption>Qrels are question&ndash;document pairs in release v2026.10.25.</caption>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="pipeline">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="kicker">Projection pipeline</p>
+      <h2>Every hop grounded, every answer checked</h2>
+    </div>
+    <ol class="stages">
+      <li class="stage">
+        <h3>Preparation</h3>
+        <p>Exact and near-duplicate detection over the whole corpus (Jaccard 0.7 or more; nothing is removed), and one task per source question.</p>
+      </li>
+      <li class="stage">
+        <h3>Projection</h3>
+        <p>Agents decompose each question into hops, search ClimbMix for evidence of each hop, and judge whether the answer can be derived from what they found.</p>
+      </li>
+      <li class="stage">
+        <h3>Audit and review</h3>
+        <p>An auditor checks constraint coverage, uniqueness and set completeness and may revise the question; hunters look for rival answers; the authors review every question.</p>
+      </li>
+      <li class="stage">
+        <h3>Qrels</h3>
+        <p>Judge agents keep the pooled documents that support a hop and add their duplicates; documents the evaluated agents retrieved are then judged the same way, TREC-style.</p>
+      </li>
+    </ol>
+    <figure class="shot pipeline-fig">
+      <a href="assets/projection-pipeline.webp"><img src="assets/projection-pipeline.webp" width="2400" height="2890" loading="lazy" decoding="async" alt="Flowchart of the projection pipeline for BrowseComp-Plus. Stage 0 prepares the corpus and one task per question. Stage 1 decomposes each of the 830 questions into hops and grounds them in ClimbMix; 326 are labeled projectable, and 65 verified candidates plus 47 near misses, 112 in all, go on. Stage 2 audits them, checks for rival answers, sends them to human review and a final check, and accepts 80. Stage 3 builds 11,450 qrels by candidate pooling, a precision filter and duplicate expansion."></a>
+      <figcaption>The projection pipeline, with the BrowseComp-Plus counts: 80 of 830 source questions are released, with 11,450 qrels. Open the image for full size.</figcaption>
+    </figure>
+    <div class="audit-block">
+      <div class="audit-text">
+        <h3>Stage 2: audit, revision and human review</h3>
+        <p>An auditor agent checks each question's constraints and hops (D2), then its answer's accuracy and completeness (D3). A question that fails goes to a revision agent for a permitted revision (D4); wording changes need human approval, and revised questions repeat the audit and review. Hunter and verifier agents look for rival answers and omissions, and the authors then accept, accept with fixes, or reject each question (D5). A fresh checker agent and validation scripts produce the final records (D6); HotpotQA skips the checker.</p>
+        <p class="note">The authors' review interface, with an offline demo: <a href="https://github.com/castorini/cmass/tree/main/review_site">review_site/</a>.</p>
+      </div>
+      <figure class="shot">
+        <a href="assets/audit-loop.webp"><img src="assets/audit-loop.webp" width="2402" height="2621" loading="lazy" decoding="async" alt="Flowchart of Stage 2. D1: scripts validate the inputs and evidence. D2 and D3: an auditor agent audits constraints and hops, then answer accuracy and completeness. On a failure, D4: a revision agent attempts a permitted revision and the revised question repeats the loop; a failed repair is excluded. D5: hunter and verifier agents look for rivals and omissions, then the authors accept, accept with fixes, or reject. D6: a checker agent re-checks the evidence, and scripts validate and finalize the record, which goes to Stage 3."></a>
+        <figcaption>Stage 2's audit, revision and human review loop; D1 to D6 follow the paper's appendix. Dashed blue arrows route revisions through D4, and red arrows lead to exclusion. Open the image for full size.</figcaption>
+      </figure>
+    </div>
+    <p class="more note">The pipeline is dataset- and corpus-agnostic. Code, prompts and offline demos: <a href="https://github.com/castorini/cmass/tree/main/pipelines/cmass">pipelines/cmass</a>.</p>
+  </div>
+</section>
+
+<section class="section" id="results">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="kicker">Results</p>
+      <h2>What three search agents show</h2>
+    </div>
+    <ul class="findings">
+      <li class="finding">
+        <h3>Headroom for open-weight agents</h3>
+        <p>On BCP, Gemma&nbsp;4 31B and Qwen&nbsp;3.5 9B answer <span class="figure-inline">27.5%</span> and <span class="figure-inline">16.3%</span> of questions, against <span class="figure-inline">85.0%</span> for GPT-6.1 Sol, while making more tool calls.</p>
+      </li>
+      <li class="finding">
+        <h3>Accuracy without full evidence</h3>
+        <p>Sol answers <span class="figure-inline">90.1%</span> of DSQA questions while grounding <span class="figure-inline">75.7%</span> of their hops. On HotpotQA it grounds <span class="figure-inline">90.2%</span> of hops from <span class="figure-inline">17.2%</span> of the relevant documents.</p>
+      </li>
+      <li class="finding">
+        <h3>Strong closed-book baselines</h3>
+        <p>With no tools at all, Sol answers <span class="figure-inline">89.7%</span> of HotpotQA questions, against <span class="figure-inline">94.6%</span> with search. Closed-book runs check whether accuracy gains also occur without retrieval.</p>
+      </li>
+    </ul>
+    <p class="more"><a class="btn btn-primary" href="leaderboard/">See the leaderboard <span aria-hidden="true">&rarr;</span></a></p>
+  </div>
+</section>
+
+<section class="section" id="data">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="kicker">Get the data</p>
+      <h2>Load CMASS from Hugging Face</h2>
+    </div>
+    <div class="prose">
+      <p>The current version is CMASS v1.0 (25 October 2026), released on Hugging Face as <code>v2026.10.25</code>. Questions, answers and qrels are obfuscated to discourage accidental training contamination; decode them before evaluation. Pin the release tag and report it with your results: results on <code>v2026.10.20</code> and <code>v2026.10.25</code> qrels are not directly comparable. The corpus text is not redistributed; document ids refer to <a href="https://huggingface.co/datasets/karpathy/climbmix-400b-shuffle">ClimbMix</a>.</p>
+    </div>
+    <div class="code-stack">
+      <figure class="code">
+        <div class="code-bar"><span>Shell</span><button class="copy-btn" type="button" data-copy="code-shell">Copy</button></div>
+<pre id="code-shell">python3 -m pip install datasets
+curl --fail --location \
+  https://huggingface.co/datasets/castorini/cmass/resolve/v2026.10.25/deobfuscate.py \
+  --output deobfuscate.py</pre>
+      </figure>
+      <figure class="code">
+        <div class="code-bar"><span>Python</span><button class="copy-btn" type="button" data-copy="code-python">Copy</button></div>
+<pre id="code-python">from datasets import load_dataset
+from deobfuscate import decode_row
+
+repo = "castorini/cmass"
+revision = "v2026.10.25"
+split = "bcp"  # Also: trqa, hotpotqa, dsqa.
+queries = load_dataset(repo, "queries", split=split, revision=revision)
+qrels = load_dataset(repo, "qrels", split=split, revision=revision)
+
+query = decode_row(queries[0])
+decoded_qrels = [decode_row(row) for row in qrels]
+evidence_ids = [row["doc_id"] for row in decoded_qrels
+                if row["query_id"] == query["id"]]
+
+print(query["question"])
+print(query["answer"])
+print(evidence_ids)</pre>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="citation">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="kicker">Citation</p>
+      <h2>Cite CMASS</h2>
+    </div>
+    <figure class="code">
+      <div class="code-bar"><span>BibTeX</span><button class="copy-btn" type="button" data-copy="bibtex">Copy</button></div>
+<pre id="bibtex">@misc{sharifymoghaddam2026cmassclimbmixagenticsearch,
+      title={CMASS: A ClimbMix Agentic Search Suite for Evaluating Search Agents Across Heterogeneous Tasks},
+      author={Sahel Sharifymoghaddam and Lingwei Gu and Yijun Ge and Jimmy Lin},
+      year={2026},
+      eprint={2608.20317},
+      archivePrefix={arXiv},
+      primaryClass={cs.IR},
+      url={https://arxiv.org/abs/2608.20317},
+}</pre>
+    </figure>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-row">
+    <p>CMASS &middot; University of Waterloo &middot; Code under Apache&nbsp;2.0; each split keeps its source dataset's license.</p>
+    <nav class="footer-links" aria-label="Project links">
+      <a href="leaderboard/">Leaderboard</a>
+      <a href="https://huggingface.co/datasets/castorini/cmass">Hugging Face</a>
+      <a href="https://github.com/castorini/cmass">GitHub</a>
+      <a href="https://arxiv.org/abs/2608.20317">arXiv</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+</body>
+</html>

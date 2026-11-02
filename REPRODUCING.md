@@ -120,6 +120,9 @@ The recorded transport was Pyserini REST. A local implementation is acceptable
 if it preserves the index, ranking and model-visible output and records its
 provenance; a hosted endpoint is optional.
 
+For hosted access, follow the [Pyserini API and token-issuance guide](pyserini-rest-api/README.md).
+Existing TREC RAG tokens can be reused for the `climbmix-400b` index.
+
 Search returns up to five hits, with whitespace-normalized previews of at most
 500 characters. The archived REST launchers use paginated backend reads by
 default: the two-tool `read_document` call supplies only a document ID, so it
