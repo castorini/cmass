@@ -1,9 +1,9 @@
 # Retrieval hop groundedness
 
 For each question, a retained hop receives **1** if at least one unique
-search-returned document ID belongs to that hop's phase-2 evidence set, and **0**
-otherwise. Average these binary values within the question, then average the
-question scores within each dataset/model combination:
+search-returned document ID belongs to that hop's evidence set in the released
+`v2026.10.25` qrels, and **0** otherwise. Average these binary values within the
+question, then average the question scores within each dataset/model combination:
 
 `HG(q) = sum_h 1[R_q intersects D_qh] / number_of_retained_hops(q)`
 
@@ -18,7 +18,7 @@ with more hops must not receive greater weight.
 - `R_q` is the union of unique IDs shown in all search results in the selected
   final attempt, the same view used for recall@all. Repeated retrieval counts
   once. Opened-only documents do not change this metric.
-- `D_qh` comes from the frozen phase-2 hop/document associations, not a fresh
+- `D_qh` comes from the hop/document associations behind those qrels, not a fresh
   judgment of the agent's answer or reasoning. All retained inclusion and
   exclusion hops count, including required, confirmatory and derivation
   annotations. Existing full/partial/audit evidence links are used as recorded.
@@ -26,7 +26,7 @@ with more hops must not receive greater weight.
   document's single inclusion/exclusion category for document recall does not
   replace its many-to-many hop associations.
 - Hops with empty evidence sets count as uncovered, not as missing denominators.
-  There are none in these frozen inputs. A missing question or hop inventory
+  There are none in these inputs. A missing question or hop inventory
   is an input error; do not drop it silently.
 - All selected questions remain, including a model-unanswered outcome. When
   reporting role-specific coverage, average only over questions with at least
@@ -45,14 +45,16 @@ role-specific scores, eligible counts and source hashes are in
 
 | Dataset | Questions | Retained hops | Sol | Gemma | Qwen |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| BCP | 80 | 582 | 73.79 | 28.32 | 27.75 |
-| TRQA | 68 | 644 | 78.19 | 79.06 | 84.64 |
-| HotpotQA | 204 | 803 | 86.74 | 75.96 | 80.86 |
-| DSQA | 71 | 679 | 73.17 | 63.32 | 68.16 |
+| BCP | 80 | 582 | 75.50 | 31.42 | 31.38 |
+| TRQA | 68 | 644 | 79.66 | 82.69 | 85.76 |
+| HotpotQA | 204 | 803 | 90.20 | 78.40 | 83.92 |
+| DSQA | 71 | 679 | 75.74 | 68.07 | 71.97 |
 
 Sol is GPT-6.1 Sol high; Gemma is Gemma 4 31B IT; Qwen is Qwen 3.5 9B.
-These results were recomputed from all **1,269 hash-matched selected artifacts**
-and **2,708 retained-hop mappings**, reproducing the archived twelve summaries.
+These results score all **1,269 hash-matched selected artifacts** against the
+**2,708 retained-hop mappings** of `v2026.10.25`, and are not directly comparable
+with scores on `v2026.10.20`. On the `v2026.10.20` hop files, the same evaluator
+reproduces all twelve summaries published for that release.
 The source question strings were matched against the pinned released revisions.
 This is a fresh artifact/metric check, not a fresh semantic adjudication of the
 hop evidence or a full raw-event-stream audit.
@@ -73,7 +75,7 @@ including ones with no supporting documents. IDs are strings, scoped by dataset.
 ```bash
 python3 evaluation/hop_groundedness.py \
   --runs /absolute/private/selected-runs.jsonl \
-  --hops /absolute/private/phase2-hop-documents.jsonl \
+  --hops /absolute/private/hop-documents.jsonl \
   > /absolute/private/hop-aggregates.json
 ```
 

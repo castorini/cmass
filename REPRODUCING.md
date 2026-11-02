@@ -4,7 +4,7 @@ The current evaluation covers **BCP (80), Total Recall QA (68), HotpotQA (204),
 and DeepSearchQA (71)**: 423 revised questions, with three models and two
 conditions per dataset. Each model answers closed-book and with Piika retrieval
 over ClimbMix. The [results](evaluation/RESULTS.md) include all 24 combinations,
-DSQA strict/relaxed accuracy, recall@all, average tool calls, and the separate
+DSQA strict/relaxed accuracy, precision@all, recall@all, average tool calls, and the separate
 Sol qrels-only diagnostic. The [settings](evaluation/SETTINGS.md) identify the
 models, serving configuration, context/output limits and stopping rules.
 
@@ -56,10 +56,11 @@ cannot establish whether a model used retrieved evidence or parametric knowledge
 ## 1. Freeze the released inputs
 
 Use the reviewed HF release at
-[`09b13bd392f499ab9af21618bcde3284a69cbcbb`](https://huggingface.co/datasets/castorini/cmass/tree/09b13bd392f499ab9af21618bcde3284a69cbcbb)
-(`v2026.10.20`), including phase-2 qrels and DSQA canonical answer sets. This
-incorporates the final revisions. BCP has 80 unique questions; duplicate
-annotation records are not extra evaluation questions.
+[`b45390693461d948d47fdd835f27b46026b5e2a2`](https://huggingface.co/datasets/castorini/cmass/tree/b45390693461d948d47fdd835f27b46026b5e2a2)
+(`v2026.10.25`), including the expanded qrels and DSQA canonical answer sets. This
+incorporates the final revisions. Its questions, answers and answer sets are the
+same as in `v2026.10.20`, which the reported runs used. BCP has 80 unique
+questions; duplicate annotation records are not extra evaluation questions.
 
 Decoded inputs and outputs belong outside this public repo:
 
@@ -134,7 +135,7 @@ Choose provider/model, thinking and timeout explicitly from the settings record:
 
 ```bash
 npm run run:benchmark:query-set -- \
-  --benchmark "cmass-$dataset-20261020" --query-set final \
+  --benchmark "cmass-$dataset-20261025" --query-set final \
   --query-file "$CMASS_WORK/$dataset/generation/questions.tsv" \
   --qrels "$CMASS_WORK/$dataset/evaluation/qrels.txt" \
   --output-dir "$CMASS_WORK/runs/$dataset/$model/piika" \
@@ -187,7 +188,7 @@ For BCP/TRQA/HotpotQA, use Piika gold-answer mode:
 
 ```bash
 npm run evaluate:run -- \
-  --benchmark "cmass-$dataset-20261020" \
+  --benchmark "cmass-$dataset-20261025" \
   --inputDir "$CMASS_WORK/runs/$dataset/$model/$condition" \
   --evalDir "$CMASS_WORK/evals/$dataset/$model/$condition" \
   --groundTruth "$CMASS_WORK/$dataset/evaluation/ground_truth.jsonl" \
@@ -215,11 +216,15 @@ responses use the same DSQA judge.
 ## 5. Compute metrics
 
 Let `R_q` be the union of unique document IDs shown in all search results in
-question `q`'s selected attempt, and `G_q` its phase-2 relevant IDs.
+question `q`'s selected attempt, and `G_q` its relevant IDs in the pinned release.
 `Recall@all(q) = |R_q ∩ G_q| / |G_q|`. Report its arithmetic mean across questions,
 times 100. This is not recall over only opened documents or citations.
 Repeated retrieval of one ID counts once; distinct duplicate-backed IDs stay
 distinct in both numerator and denominator.
+
+`Precision@all(q) = |R_q ∩ G_q| / |R_q|`, and 0 when `R_q` is empty. Report its
+arithmetic mean across questions, times 100. Unjudged documents count as
+non-relevant, so it is a lower bound.
 
 Average tool calls is `sum(search_calls + read_document_calls) / N`, including
 selected model-unanswered attempts. Count agent invocations, not internal HTTP

@@ -94,6 +94,7 @@ class ProtocolTests(unittest.TestCase):
         qrels.append(dict(query_id="2", doc_id="<z>", relevance=1))
         result = aggregate(records, qrels)
         self.assertEqual(result["recall_at_all_percent"], 25)
+        self.assertEqual(result["precision_at_all_percent"], 50)
         self.assertEqual(result["accuracy_percent"], 50)
         self.assertEqual(result["mean_tool_calls"], 2)
         self.assertEqual(result["model_unanswered"], 1)

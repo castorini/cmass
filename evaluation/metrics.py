@@ -21,7 +21,7 @@ def aggregate(records: list[dict], qrels: list[dict], dsqa: bool = False) -> dic
     if not ids or len(ids) != len(set(ids)) or set(ids) != set(gold):
         raise ValueError("Expected exactly one selected outcome per qrel question")
     sums = {"strict_correct": 0, "relaxed_correct": 0} if dsqa else {"correct": 0}
-    recall, searches, reads, unanswered = 0.0, 0, 0, 0
+    recall, precision, searches, reads, unanswered = 0.0, 0.0, 0, 0, 0
     for row in records:
         if row["outcome"] not in ("completed", "model_unanswered"):
             raise ValueError("Resolve infrastructure errors before reporting a final table")
@@ -41,13 +41,16 @@ def aggregate(records: list[dict], qrels: list[dict], dsqa: bool = False) -> dic
         if not isinstance(pool, list) or not all(isinstance(i, str) for i in pool):
             raise ValueError("surfaced_docids must contain document IDs")
         relevant = gold[str(row["query_id"])]
-        recall += len(set(pool) & relevant) / len(relevant)
+        found = len(set(pool) & relevant)
+        recall += found / len(relevant)
+        precision += found / len(set(pool)) if pool else 0  # nothing surfaced scores 0, as in recall
         searches += row["search_calls"]
         reads += row["read_document_calls"]
     n = len(records)
     return dict(questions=n, completed_answers=n-unanswered, model_unanswered=unanswered,
                 **sums, **{k.replace("correct", "accuracy_percent"): 100*v/n for k, v in sums.items()},
                 recall_at_all_percent=100*recall/n,
+                precision_at_all_percent=100*precision/n,
                 mean_tool_calls=(searches+reads)/n,
                 search_calls=searches, read_document_calls=reads)
 
