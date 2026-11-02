@@ -6,9 +6,10 @@ Reads every q_all/projections/bcp_<qid>.json
   - q_all/all_830_verdicts.jsonl
   - merged/verdicts.jsonl
 each row {record_id, verdict, method:"inference_allowed_1agent"}, sorted by record_id.
-qid 393 is AUP-blocked (content-policy refusal; no projection file) -> verdict AUP_SKIP.
+Records the agent refused for content policy (no projection file) are passed with --aup-skip QID ... and get
+verdict AUP_SKIP (one record in the original run).
 """
-import json, os
+import argparse, json, os
 from collections import Counter
 
 TOOLS = os.path.dirname(os.path.abspath(__file__))
@@ -25,7 +26,10 @@ for f in os.listdir(projdir):
     if qid == "None":
         continue
     allv[qid] = json.load(open(os.path.join(projdir, f))).get("verdict", "?")
-allv.setdefault("393", "AUP_SKIP")  # AUP-blocked record (no projection produced)
+ap = argparse.ArgumentParser()
+ap.add_argument("--aup-skip", nargs="*", default=[], help="qids with a content-policy refusal and no projection")
+for q in ap.parse_args().aup_skip:
+    allv.setdefault(q, "AUP_SKIP")
 
 rows = [{"record_id": q, "verdict": allv[q], "method": ("content_policy_block" if allv[q] == "AUP_SKIP" else "inference_allowed_1agent")}
         for q in sorted(allv, key=lambda x: int(x))]

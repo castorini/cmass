@@ -1,0 +1,37 @@
+{"_about": "Rule files an agent might write, version by version, for the invented questions of questions.json (set demo): test_rules.py writes them to <qid>.rules.jsonl in turn and checks the state after each.",
+ "demo_r1": {
+  "v1": [
+   {"rule_id": "demo/demo_r1/1/varn_quay", "group": "demo/demo_r1/1", "all": [["Edda Varn"], ["customs quay"]]},
+   {"rule_id": "demo/demo_r1/2/light_1871", "group": "demo/demo_r1/2", "all": [["Cape Vardequist"], ["lighthouse"], ["1871"]]}],
+  "v2": [
+   {"rule_id": "demo/demo_r1/1/varn_quay", "group": "demo/demo_r1/1", "all": [["Edda Varn"], ["customs quay"]]},
+   {"rule_id": "demo/demo_r1/1/varn_wharf", "group": "demo/demo_r1/1", "all": [["Varn"], ["customs wharf"]],
+    "meta": {"for": ["demo_doc_251"], "note": "says customs wharf, and Mrs Varn without her first name"}},
+   {"rule_id": "demo/demo_r1/2/light_1871", "group": "demo/demo_r1/2",
+    "all": [["Vardequist", "Vardekvist"], ["lighthouse", "light", "fyr"], ["1871", "eighteen seventy-one"]]}]},
+ "demo_r2": {
+  "v1": [
+   {"rule_id": "demo/demo_r2/1/ardune", "group": "demo/demo_r2/1", "all": [["Ardune"]]},
+   {"rule_id": "demo/demo_r2/2/mouth", "group": "demo/demo_r2/2", "all": [["Port Ilse"], ["mouth of the Ardune"]]}],
+  "v2": [
+   {"rule_id": "demo/demo_r2/1/ardune_flood", "group": "demo/demo_r2/1",
+    "all": [["Ardune"], ["flood", "floods", "flooded", "flooding"]]},
+   {"rule_id": "demo/demo_r2/2/mouth", "group": "demo/demo_r2/2", "all": [["Port Ilse"], ["mouth of the Ardune"]]}],
+  "v3": [
+   {"rule_id": "demo/demo_r2/1/ardune_flood", "group": "demo/demo_r2/1",
+    "all": [["Ardune"], ["flood", "floods", "flooded", "flooding"]]},
+   {"rule_id": "demo/demo_r2/2/mouth", "group": "demo/demo_r2/2", "all": [["Port Ilse"], ["mouth of the Ardune"]],
+    "meta": {"broad_ok": "the town's place at the river mouth is stated on most pages about Port Ilse; each match states the fact itself"}}]},
+ "invalid": {
+  "json": "{\"rule_id\": \"demo/demo_r1/1/a\", \"all\": [[\"x\"]]",
+  "other_group": [
+   {"rule_id": "demo/demo_r1/9/a", "group": "demo/demo_r1/9", "all": [["Varn"]]}],
+  "prefix": [
+   {"rule_id": "varn", "group": "demo/demo_r1/1", "all": [["Varn"]]},
+   {"rule_id": "demo/demo_r1/2/a", "group": "demo/demo_r1/2", "all": [["Vardequist"]]}],
+  "short_reason": [
+   {"rule_id": "demo/demo_r1/1/a", "group": "demo/demo_r1/1", "all": [["Varn"]], "meta": {"broad_ok": "many"}},
+   {"rule_id": "demo/demo_r1/2/a", "group": "demo/demo_r1/2", "all": [["Vardequist"]]}],
+  "hop_unruled": [
+   {"rule_id": "demo/demo_r1/1/a", "group": "demo/demo_r1/1", "all": [["Varn"]]}]}
+}

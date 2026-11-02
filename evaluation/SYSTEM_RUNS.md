@@ -74,6 +74,11 @@ This is a private candidate pool, not a claim that 43,261 new relevant pairs
 have been found. It is also a pool of these three selected systems, not an
 exhaustive corpus judgment. No new relevance judgments were run for this update.
 
+Stage 3's system pooling ([`pipelines/cmass/stage3/pool.py`](../pipelines/cmass/stage3/pool.py),
+phase 3 in its README) implements steps 2-4 on such a pool: it judges the unjudged
+candidates that match a hop rule and writes a new qrels version. The released
+qrels `v2026.10.25` of `castorini/cmass` are that version.
+
 ## Regenerate a private export
 
 [export_system_runs.py](export_system_runs.py) accepts a private frozen selection

@@ -45,7 +45,7 @@ function prompt(q){ return [
 "",
 "ACTION 3 - COVERAGE of the QUESTION (judge the hop list against the question text):",
 "  Enumerate every information-bearing CONTENT phrase in the question: named entities, relations, specific events, superlatives, and quantities.",
-"  CRITICAL - SPECIFIC NUMBERS: when the question states a specific number, count, or interval - e.g. 'married three times', 'between 24 and 25 years later', 'an attendance of 61,700' - that NUMBER is itself a content sub-clue; a hop mentioning the surrounding event but omitting the number does NOT cover it.",
+"  CRITICAL - SPECIFIC NUMBERS: when the question states a specific number, count, or interval - e.g. 'founded two academies', 'between 12 and 14 years later', 'a crowd of 8,400' - that NUMBER is itself a content sub-clue; a hop mentioning the surrounding event but omitting the number does NOT cover it.",
 "  IGNORE 'as of <year>' timestamp qualifiers - those are non-blocking.",
 "  Any content phrase with no corresponding hop goes into uncovered_phrases.",
 "",

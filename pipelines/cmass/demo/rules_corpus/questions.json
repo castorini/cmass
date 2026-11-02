@@ -1,0 +1,42 @@
+{"_layout": {
+  "about": "Invented questions on the invented demo documents of docs.json (the fictional Oskeria; no benchmark content). Compact rows: test_rules.py expands them into the JSONL inputs of stage3/rules.py in a temporary directory.",
+  "question_rows": "[qid, question, answer, hops]; a hop is [hop id, kind, clue, docs]; a doc is [doc id, support, [recorded quotes]] (the qrels_hops docs entry)",
+  "quote_rows": "[qid, hop id, doc id, quote]: rows of the --quotes file, for a qrels format whose hops carry no quotes",
+  "standards": "{qid: {hop id: hop standard}}: standards/<qid>.json (QRELS.md, step 1)"},
+ "question_rows": [
+  ["demo_r1", "How many years passed between the first lighting of the Cape Vardequist lighthouse and the closing of the old customs quay of Port Ilse?", "63", [
+    ["1", "required", "the Port Ilse harbour master who closed the old customs quay in 1934", [
+      ["demo_doc_250", "full", ["ordered the old customs quay closed in 1934"]],
+      ["demo_doc_251", "full", []],
+      ["demo_doc_252", "full", []]]],
+    ["2", "required", "the year the Cape Vardequist lighthouse was first lit", [
+      ["demo_doc_253", "full", []],
+      ["demo_doc_254", "full", []]]],
+    ["3", "derivation", "the years between the lighting (hop 2) and the closing (hop 1)", []],
+    ["4", "confirmatory", "the harbour master's term of office", []]]],
+  ["demo_r2", "Which town lies at the mouth of the river that floods the Velmaran quays most springs?", "Port Ilse", [
+    ["1", "required", "the river through Velmaran that floods most springs", [
+      ["demo_doc_255", "full", []],
+      ["demo_doc_256", "partial", []]]],
+    ["2", "required", "the town at the mouth of the Ardune", [
+      ["demo_doc_258", "full", []],
+      ["demo_doc_259", "audit", []]]]]],
+  ["demo_r3", "Which composer founded the Velmaran Conservatory?", "Ilsa Renvaar", [
+    ["1", "required", "the composer who founded the Velmaran Conservatory", [
+      ["demo_doc_292", "full", []],
+      ["demo_doc_293", "full", []],
+      ["demo_doc_294", "partial", []]]]]],
+  ["demo_r4", "How many decades did the Velmaran tram run?", "5", [
+    ["1", "derivation", "the decades between the opening and closing years", []]]]
+ ],
+ "quote_rows": [
+  ["demo_r1", "1", "demo_doc_251", "When Mrs Varn shut the customs wharf in the spring of '34"],
+  ["demo_r3", "1", "demo_doc_292", "Ilsa Renvaar founded the Velmaran Conservatory in 1874"],
+  ["demo_r3", "1", "demo_doc_293", "founder of the Conservatory at Velmaran (1874)"]
+ ],
+ "standards": {
+  "demo_r3": {"1": {"subject": "Ilsa Renvaar (1841-1902), Oskerian composer; catalogues write Renvaar, I.",
+                    "full": "Renvaar founded the Velmaran Conservatory",
+                    "partial": ["the founding year 1874 with Renvaar, the conservatory named only as her academy in the capital"],
+                    "reject": ["the Velmaran Conservatory named without its founder", "songs or prizes named after Renvaar"]}}}
+}

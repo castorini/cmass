@@ -226,6 +226,7 @@ def main() -> int:
     g.add_argument("--new-commits", metavar="SHA")
     g.add_argument("--tree", nargs="?", const="HEAD", metavar="REV")
     g.add_argument("--history", action="store_true")
+    g.add_argument("--files", nargs="+", metavar="PATH", help="working-tree files or directories, without git")
     a = ap.parse_args()
     globs = allowlist()
     blobs, findings, seen = Blobs(), [], set()
@@ -251,6 +252,24 @@ def main() -> int:
             parts = line.split(" ", 1)
             if len(parts) == 2 and git("cat-file", "-t", parts[0]).strip() == b"blob":
                 check(parts[1], parts[0], "history")
+    elif a.files:
+        root = Path(git("rev-parse", "--show-toplevel").decode().strip())
+        cand = []
+        for arg in a.files:
+            base = Path(arg).resolve()
+            cand += [f for f in sorted([base] if base.is_file() else base.rglob("*"))
+                     if f.is_file() and ".git" not in f.parts and "__pycache__" not in f.parts]
+        inside = [f.relative_to(root).as_posix() for f in cand if f.is_relative_to(root)]
+        r = subprocess.run(["git", "check-ignore", "--stdin", "-z"], input="\0".join(inside).encode(),
+                           capture_output=True, cwd=root)
+        ignored = {x for x in r.stdout.decode().split("\0") if x}     # gitignored files never reach a commit
+        for f in cand:
+            rel = f.relative_to(root).as_posix() if f.is_relative_to(root) else str(f)
+            if rel in ignored:
+                continue
+            if (rel, "file") not in seen:
+                seen.add((rel, "file"))
+                findings.extend(scan_blob(rel, f.read_bytes(), globs, "working tree"))
     else:
         for p, sha in tree_blobs(a.tree):
             check(p, sha, a.tree)

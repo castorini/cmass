@@ -1,0 +1,11 @@
+[
+ {"group": "demo/q1/h1", "doc_id": "demo_doc_200"},
+ {"group": "demo/q1/h1", "doc_id": "demo_doc_201"},
+ {"group": "demo/q1/h1", "doc_id": "demo_doc_203"},
+ {"group": "demo/q1/h1", "doc_id": "demo_doc_221"},
+ {"group": "demo/q1/h1", "doc_id": "demo_doc_222"},
+ {"group": "demo/q2/h1", "doc_id": "demo_doc_207"},
+ {"group": "demo/q2/h1", "doc_id": "demo_doc_208"},
+ {"group": "demo/q3/h1", "doc_id": "demo_doc_209"},
+ {"group": "demo/q3/h1", "doc_id": "demo_doc_225"}
+]
