@@ -106,6 +106,8 @@ TREC RAG Pyserini tokens work for CMASS as well.
 
 ![Projecting QA benchmarks onto ClimbMix](assets/projection-pipeline.png)
 
+*Counts shown are for BrowseComp-Plus.*
+
 - **Stage 0, preparation:** duplicate detection over the corpus (exact and near duplicates, Jaccard
   0.7 or more; nothing is removed) and one task per source question.
 - **Stage 1, projection:** agents decompose each question into hops, search ClimbMix for evidence of
