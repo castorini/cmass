@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / "evaluation"))
 from prepare_inputs import COUNTS, QREL_COUNTS
 
 PAGE = ROOT / "docs/leaderboard/index.html"
+SYSTEM_PAGE = ROOT / "docs/leaderboard/systems/index.html"
 SETS = [("bcp", "BrowseComp-Plus (BCP)"), ("trqa", "Total Recall QA (TRQA)"),
         ("dsqa", "DeepSearchQA (DSQA)"), ("hotpotqa", "HotpotQA")]
 MODELS = {
@@ -74,8 +75,9 @@ def table() -> dict:
     return data
 
 
-def link(url: str, label: str) -> str:
-    return f'<a href="{html.escape(url, quote=True)}">{html.escape(label)}</a>'
+def link(url: str, label: str, *, new_tab: bool = False) -> str:
+    attrs = ' target="_blank" rel="noopener" title="Opens in a new tab"' if new_tab else ""
+    return f'<a href="{html.escape(url, quote=True)}"{attrs}>{html.escape(label)}</a>'
 
 
 def rows() -> list[str]:
@@ -100,14 +102,14 @@ def rows() -> list[str]:
                 else:
                     value = str(one_decimal(r[c]))
                 if c == "tc" and r["harness"] == "JevGPT":
-                    value = f'<a class="tool-detail" href="#jev-tool-usage" title="Mean total tool calls per question; view breakdown">{value}</a>'
+                    value = f'<a class="tool-detail" href="systems/#jev-tool-usage" target="_blank" rel="noopener" title="Mean total tool calls per question; breakdown opens in a new tab">{value}</a>'
                 if c == "acc" and r["relaxed"] is not None:
                     value += f'<span class="cell-sub relaxed">{one_decimal(r["relaxed"])} relaxed</span>'
                 cells.append(f'<td class="{" ".join(cls)}">{value}</td>')
             is_jev = r["harness"] == "JevGPT"
-            info_url = "#system-" + r["system"].lower()
-            title = link(info_url, r["system"] if is_jev else name)
-            detail = f'{name if is_jev else r["harness"]} &middot; {link(info_url, "System info")}'
+            info_url = "systems/#system-" + r["system"].lower()
+            title = link(info_url, r["system"] if is_jev else name, new_tab=True)
+            detail = link(info_url, "System info ↗", new_tab=True)
             model = f'<td class="model">{title}<span class="cell-sub">{detail}</span></td>'
             out.append(f'            <tr data-system="{r["system"]}"><td class="rank">{rank}</td>{model}{"".join(cells)}</tr>')
         out.append('          </tbody>')
@@ -142,12 +144,14 @@ def piika_models() -> list[str]:
 
 
 def main() -> None:
-    text = PAGE.read_text()
-    for name, content in [("rows", rows()), ("jev-tools", tool_rows()), ("piika-models", piika_models())]:
-        start, end = f"<!-- {name}:start -->", f"<!-- {name}:end -->"
-        i, j = text.index(start) + len(start), text.index(end)
-        text = text[:i] + "\n" + "\n".join(content) + "\n          " + text[j:]
-    PAGE.write_text(text)
+    for page, sections in [(PAGE, [("rows", rows())]),
+                           (SYSTEM_PAGE, [("jev-tools", tool_rows()), ("piika-models", piika_models())])]:
+        text = page.read_text()
+        for name, content in sections:
+            start, end = f"<!-- {name}:start -->", f"<!-- {name}:end -->"
+            i, j = text.index(start) + len(start), text.index(end)
+            text = text[:i] + "\n" + "\n".join(content) + "\n          " + text[j:]
+        page.write_text(text)
 
 
 if __name__ == "__main__":

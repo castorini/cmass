@@ -376,15 +376,10 @@ table.data td:last-child, table.data th:last-child { padding-right: 0; }
 .chip:hover { border-color: var(--accent); color: var(--accent); }
 .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 
-.board-tabs { display: flex; gap: 1.5rem; border-bottom: 1px solid var(--line); margin-bottom: 1.5rem; }
-.board-tabs a { padding: .65rem 0; color: var(--muted); text-decoration: none; font-weight: 500; border-bottom: 3px solid transparent; }
-.board-tabs a:hover { color: var(--accent); }
-.board-tabs a[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
 .system-models { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; margin-top: 1.75rem; }
 .system-model { border-top: 1px solid var(--line); padding-top: 1rem; }
 .system-model h3 { margin: 0 0 .5rem; font: 600 1.125rem/1.3 var(--serif); }
 .system-model p { margin: 0; color: var(--muted); font-size: .9375rem; }
-[data-tab-panel] + #submit { border-top: 1px solid var(--line); }
 .table-scroll-hint { display: none; }
 @media (max-width: 960px) { .table-scroll-hint { display: block; } }
 table.board { min-width: 51rem; }

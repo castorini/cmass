@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CMASS System Info</title>
+<meta name="description" content="System configurations, papers, evaluation notes and tool usage for CMASS leaderboard entries.">
+<link rel="canonical" href="https://cmass.tech/leaderboard/systems/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="CMASS System Info">
+<meta property="og:description" content="Harnesses, BM25 settings, models, evaluation notes and tool usage for CMASS search agents.">
+<meta property="og:url" content="https://cmass.tech/leaderboard/systems/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<link rel="stylesheet" href="../../assets/site.css?v=system-pages-1">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="wordmark" href="../../" aria-label="CMASS home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19 10.5 12.5 14.5 15.5 20 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="19" r="2.3" fill="var(--accent)"/><circle cx="10.5" cy="12.5" r="2.3" fill="var(--accent)"/><circle cx="14.5" cy="15.5" r="2.3" fill="var(--accent)"/><circle cx="20" cy="6" r="2.6" fill="var(--warm)"/></svg>
+      CMASS
+    </a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="../../">Overview</a>
+      <a href="../">Leaderboard</a>
+      <a href="https://huggingface.co/datasets/castorini/cmass">Dataset</a>
+      <a href="https://github.com/castorini/cmass">Code</a>
+      <a href="https://arxiv.org/abs/2608.20317">Paper</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="page-head">
+  <div class="wrap">
+    <p class="eyebrow">System info <span class="version-pill">CMASS v1.0 &middot; v2026.10.25</span></p>
+    <h1>Leaderboard systems</h1>
+    <p class="lead">Configurations, papers, evaluation notes and tool usage.</p>
+    <p><a href="../">&larr; Back to leaderboard</a></p>
+  </div>
+</section>
+<section class="section" id="piika">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="kicker">System info</p>
+      <h2>Piika baselines</h2>
+    </div>
+    <div class="prose">
+      <p>The baseline systems use the <a href="https://github.com/castorini/piika">Piika harness</a> with BM25 (k<sub>1</sub> = 0.9, b = 0.4) and no reranker. Each model has a matched closed-book evaluation. The open-weight models are served with vLLM.</p>
+      <p><a href="https://arxiv.org/abs/2608.20317">CMASS paper</a> &middot; <a href="https://github.com/castorini/piika">Harness code</a> &middot; <a href="https://github.com/castorini/cmass/blob/main/evaluation/SETTINGS.md">Execution settings</a></p>
+    </div>
+    <div class="system-models">
+      <!-- piika-models:start -->
+      <article class="system-model" id="system-piika-sol" tabindex="-1">
+        <h3><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1 Sol</a></h3>
+        <p>OpenAI &middot; API &middot; high reasoning effort</p>
+      </article>
+      <article class="system-model" id="system-piika-gemma" tabindex="-1">
+        <h3><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma 4 31B</a></h3>
+        <p>Google DeepMind &middot; open weights &middot; IT, thinking enabled</p>
+      </article>
+      <article class="system-model" id="system-piika-qwen" tabindex="-1">
+        <h3><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen 3.5 9B</a></h3>
+        <p>Qwen &middot; open weights &middot; thinking enabled</p>
+      </article>
+          <!-- piika-models:end -->
+    </div>
+  </div>
+</section>
+
+<section class="section" id="jevgpt">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="kicker">System details</p>
+      <h2 id="system-jevgpt-bm25" tabindex="-1">JevGPT with BM25</h2>
+    </div>
+    <div class="prose">
+      <p><a href="https://arxiv.org/abs/2610.18272">JevGPT</a> combines GPT-6.1 Sol high as System Two with Jev-1.13.0 as System One for parallel source inspection and evidence selection. The harness is based on Pi-Serini. This entry uses BM25 (k<sub>1</sub> = 0.9, b = 0.4) and a 1,800-second research budget. Jev is an evidence model, rather than a separate ranking stage applied to the displayed BM25 hits.</p>
+      <p>All 423 answers were independently graded with the same GPT-6.1 Sol high prompts used for the Piika results, with tools disabled. Strict accuracy is 396/423 (93.62%); relaxed accuracy is 398/423 (94.09%). The independent judge accepted one additional DSQA answer relative to the sender’s grades; the original and independent aggregate counts are retained in the provenance.</p>
+      <p>P@all, R@all and H.G. count unique parent documents displayed as ranked hits in <code>search</code> and <code>read_search_results</code>. Internal candidate pools, System One inspections and auto-scan evidence notices are separate views. Notices can occur within a search response; including them changes some retrieval scores. The <a href="https://github.com/castorini/cmass/blob/main/evaluation/jevgpt_results.json">aggregate results</a> include that sensitivity analysis. Unjudged documents count as non-relevant, and no qrels were expanded from these runs.</p>
+      <p class="note">Selected outputs and their hashes were verified. The full history of unselected attempts is unavailable, so selection independent of correctness could not be established. <a href="https://arxiv.org/abs/2610.18272">Paper</a> &middot; <a href="https://github.com/sunyasheng/JevGPT">Harness code</a> &middot; <a href="https://huggingface.co/datasets/yashengsun/JevGPT-runs/tree/cb62978c2053d391df6edc6e45d96dfe8ceaaa2e">Pinned runs</a></p>
+    </div>
+    <details class="tool-breakdown" id="jev-tool-usage">
+      <summary>JevGPT tool usage</summary>
+      <p>Counts are totals across every question in each dataset. The final column is their sum divided by the question count. JevGPT has four agent tools; these totals are not directly comparable with Piika’s search-plus-read T.C. Internal System One requests are excluded.</p>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="JevGPT tool counts">
+        <table class="data">
+          <thead><tr><th scope="col">Dataset</th><th scope="col">System</th><th scope="col">search</th><th scope="col">read_search_results</th><th scope="col">jev_find</th><th scope="col">read_document</th><th scope="col">All calls / question</th></tr></thead>
+          <!-- jev-tools:start -->
+          <tbody data-set="bcp">
+            <tr><td>BCP</td><td>JevGPT-BM25</td><td>875</td><td>34</td><td>748</td><td>108</td><td>22.1</td></tr>
+          </tbody>
+          <tbody data-set="trqa">
+            <tr><td>TRQA</td><td>JevGPT-BM25</td><td>204</td><td>8</td><td>202</td><td>32</td><td>6.6</td></tr>
+          </tbody>
+          <tbody data-set="dsqa">
+            <tr><td>DSQA</td><td>JevGPT-BM25</td><td>503</td><td>23</td><td>436</td><td>94</td><td>14.9</td></tr>
+          </tbody>
+          <tbody data-set="hotpotqa">
+            <tr><td>HotpotQA</td><td>JevGPT-BM25</td><td>470</td><td>5</td><td>473</td><td>46</td><td>4.9</td></tr>
+          </tbody>
+          <!-- jev-tools:end -->
+        </table>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="section" id="run-settings">
+  <div class="wrap">
+    <div>
+      <div class="section-head">
+        <p class="kicker">Setup</p>
+        <h2>How the runs were made</h2>
+      </div>
+      <dl class="defs">
+        <dt>Agent harness</dt>
+        <dd>The baseline rows use <a href="https://github.com/castorini/piika">Piika</a>, a search-agent framework following the Pi-Serini design. The JevGPT-BM25 entry uses <a href="https://github.com/sunyasheng/JevGPT">JevGPT</a>, also based on Pi-Serini, with Jev-1.13.0 for evidence inspection.</dd>
+        <dt>Tools</dt>
+        <dd>Piika exposes <code>search</code> (at most five previews) and <code>read_document</code> (first 200 lines by default). JevGPT adds <code>read_search_results</code> and <code>jev_find</code>. Its internal evidence inspections are not additional displayed search hits.</dd>
+        <dt>Retriever</dt>
+        <dd>All entries shown here use BM25 over ClimbMix (k<sub>1</sub>&nbsp;=&nbsp;0.9, b&nbsp;=&nbsp;0.4). Piika uses the <a href="https://github.com/castorini/pyserini">Pyserini</a> 2.4.0 REST backend; JevGPT uses its ClimbMix adapter. No dense retriever or passage index is used by this JevGPT entry.</dd>
+        <dt>Budgets</dt>
+        <dd>JevGPT uses 1,800 seconds per question. Piika baselines retain accepted earlier outputs and documented longer continuations; see the <a href="https://github.com/castorini/cmass/blob/main/evaluation/SETTINGS.md#budgets-continuation-and-termination">execution settings</a>.</dd>
+        <dt>Reranker / evidence model</dt>
+        <dd>Piika uses no reranker. JevGPT uses Jev-1.13.0 for System One evidence inspection and selection; it does not rerank the displayed BM25 hits.</dd>
+        <dt>Version</dt>
+        <dd>CMASS v1.0, released on 25 October 2026 as <code>v2026.10.25</code>. P@all, R@all and H.G. depend on the qrels, so report the version you used.</dd>
+      </dl>
+      <p class="note more">Prompts, settings and scripts: <a href="https://github.com/castorini/cmass/blob/main/REPRODUCING.md">REPRODUCING.md</a> and <a href="https://github.com/castorini/cmass/tree/main/evaluation">evaluation/</a>.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-row">
+    <p>CMASS &middot; University of Waterloo &middot; Code under Apache&nbsp;2.0; each split keeps its source dataset's license.</p>
+    <nav class="footer-links" aria-label="Project links">
+      <a href="../../">Overview</a>
+      <a href="https://huggingface.co/datasets/castorini/cmass">Hugging Face</a>
+      <a href="https://github.com/castorini/cmass">GitHub</a>
+      <a href="https://arxiv.org/abs/2608.20317">arXiv</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="../../assets/site.js?v=system-pages-1"></script>
+</body>
+</html>

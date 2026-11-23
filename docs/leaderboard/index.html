@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
-<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="../assets/site.css?v=system-pages-1">
 </head>
 <body>
 
@@ -42,19 +42,11 @@
     <p class="eyebrow">Leaderboard <span class="version-pill">CMASS v1.0 &middot; v2026.10.25</span></p>
     <h1>Search agents on CMASS</h1>
     <div class="prose">
-      <p class="lead">Compare search agents over the 553M ClimbMix documents. Follow an entry’s System info link for its configuration and paper. Within each dataset, systems are ranked by answer accuracy; equal scores share a rank. DSQA uses strict scoring, with relaxed accuracy shown underneath.</p>
+      <p class="lead">Compare search agents over the 553M ClimbMix documents. System info links open configurations and papers in a separate tab. Within each dataset, systems are ranked by answer accuracy; equal scores share a rank. DSQA uses strict scoring, with relaxed accuracy shown underneath.</p>
     </div>
   </div>
 </section>
 
-<div class="wrap">
-  <nav class="board-tabs" aria-label="Leaderboard views">
-    <a id="tab-results" href="#results" data-tab="results">Results</a>
-    <a id="tab-system-info" href="#system-info" data-tab="system-info">System info</a>
-  </nav>
-</div>
-
-<div id="results" data-tab-panel aria-labelledby="tab-results">
 <section class="board-section">
   <div class="wrap">
     <div class="filters" role="group" aria-label="Show dataset">
@@ -86,36 +78,36 @@
           <!-- rows:start -->
           <tbody data-set="bcp">
             <tr class="set-row"><th scope="rowgroup" colspan="8">BrowseComp-Plus (BCP)<span>80 questions &middot; 11,450 qrels</span></th></tr>
-            <tr data-system="piika-sol"><td class="rank">1</td><td class="model"><a href="#system-piika-sol">GPT-6.1 Sol</a><span class="cell-sub">Piika &middot; <a href="#system-piika-sol">System info</a></span></td><td class="num key best">85.0</td><td class="num best">38.2</td><td class="num best">12.1</td><td class="num best">75.5</td><td class="num">21.5</td><td class="num best">52.5</td></tr>
-            <tr data-system="JevGPT-BM25"><td class="rank">2</td><td class="model"><a href="#system-jevgpt-bm25">JevGPT-BM25</a><span class="cell-sub">GPT-6.1 Sol &middot; <a href="#system-jevgpt-bm25">System info</a></span></td><td class="num key">81.3</td><td class="num">27.6</td><td class="num">8.3</td><td class="num">63.3</td><td class="num"><a class="tool-detail" href="#jev-tool-usage" title="Mean total tool calls per question; view breakdown">22.1</a></td><td class="num"><span aria-label="Unavailable" title="Not evaluated for this system">—</span></td></tr>
-            <tr data-system="piika-gemma"><td class="rank">3</td><td class="model"><a href="#system-piika-gemma">Gemma 4 31B</a><span class="cell-sub">Piika &middot; <a href="#system-piika-gemma">System info</a></span></td><td class="num key">27.5</td><td class="num">10.9</td><td class="num">4.2</td><td class="num">31.4</td><td class="num">23.5</td><td class="num">16.3</td></tr>
-            <tr data-system="piika-qwen"><td class="rank">4</td><td class="model"><a href="#system-piika-qwen">Qwen 3.5 9B</a><span class="cell-sub">Piika &middot; <a href="#system-piika-qwen">System info</a></span></td><td class="num key">16.3</td><td class="num">9.2</td><td class="num">4.4</td><td class="num">31.4</td><td class="num">49.9</td><td class="num">5.0</td></tr>
+            <tr data-system="piika-sol"><td class="rank">1</td><td class="model"><a href="systems/#system-piika-sol" target="_blank" rel="noopener" title="Opens in a new tab">GPT-6.1 Sol</a><span class="cell-sub"><a href="systems/#system-piika-sol" target="_blank" rel="noopener" title="Opens in a new tab">System info ↗</a></span></td><td class="num key best">85.0</td><td class="num best">38.2</td><td class="num best">12.1</td><td class="num best">75.5</td><td class="num">21.5</td><td class="num best">52.5</td></tr>
+            <tr data-system="JevGPT-BM25"><td class="rank">2</td><td class="model"><a href="systems/#system-jevgpt-bm25" target="_blank" rel="noopener" title="Opens in a new tab">JevGPT-BM25</a><span class="cell-sub"><a href="systems/#system-jevgpt-bm25" target="_blank" rel="noopener" title="Opens in a new tab">System info ↗</a></span></td><td class="num key">81.3</td><td class="num">27.6</td><td class="num">8.3</td><td class="num">63.3</td><td class="num"><a class="tool-detail" href="systems/#jev-tool-usage" target="_blank" rel="noopener" title="Mean total tool calls per question; breakdown opens in a new tab">22.1</a></td><td class="num"><span aria-label="Unavailable" title="Not evaluated for this system">—</span></td></tr>
+            <tr data-system="piika-gemma"><td class="rank">3</td><td class="model"><a href="systems/#system-piika-gemma" target="_blank" rel="noopener" title="Opens in a new tab">Gemma 4 31B</a><span class="cell-sub"><a href="systems/#system-piika-gemma" target="_blank" rel="noopener" title="Opens in a new tab">System info ↗</a></span></td><td class="num key">27.5</td><td class="num">10.9</td><td class="num">4.2</td><td class="num">31.4</td><td class="num">23.5</td><td class="num">16.3</td></tr>
+            <tr data-system="piika-qwen"><td class="rank">4</td><td class="model"><a href="systems/#system-piika-qwen" target="_blank" rel="noopener" title="Opens in a new tab">Qwen 3.5 9B</a><span class="cell-sub"><a href="systems/#system-piika-qwen" target="_blank" rel="noopener" title="Opens in a new tab">System info ↗</a></span></td><td class="num key">16.3</td><td class="num">9.2</td><td class="num">4.4</td><td class="num">31.4</td><td class="num">49.9</td><td class="num">5.0</td></tr>
           </tbody>
           <tbody data-set="trqa">
             <tr class="set-row"><th scope="rowgroup" colspan="8">Total Recall QA (TRQA)<span>68 questions &middot; 8,307 qrels</span></th></tr>
-            <tr data-system="JevGPT-BM25"><td class="rank">1</td><td class="model"><a href="#system-jevgpt-bm25">JevGPT-BM25</a><span class="cell-sub">GPT-6.1 Sol &middot; <a href="#system-jevgpt-bm25">System info</a></span></td><td class="num key best">97.1</td><td class="num">66.7</td><td class="num">8.4</td><td class="num">70.2</td><td class="num"><a class="tool-detail" href="#jev-tool-usage" title="Mean total tool calls per question; view breakdown">6.6</a></td><td class="num"><span aria-label="Unavailable" title="Not evaluated for this system">—</span></td></tr>
-            <tr data-system="piika-sol"><td class="rank">2</td><td class="model"><a href="#system-piika-sol">GPT-6.1 Sol</a><span class="cell-sub">Piika &middot; <a href="#system-piika-sol">System info</a></span></td><td class="num key">94.1</td><td class="num best">70.9</td><td class="num">10.6</td><td class="num">79.7</td><td class="num">8.6</td><td class="num best">86.8</td></tr>
-            <tr data-system="piika-gemma"><td class="rank">3</td><td class="model"><a href="#system-piika-gemma">Gemma 4 31B</a><span class="cell-sub">Piika &middot; <a href="#system-piika-gemma">System info</a></span></td><td class="num key">66.2</td><td class="num">59.2</td><td class="num">17.0</td><td class="num">82.7</td><td class="num">12.4</td><td class="num">50.0</td></tr>
-            <tr data-system="piika-qwen"><td class="rank">4</td><td class="model"><a href="#system-piika-qwen">Qwen 3.5 9B</a><span class="cell-sub">Piika &middot; <a href="#system-piika-qwen">System info</a></span></td><td class="num key">57.4</td><td class="num">59.4</td><td class="num best">18.6</td><td class="num best">85.8</td><td class="num">19.7</td><td class="num">39.7</td></tr>
+            <tr data-system="JevGPT-BM25"><td class="rank">1</td><td class="model"><a href="systems/#system-jevgpt-bm25" target="_blank" rel="noopener" title="Opens in a new tab">JevGPT-BM25</a><span class="cell-sub"><a href="systems/#system-jevgpt-bm25" target="_blank" rel="noopener" title="Opens in a new tab">System info ↗</a></span></td><td class="num key best">97.1</td><td class="num">66.7</td><td class="num">8.4</td><td class="num">70.2</td><td class="num"><a class="tool-detail" href="systems/#jev-tool-usage" target="_blank" rel="noopener" title="Mean total tool calls per question; breakdown opens in a new tab">6.6</a></td><td class="num"><span aria-label="Unavailable" title="Not evaluated for this system">—</span></td></tr>
+            <tr data-system="piika-sol"><td class="rank">2</td><td class="model"><a href="systems/#system-piika-sol" target="_blank" rel="noopener" title="Opens in a new tab">GPT-6.1 Sol</a><span class="cell-sub"><a href="systems/#system-piika-sol" target="_blank" rel="noopener" title="Opens in a new tab">System info ↗</a></span></td><td class="num key">94.1</td><td class="num best">70.9</td><td class="num">10.6</td><td class="num">79.7</td><td class="num">8.6</td><td class="num best">86.8</td></tr>
+            <tr data-system="piika-gemma"><td class="rank">3</td><td class="model"><a href="systems/#system-piika-gemma" target="_blank" rel="noopener" title="Opens in a new tab">Gemma 4 31B</a><span class="cell-sub"><a href="systems/#system-piika-gemma" target="_blank" rel="noopener" title="Opens in a new tab">System info ↗</a></span></td><td class="num key">66.2</td><td class="num">59.2</td><td class="num">17.0</td><td class="num">82.7</td><td class="num">12.4</td><td class="num">50.0</td></tr>
+            <tr data-system="piika-qwen"><td class="rank">4</td><td class="model"><a href="systems/#system-piika-qwen" target="_blank" rel="noopener" title="Opens in a new tab">Qwen 3.5 9B</a><span class="cell-sub"><a href="systems/#system-piika-qwen" target="_blank" rel="noopener" title="Opens in a new tab">System info ↗</a></span></td><td class="num key">57.4</td><td class="num">59.4</td><td class="num best">18.6</td><td class="num best">85.8</td><td class="num">19.7</td><td class="num">39.7</td></tr>
           </tbody>
           <tbody data-set="dsqa">
             <tr class="set-row"><th scope="rowgroup" colspan="8">DeepSearchQA (DSQA)<span>71 questions &middot; 9,889 qrels</span></th></tr>
-            <tr data-system="JevGPT-BM25"><td class="rank">1</td><td class="model"><a href="#system-jevgpt-bm25">JevGPT-BM25</a><span class="cell-sub">GPT-6.1 Sol &middot; <a href="#system-jevgpt-bm25">System info</a></span></td><td class="num key best">97.2<span class="cell-sub relaxed">100.0 relaxed</span></td><td class="num">39.0</td><td class="num">11.3</td><td class="num">69.4</td><td class="num"><a class="tool-detail" href="#jev-tool-usage" title="Mean total tool calls per question; view breakdown">14.9</a></td><td class="num"><span aria-label="Unavailable" title="Not evaluated for this system">—</span></td></tr>
-            <tr data-system="piika-sol"><td class="rank">2</td><td class="model"><a href="#system-piika-sol">GPT-6.1 Sol</a><span class="cell-sub">Piika &middot; <a href="#system-piika-sol">System info</a></span></td><td class="num key">90.1<span class="cell-sub relaxed">93.0 relaxed</span></td><td class="num best">50.5</td><td class="num">15.0</td><td class="num best">75.7</td><td class="num">17.9</td><td class="num best">70.4</td></tr>
-            <tr data-system="piika-qwen"><td class="rank">3</td><td class="model"><a href="#system-piika-qwen">Qwen 3.5 9B</a><span class="cell-sub">Piika &middot; <a href="#system-piika-qwen">System info</a></span></td><td class="num key">39.4<span class="cell-sub relaxed">53.5 relaxed</span></td><td class="num">35.3</td><td class="num best">19.8</td><td class="num">72.0</td><td class="num">37.1</td><td class="num">12.7</td></tr>
-            <tr data-system="piika-gemma"><td class="rank">4</td><td class="model"><a href="#system-piika-gemma">Gemma 4 31B</a><span class="cell-sub">Piika &middot; <a href="#system-piika-gemma">System info</a></span></td><td class="num key">38.0<span class="cell-sub relaxed">53.5 relaxed</span></td><td class="num">33.2</td><td class="num">17.4</td><td class="num">68.1</td><td class="num">21.5</td><td class="num">23.9</td></tr>
+            <tr data-system="JevGPT-BM25"><td class="rank">1</td><td class="model"><a href="systems/#system-jevgpt-bm25" target="_blank" rel="noopener" title="Opens in a new tab">JevGPT-BM25</a><span class="cell-sub"><a href="systems/#system-jevgpt-bm25" target="_blank" rel="noopener" title="Opens in a new tab">System info ↗</a></span></td><td class="num key best">97.2<span class="cell-sub relaxed">100.0 relaxed</span></td><td class="num">39.0</td><td class="num">11.3</td><td class="num">69.4</td><td class="num"><a class="tool-detail" href="systems/#jev-tool-usage" target="_blank" rel="noopener" title="Mean total tool calls per question; breakdown opens in a new tab">14.9</a></td><td class="num"><span aria-label="Unavailable" title="Not evaluated for this system">—</span></td></tr>
+            <tr data-system="piika-sol"><td class="rank">2</td><td class="model"><a href="systems/#system-piika-sol" target="_blank" rel="noopener" title="Opens in a new tab">GPT-6.1 Sol</a><span class="cell-sub"><a href="systems/#system-piika-sol" target="_blank" rel="noopener" title="Opens in a new tab">System info ↗</a></span></td><td class="num key">90.1<span class="cell-sub relaxed">93.0 relaxed</span></td><td class="num best">50.5</td><td class="num">15.0</td><td class="num best">75.7</td><td class="num">17.9</td><td class="num best">70.4</td></tr>
+            <tr data-system="piika-qwen"><td class="rank">3</td><td class="model"><a href="systems/#system-piika-qwen" target="_blank" rel="noopener" title="Opens in a new tab">Qwen 3.5 9B</a><span class="cell-sub"><a href="systems/#system-piika-qwen" target="_blank" rel="noopener" title="Opens in a new tab">System info ↗</a></span></td><td class="num key">39.4<span class="cell-sub relaxed">53.5 relaxed</span></td><td class="num">35.3</td><td class="num best">19.8</td><td class="num">72.0</td><td class="num">37.1</td><td class="num">12.7</td></tr>
+            <tr data-system="piika-gemma"><td class="rank">4</td><td class="model"><a href="systems/#system-piika-gemma" target="_blank" rel="noopener" title="Opens in a new tab">Gemma 4 31B</a><span class="cell-sub"><a href="systems/#system-piika-gemma" target="_blank" rel="noopener" title="Opens in a new tab">System info ↗</a></span></td><td class="num key">38.0<span class="cell-sub relaxed">53.5 relaxed</span></td><td class="num">33.2</td><td class="num">17.4</td><td class="num">68.1</td><td class="num">21.5</td><td class="num">23.9</td></tr>
           </tbody>
           <tbody data-set="hotpotqa">
             <tr class="set-row"><th scope="rowgroup" colspan="8">HotpotQA<span>204 questions &middot; 11,090 qrels</span></th></tr>
-            <tr data-system="JevGPT-BM25"><td class="rank">1</td><td class="model"><a href="#system-jevgpt-bm25">JevGPT-BM25</a><span class="cell-sub">GPT-6.1 Sol &middot; <a href="#system-jevgpt-bm25">System info</a></span></td><td class="num key best">96.1</td><td class="num">50.3</td><td class="num">12.3</td><td class="num">75.5</td><td class="num"><a class="tool-detail" href="#jev-tool-usage" title="Mean total tool calls per question; view breakdown">4.9</a></td><td class="num"><span aria-label="Unavailable" title="Not evaluated for this system">—</span></td></tr>
-            <tr data-system="piika-sol"><td class="rank">2</td><td class="model"><a href="#system-piika-sol">GPT-6.1 Sol</a><span class="cell-sub">Piika &middot; <a href="#system-piika-sol">System info</a></span></td><td class="num key">94.6</td><td class="num best">57.9</td><td class="num">17.2</td><td class="num best">90.2</td><td class="num">6.7</td><td class="num best">89.7</td></tr>
-            <tr data-system="piika-qwen"><td class="rank">3</td><td class="model"><a href="#system-piika-qwen">Qwen 3.5 9B</a><span class="cell-sub">Piika &middot; <a href="#system-piika-qwen">System info</a></span></td><td class="num key">70.1</td><td class="num">44.4</td><td class="num best">19.7</td><td class="num">83.9</td><td class="num">17.0</td><td class="num">27.5</td></tr>
-            <tr data-system="piika-gemma"><td class="rank">4</td><td class="model"><a href="#system-piika-gemma">Gemma 4 31B</a><span class="cell-sub">Piika &middot; <a href="#system-piika-gemma">System info</a></span></td><td class="num key">65.7</td><td class="num">44.4</td><td class="num">18.1</td><td class="num">78.4</td><td class="num">10.2</td><td class="num">36.8</td></tr>
+            <tr data-system="JevGPT-BM25"><td class="rank">1</td><td class="model"><a href="systems/#system-jevgpt-bm25" target="_blank" rel="noopener" title="Opens in a new tab">JevGPT-BM25</a><span class="cell-sub"><a href="systems/#system-jevgpt-bm25" target="_blank" rel="noopener" title="Opens in a new tab">System info ↗</a></span></td><td class="num key best">96.1</td><td class="num">50.3</td><td class="num">12.3</td><td class="num">75.5</td><td class="num"><a class="tool-detail" href="systems/#jev-tool-usage" target="_blank" rel="noopener" title="Mean total tool calls per question; breakdown opens in a new tab">4.9</a></td><td class="num"><span aria-label="Unavailable" title="Not evaluated for this system">—</span></td></tr>
+            <tr data-system="piika-sol"><td class="rank">2</td><td class="model"><a href="systems/#system-piika-sol" target="_blank" rel="noopener" title="Opens in a new tab">GPT-6.1 Sol</a><span class="cell-sub"><a href="systems/#system-piika-sol" target="_blank" rel="noopener" title="Opens in a new tab">System info ↗</a></span></td><td class="num key">94.6</td><td class="num best">57.9</td><td class="num">17.2</td><td class="num best">90.2</td><td class="num">6.7</td><td class="num best">89.7</td></tr>
+            <tr data-system="piika-qwen"><td class="rank">3</td><td class="model"><a href="systems/#system-piika-qwen" target="_blank" rel="noopener" title="Opens in a new tab">Qwen 3.5 9B</a><span class="cell-sub"><a href="systems/#system-piika-qwen" target="_blank" rel="noopener" title="Opens in a new tab">System info ↗</a></span></td><td class="num key">70.1</td><td class="num">44.4</td><td class="num best">19.7</td><td class="num">83.9</td><td class="num">17.0</td><td class="num">27.5</td></tr>
+            <tr data-system="piika-gemma"><td class="rank">4</td><td class="model"><a href="systems/#system-piika-gemma" target="_blank" rel="noopener" title="Opens in a new tab">Gemma 4 31B</a><span class="cell-sub"><a href="systems/#system-piika-gemma" target="_blank" rel="noopener" title="Opens in a new tab">System info ↗</a></span></td><td class="num key">65.7</td><td class="num">44.4</td><td class="num">18.1</td><td class="num">78.4</td><td class="num">10.2</td><td class="num">36.8</td></tr>
           </tbody>
           <!-- rows:end -->
       </table>
     </div>
-    <p class="note table-note">CMASS v1.0 (release v2026.10.25), using the same frozen qrels for every system. Piika baselines reproduce Table 3 of the CMASS paper plus P@all; JevGPT-BM25 uses independently graded answers. Values are percentages except T.C., the mean total tool calls per question. Tool sets differ: Piika uses two tools and JevGPT uses four; see System info for the breakdown. Bold marks the best primary score per dataset. Ranking uses unrounded accuracy. A dash means unavailable.</p>
+    <p class="note table-note">CMASS v2026.10.25, using the same frozen qrels for every system. Values are percentages except T.C., the mean total tool calls per question. Tool sets differ; see each entry’s System info link. Bold marks the best primary score per dataset. Ranking uses unrounded accuracy. A dash means unavailable.</p>
   </div>
 </section>
 
@@ -136,110 +128,13 @@
         <dt>H.G.</dt>
         <dd>Hop groundedness: the percentage of a question's hops supported by at least one retrieved document, averaged over questions. It uses hop-level judgments that are not released.</dd>
         <dt>T.C.</dt>
-        <dd>Mean total agent tool calls per question. Piika counts <code>search</code> and <code>read_document</code>; JevGPT also counts <code>read_search_results</code> and <code>jev_find</code>. Internal System One requests are excluded. These different tool sets are not directly comparable; the JevGPT values link to a per-tool breakdown in System info.</dd>
+        <dd>Mean total agent tool calls per question. Tool sets differ across systems; follow the entry’s System info link for the breakdown and counting conventions.</dd>
         <dt>Closed-book</dt>
-        <dd>Accuracy from the question alone, with all tools disabled at the API level. JevGPT has no matched closed-book evaluation; its entries are unavailable.</dd>
+        <dd>Accuracy from the question alone, with all tools disabled at the API level. A dash indicates that a matched evaluation is unavailable.</dd>
       </dl>
     </div>
   </div>
 </section>
-</div>
-
-<div id="system-info" data-tab-panel aria-labelledby="tab-system-info">
-<section class="section" id="piika">
-  <div class="wrap">
-    <div class="section-head">
-      <p class="kicker">System info</p>
-      <h2>Piika baselines</h2>
-    </div>
-    <div class="prose">
-      <p>The baseline systems use the <a href="https://github.com/castorini/piika">Piika harness</a> with BM25 (k<sub>1</sub> = 0.9, b = 0.4) and no reranker. Each model has a matched closed-book evaluation. The open-weight models are served with vLLM.</p>
-      <p><a href="https://arxiv.org/abs/2608.20317">CMASS paper</a> &middot; <a href="https://github.com/castorini/piika">Harness code</a> &middot; <a href="https://github.com/castorini/cmass/blob/main/evaluation/SETTINGS.md">Execution settings</a></p>
-    </div>
-    <div class="system-models">
-      <!-- piika-models:start -->
-      <article class="system-model" id="system-piika-sol" tabindex="-1">
-        <h3><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1 Sol</a></h3>
-        <p>OpenAI &middot; API &middot; high reasoning effort</p>
-      </article>
-      <article class="system-model" id="system-piika-gemma" tabindex="-1">
-        <h3><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma 4 31B</a></h3>
-        <p>Google DeepMind &middot; open weights &middot; IT, thinking enabled</p>
-      </article>
-      <article class="system-model" id="system-piika-qwen" tabindex="-1">
-        <h3><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen 3.5 9B</a></h3>
-        <p>Qwen &middot; open weights &middot; thinking enabled</p>
-      </article>
-          <!-- piika-models:end -->
-    </div>
-  </div>
-</section>
-
-<section class="section" id="jevgpt">
-  <div class="wrap">
-    <div class="section-head">
-      <p class="kicker">System details</p>
-      <h2 id="system-jevgpt-bm25" tabindex="-1">JevGPT with BM25</h2>
-    </div>
-    <div class="prose">
-      <p><a href="https://arxiv.org/abs/2610.18272">JevGPT</a> combines GPT-6.1 Sol high as System Two with Jev-1.13.0 as System One for parallel source inspection and evidence selection. The harness is based on Pi-Serini. This entry uses BM25 (k<sub>1</sub> = 0.9, b = 0.4) and a 1,800-second research budget. Jev is an evidence model, rather than a separate ranking stage applied to the displayed BM25 hits.</p>
-      <p>All 423 answers were independently graded with the same GPT-6.1 Sol high prompts used for the Piika results, with tools disabled. Strict accuracy is 396/423 (93.62%); relaxed accuracy is 398/423 (94.09%). The independent judge accepted one additional DSQA answer relative to the sender’s grades; the original and independent aggregate counts are retained in the provenance.</p>
-      <p>P@all, R@all and H.G. count unique parent documents displayed as ranked hits in <code>search</code> and <code>read_search_results</code>. Internal candidate pools, System One inspections and auto-scan evidence notices are separate views. Notices can occur within a search response; including them changes some retrieval scores. The <a href="https://github.com/castorini/cmass/blob/main/evaluation/jevgpt_results.json">aggregate results</a> include that sensitivity analysis. Unjudged documents count as non-relevant, and no qrels were expanded from these runs.</p>
-      <p class="note">Selected outputs and their hashes were verified. The full history of unselected attempts is unavailable, so selection independent of correctness could not be established. <a href="https://arxiv.org/abs/2610.18272">Paper</a> &middot; <a href="https://github.com/sunyasheng/JevGPT">Harness code</a> &middot; <a href="https://huggingface.co/datasets/yashengsun/JevGPT-runs/tree/cb62978c2053d391df6edc6e45d96dfe8ceaaa2e">Pinned runs</a></p>
-    </div>
-    <details class="tool-breakdown" id="jev-tool-usage">
-      <summary>JevGPT tool usage</summary>
-      <p>Counts are totals across every question in each dataset. The final column is their sum divided by the question count. JevGPT has four agent tools; these totals are not directly comparable with Piika’s search-plus-read T.C. Internal System One requests are excluded.</p>
-      <div class="table-scroll" tabindex="0" role="region" aria-label="JevGPT tool counts">
-        <table class="data">
-          <thead><tr><th scope="col">Dataset</th><th scope="col">System</th><th scope="col">search</th><th scope="col">read_search_results</th><th scope="col">jev_find</th><th scope="col">read_document</th><th scope="col">All calls / question</th></tr></thead>
-          <!-- jev-tools:start -->
-          <tbody data-set="bcp">
-            <tr><td>BCP</td><td>JevGPT-BM25</td><td>875</td><td>34</td><td>748</td><td>108</td><td>22.1</td></tr>
-          </tbody>
-          <tbody data-set="trqa">
-            <tr><td>TRQA</td><td>JevGPT-BM25</td><td>204</td><td>8</td><td>202</td><td>32</td><td>6.6</td></tr>
-          </tbody>
-          <tbody data-set="dsqa">
-            <tr><td>DSQA</td><td>JevGPT-BM25</td><td>503</td><td>23</td><td>436</td><td>94</td><td>14.9</td></tr>
-          </tbody>
-          <tbody data-set="hotpotqa">
-            <tr><td>HotpotQA</td><td>JevGPT-BM25</td><td>470</td><td>5</td><td>473</td><td>46</td><td>4.9</td></tr>
-          </tbody>
-          <!-- jev-tools:end -->
-        </table>
-      </div>
-    </details>
-  </div>
-</section>
-
-<section class="section" id="run-settings">
-  <div class="wrap">
-    <div>
-      <div class="section-head">
-        <p class="kicker">Setup</p>
-        <h2>How the runs were made</h2>
-      </div>
-      <dl class="defs">
-        <dt>Agent harness</dt>
-        <dd>The baseline rows use <a href="https://github.com/castorini/piika">Piika</a>, a search-agent framework following the Pi-Serini design. The JevGPT-BM25 entry uses <a href="https://github.com/sunyasheng/JevGPT">JevGPT</a>, also based on Pi-Serini, with Jev-1.13.0 for evidence inspection.</dd>
-        <dt>Tools</dt>
-        <dd>Piika exposes <code>search</code> (at most five previews) and <code>read_document</code> (first 200 lines by default). JevGPT adds <code>read_search_results</code> and <code>jev_find</code>. Its internal evidence inspections are not additional displayed search hits.</dd>
-        <dt>Retriever</dt>
-        <dd>All entries shown here use BM25 over ClimbMix (k<sub>1</sub>&nbsp;=&nbsp;0.9, b&nbsp;=&nbsp;0.4). Piika uses the <a href="https://github.com/castorini/pyserini">Pyserini</a> 2.4.0 REST backend; JevGPT uses its ClimbMix adapter. No dense retriever or passage index is used by this JevGPT entry.</dd>
-        <dt>Budgets</dt>
-        <dd>JevGPT uses 1,800 seconds per question. Piika baselines retain accepted earlier outputs and documented longer continuations; see the <a href="https://github.com/castorini/cmass/blob/main/evaluation/SETTINGS.md#budgets-continuation-and-termination">execution settings</a>.</dd>
-        <dt>Reranker / evidence model</dt>
-        <dd>Piika uses no reranker. JevGPT uses Jev-1.13.0 for System One evidence inspection and selection; it does not rerank the displayed BM25 hits.</dd>
-        <dt>Version</dt>
-        <dd>CMASS v1.0, released on 25 October 2026 as <code>v2026.10.25</code>. P@all, R@all and H.G. depend on the qrels, so report the version you used.</dd>
-      </dl>
-      <p class="note more">Prompts, settings and scripts: <a href="https://github.com/castorini/cmass/blob/main/REPRODUCING.md">REPRODUCING.md</a> and <a href="https://github.com/castorini/cmass/tree/main/evaluation">evaluation/</a>.</p>
-    </div>
-  </div>
-</section>
-
-</div>
 
 <section class="section" id="submit">
   <div class="wrap">
@@ -273,6 +168,6 @@
   </div>
 </footer>
 
-<script src="../assets/site.js"></script>
+<script src="../assets/site.js?v=system-pages-1"></script>
 </body>
 </html>
