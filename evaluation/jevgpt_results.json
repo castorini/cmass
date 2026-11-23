@@ -146,7 +146,7 @@
   "run_url": "https://huggingface.co/datasets/yashengsun/JevGPT-runs/tree/cb62978c2053d391df6edc6e45d96dfe8ceaaa2e",
   "systems": {
     "JevGPT-BM25": {
-      "retriever": "Document BM25",
+      "retriever": "BM25",
       "retriever_note": "k\u2081 = 0.9, b = 0.4",
       "reranker": null,
       "evidence_model": "Jev-1.13.0",

@@ -43,7 +43,7 @@ def table() -> dict:
         a, cb = accuracy[ds, model, "piika"], accuracy[ds, model, "closedbook"]
         data.setdefault(ds, []).append(dict(
             system="piika-" + model, model=model, harness="Piika",
-            harness_url="https://github.com/castorini/piika", retriever="Document BM25",
+            harness_url="https://github.com/castorini/piika", retriever="BM25",
             retriever_note="k₁ = 0.9, b = 0.4", evidence="None", evidence_note="",
             acc=a.get("accuracy_percent", a.get("strict_accuracy_percent")),
             relaxed=a.get("relaxed_accuracy_percent"),
@@ -67,10 +67,10 @@ def table() -> dict:
             retriever=setup["retriever"], retriever_note=setup["retriever_note"],
             evidence=setup["evidence_model"], evidence_note="System One evidence", paper=jev["paper_url"],
             acc=r["independent_accuracy_percent"], relaxed=r["independent_relaxed_accuracy_percent"] if ds == "dsqa" else None,
-            cb=None, tc=None, p_all=r["precision_at_all_percent"], r_all=r["recall_at_all_percent"],
+            cb=None, tc=r["mean_tool_calls"], p_all=r["precision_at_all_percent"], r_all=r["recall_at_all_percent"],
             hg=r["hop_groundedness_percent"]))
     if seen != {(ds, system) for ds, _ in SETS for system in jev["systems"]}:
-        raise ValueError("Expected every released dataset for both JevGPT variants")
+        raise ValueError("Expected every released dataset for each included JevGPT system")
     return data
 
 
@@ -84,7 +84,7 @@ def rows() -> list[str]:
         ranked = sorted(data[key], key=lambda r: -r["acc"])
         best = {c: max(r[c] for r in ranked if r[c] is not None) for c in BOLD}
         out.append(f'          <tbody data-set="{key}">')
-        out.append(f'            <tr class="set-row"><th scope="rowgroup" colspan="11">{label}'
+        out.append(f'            <tr class="set-row"><th scope="rowgroup" colspan="8">{label}'
                    f'<span>{COUNTS[key]} questions &middot; {QREL_COUNTS[key]:,} qrels</span></th></tr>')
         previous, rank = None, 0
         for position, r in enumerate(ranked, 1):
@@ -96,21 +96,20 @@ def rows() -> list[str]:
             for c in COLS:
                 cls = ["num"] + (["key"] if c == "acc" else []) + (["best"] if c in BOLD and r[c] == best[c] else [])
                 if r[c] is None:
-                    value = ('<a class="tool-detail" href="#jev-tool-usage">See tools</a>' if c == "tc"
-                             else '<span aria-label="Unavailable" title="Not evaluated for this system">—</span>')
+                    value = '<span aria-label="Unavailable" title="Not evaluated for this system">—</span>'
                 else:
                     value = str(one_decimal(r[c]))
+                if c == "tc" and r["harness"] == "JevGPT":
+                    value = f'<a class="tool-detail" href="#jev-tool-usage" title="Mean total tool calls per question; view breakdown">{value}</a>'
                 if c == "acc" and r["relaxed"] is not None:
                     value += f'<span class="cell-sub relaxed">{one_decimal(r["relaxed"])} relaxed</span>'
                 cells.append(f'<td class="{" ".join(cls)}">{value}</td>')
             is_jev = r["harness"] == "JevGPT"
-            title = link(r["paper"], r["system"]) if is_jev else link(url, name)
-            detail = f'{link(url, name)} &middot; high reasoning effort' if is_jev else f'<span class="tag">{kind}</span> {org} &middot; {note}'
+            info_url = "#system-" + r["system"].lower()
+            title = link(info_url, r["system"] if is_jev else name)
+            detail = f'{name if is_jev else r["harness"]} &middot; {link(info_url, "System info")}'
             model = f'<td class="model">{title}<span class="cell-sub">{detail}</span></td>'
-            harness = f'<td class="harness">{link(r["harness_url"], r["harness"])}</td>'
-            retrieval = f'<td class="retriever">{html.escape(r["retriever"])}<span class="cell-sub">{html.escape(r["retriever_note"])}</span></td>'
-            evidence = f'<td class="evidence">{html.escape(r["evidence"])}<span class="cell-sub">{html.escape(r["evidence_note"])}</span></td>'
-            out.append(f'            <tr data-system="{r["system"]}"><td class="rank">{rank}</td>{model}{harness}{retrieval}{evidence}{"".join(cells)}</tr>')
+            out.append(f'            <tr data-system="{r["system"]}"><td class="rank">{rank}</td>{model}{"".join(cells)}</tr>')
         out.append('          </tbody>')
     return out
 
@@ -132,9 +131,19 @@ def tool_rows() -> list[str]:
     return out
 
 
+def piika_models() -> list[str]:
+    out = []
+    for model, (name, url, org, kind, note) in MODELS.items():
+        out.append(f'      <article class="system-model" id="system-piika-{model}" tabindex="-1">')
+        out.append(f'        <h3>{link(url, name)}</h3>')
+        out.append(f'        <p>{org} &middot; {kind} &middot; {note}</p>')
+        out.append('      </article>')
+    return out
+
+
 def main() -> None:
     text = PAGE.read_text()
-    for name, content in [("rows", rows()), ("jev-tools", tool_rows())]:
+    for name, content in [("rows", rows()), ("jev-tools", tool_rows()), ("piika-models", piika_models())]:
         start, end = f"<!-- {name}:start -->", f"<!-- {name}:end -->"
         i, j = text.index(start) + len(start), text.index(end)
         text = text[:i] + "\n" + "\n".join(content) + "\n          " + text[j:]
