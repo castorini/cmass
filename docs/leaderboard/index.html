@@ -42,7 +42,7 @@
     <p class="eyebrow">Leaderboard <span class="version-pill">CMASS v1.0 &middot; v2026.10.25</span></p>
     <h1>Search agents on CMASS</h1>
     <div class="prose">
-      <p class="lead">Each agent runs in the <a href="https://github.com/castorini/piika">Piika</a> harness with two tools, <code>search</code> and <code>read_document</code>, over a BM25 index of the 553M ClimbMix documents. Closed-book runs answer the same questions with every tool disabled. Within each dataset, rows are ranked by accuracy with retrieval tools.</p>
+      <p class="lead">Compare search agents over the 553M ClimbMix documents. Each row identifies the model, harness, retriever and evidence model. Within each dataset, systems are ranked by answer accuracy; equal scores share a rank. DSQA uses strict scoring, with relaxed accuracy shown underneath.</p>
     </div>
   </div>
 </section>
@@ -56,13 +56,16 @@
       <button class="chip" type="button" data-filter="dsqa" aria-pressed="false">DSQA</button>
       <button class="chip" type="button" data-filter="hotpotqa" aria-pressed="false">HotpotQA</button>
     </div>
-    <div class="table-scroll">
+    <p class="note table-scroll-hint">Scroll horizontally to compare all columns.</p>
+    <div class="table-scroll board-scroll" tabindex="0" role="region" aria-label="CMASS leaderboard; scroll horizontally for all columns">
       <table class="data board">
         <thead>
           <tr class="grp">
             <th scope="col" rowspan="2" class="rank">#</th>
-            <th scope="col" rowspan="2">Model</th>
+            <th scope="col" rowspan="2">System / model</th>
             <th scope="col" rowspan="2" class="harness">Harness</th>
+            <th scope="col" rowspan="2" class="retriever">Retriever</th>
+            <th scope="col" rowspan="2" class="evidence">Reranker /<br>evidence model</th>
             <th scope="colgroup" colspan="5" class="span">With retrieval tools</th>
             <th scope="colgroup" class="span">Closed-book</th>
           </tr>
@@ -77,33 +80,75 @@
         </thead>
           <!-- rows:start -->
           <tbody data-set="bcp">
-            <tr class="set-row"><th scope="rowgroup" colspan="9">BrowseComp-Plus (BCP)<span>80 questions &middot; 11,450 qrels</span></th></tr>
-            <tr><td class="rank">1</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1&nbsp;Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span><span class="cell-sub harness-sub">Harness: <a href="https://github.com/castorini/piika">Piika</a></span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="num key best">85.0</td><td class="num best">38.2</td><td class="num best">12.1</td><td class="num best">75.5</td><td class="num">21.5</td><td class="num best">52.5</td></tr>
-            <tr><td class="rank">2</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma&nbsp;4&nbsp;31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span><span class="cell-sub harness-sub">Harness: <a href="https://github.com/castorini/piika">Piika</a></span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="num key">27.5</td><td class="num">10.9</td><td class="num">4.2</td><td class="num">31.4</td><td class="num">23.5</td><td class="num">16.3</td></tr>
-            <tr><td class="rank">3</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen&nbsp;3.5&nbsp;9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span><span class="cell-sub harness-sub">Harness: <a href="https://github.com/castorini/piika">Piika</a></span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="num key">16.3</td><td class="num">9.2</td><td class="num">4.4</td><td class="num">31.4</td><td class="num">49.9</td><td class="num">5.0</td></tr>
+            <tr class="set-row"><th scope="rowgroup" colspan="11">BrowseComp-Plus (BCP)<span>80 questions &middot; 11,450 qrels</span></th></tr>
+            <tr data-system="piika-sol"><td class="rank">1</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1 Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="retriever">Document BM25<span class="cell-sub">k₁ = 0.9, b = 0.4</span></td><td class="evidence">None<span class="cell-sub"></span></td><td class="num key best">85.0</td><td class="num best">38.2</td><td class="num best">12.1</td><td class="num best">75.5</td><td class="num">21.5</td><td class="num best">52.5</td></tr>
+            <tr data-system="JevGPT-BM25"><td class="rank">2</td><td class="model"><a href="https://arxiv.org/abs/2610.18272">JevGPT-BM25</a><span class="cell-sub"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1 Sol</a> &middot; high reasoning effort</span></td><td class="harness"><a href="https://github.com/sunyasheng/JevGPT">JevGPT</a></td><td class="retriever">Document BM25<span class="cell-sub">k₁ = 0.9, b = 0.4</span></td><td class="evidence">Jev-1.13.0<span class="cell-sub">System One evidence</span></td><td class="num key">81.3</td><td class="num">27.6</td><td class="num">8.3</td><td class="num">63.3</td><td class="num"><a class="tool-detail" href="#jev-tool-usage">See tools</a></td><td class="num"><span aria-label="Unavailable" title="Not evaluated for this system">—</span></td></tr>
+            <tr data-system="piika-gemma"><td class="rank">3</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma 4 31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="retriever">Document BM25<span class="cell-sub">k₁ = 0.9, b = 0.4</span></td><td class="evidence">None<span class="cell-sub"></span></td><td class="num key">27.5</td><td class="num">10.9</td><td class="num">4.2</td><td class="num">31.4</td><td class="num">23.5</td><td class="num">16.3</td></tr>
+            <tr data-system="piika-qwen"><td class="rank">4</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen 3.5 9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="retriever">Document BM25<span class="cell-sub">k₁ = 0.9, b = 0.4</span></td><td class="evidence">None<span class="cell-sub"></span></td><td class="num key">16.3</td><td class="num">9.2</td><td class="num">4.4</td><td class="num">31.4</td><td class="num">49.9</td><td class="num">5.0</td></tr>
           </tbody>
           <tbody data-set="trqa">
-            <tr class="set-row"><th scope="rowgroup" colspan="9">Total Recall QA (TRQA)<span>68 questions &middot; 8,307 qrels</span></th></tr>
-            <tr><td class="rank">1</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1&nbsp;Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span><span class="cell-sub harness-sub">Harness: <a href="https://github.com/castorini/piika">Piika</a></span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="num key best">94.1</td><td class="num best">70.9</td><td class="num">10.6</td><td class="num">79.7</td><td class="num">8.6</td><td class="num best">86.8</td></tr>
-            <tr><td class="rank">2</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma&nbsp;4&nbsp;31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span><span class="cell-sub harness-sub">Harness: <a href="https://github.com/castorini/piika">Piika</a></span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="num key">66.2</td><td class="num">59.2</td><td class="num">17.0</td><td class="num">82.7</td><td class="num">12.4</td><td class="num">50.0</td></tr>
-            <tr><td class="rank">3</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen&nbsp;3.5&nbsp;9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span><span class="cell-sub harness-sub">Harness: <a href="https://github.com/castorini/piika">Piika</a></span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="num key">57.4</td><td class="num">59.4</td><td class="num best">18.6</td><td class="num best">85.8</td><td class="num">19.7</td><td class="num">39.7</td></tr>
+            <tr class="set-row"><th scope="rowgroup" colspan="11">Total Recall QA (TRQA)<span>68 questions &middot; 8,307 qrels</span></th></tr>
+            <tr data-system="JevGPT-BM25"><td class="rank">1</td><td class="model"><a href="https://arxiv.org/abs/2610.18272">JevGPT-BM25</a><span class="cell-sub"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1 Sol</a> &middot; high reasoning effort</span></td><td class="harness"><a href="https://github.com/sunyasheng/JevGPT">JevGPT</a></td><td class="retriever">Document BM25<span class="cell-sub">k₁ = 0.9, b = 0.4</span></td><td class="evidence">Jev-1.13.0<span class="cell-sub">System One evidence</span></td><td class="num key best">97.1</td><td class="num">66.7</td><td class="num">8.4</td><td class="num">70.2</td><td class="num"><a class="tool-detail" href="#jev-tool-usage">See tools</a></td><td class="num"><span aria-label="Unavailable" title="Not evaluated for this system">—</span></td></tr>
+            <tr data-system="piika-sol"><td class="rank">2</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1 Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="retriever">Document BM25<span class="cell-sub">k₁ = 0.9, b = 0.4</span></td><td class="evidence">None<span class="cell-sub"></span></td><td class="num key">94.1</td><td class="num best">70.9</td><td class="num">10.6</td><td class="num">79.7</td><td class="num">8.6</td><td class="num best">86.8</td></tr>
+            <tr data-system="piika-gemma"><td class="rank">3</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma 4 31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="retriever">Document BM25<span class="cell-sub">k₁ = 0.9, b = 0.4</span></td><td class="evidence">None<span class="cell-sub"></span></td><td class="num key">66.2</td><td class="num">59.2</td><td class="num">17.0</td><td class="num">82.7</td><td class="num">12.4</td><td class="num">50.0</td></tr>
+            <tr data-system="piika-qwen"><td class="rank">4</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen 3.5 9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="retriever">Document BM25<span class="cell-sub">k₁ = 0.9, b = 0.4</span></td><td class="evidence">None<span class="cell-sub"></span></td><td class="num key">57.4</td><td class="num">59.4</td><td class="num best">18.6</td><td class="num best">85.8</td><td class="num">19.7</td><td class="num">39.7</td></tr>
           </tbody>
           <tbody data-set="dsqa">
-            <tr class="set-row"><th scope="rowgroup" colspan="9">DeepSearchQA (DSQA)<span>71 questions &middot; 9,889 qrels</span></th></tr>
-            <tr><td class="rank">1</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1&nbsp;Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span><span class="cell-sub harness-sub">Harness: <a href="https://github.com/castorini/piika">Piika</a></span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="num key best">90.1</td><td class="num best">50.5</td><td class="num">15.0</td><td class="num best">75.7</td><td class="num">17.9</td><td class="num best">70.4</td></tr>
-            <tr><td class="rank">2</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen&nbsp;3.5&nbsp;9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span><span class="cell-sub harness-sub">Harness: <a href="https://github.com/castorini/piika">Piika</a></span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="num key">39.4</td><td class="num">35.3</td><td class="num best">19.8</td><td class="num">72.0</td><td class="num">37.1</td><td class="num">12.7</td></tr>
-            <tr><td class="rank">3</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma&nbsp;4&nbsp;31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span><span class="cell-sub harness-sub">Harness: <a href="https://github.com/castorini/piika">Piika</a></span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="num key">38.0</td><td class="num">33.2</td><td class="num">17.4</td><td class="num">68.1</td><td class="num">21.5</td><td class="num">23.9</td></tr>
+            <tr class="set-row"><th scope="rowgroup" colspan="11">DeepSearchQA (DSQA)<span>71 questions &middot; 9,889 qrels</span></th></tr>
+            <tr data-system="JevGPT-BM25"><td class="rank">1</td><td class="model"><a href="https://arxiv.org/abs/2610.18272">JevGPT-BM25</a><span class="cell-sub"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1 Sol</a> &middot; high reasoning effort</span></td><td class="harness"><a href="https://github.com/sunyasheng/JevGPT">JevGPT</a></td><td class="retriever">Document BM25<span class="cell-sub">k₁ = 0.9, b = 0.4</span></td><td class="evidence">Jev-1.13.0<span class="cell-sub">System One evidence</span></td><td class="num key best">97.2<span class="cell-sub relaxed">100.0 relaxed</span></td><td class="num">39.0</td><td class="num">11.3</td><td class="num">69.4</td><td class="num"><a class="tool-detail" href="#jev-tool-usage">See tools</a></td><td class="num"><span aria-label="Unavailable" title="Not evaluated for this system">—</span></td></tr>
+            <tr data-system="piika-sol"><td class="rank">2</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1 Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="retriever">Document BM25<span class="cell-sub">k₁ = 0.9, b = 0.4</span></td><td class="evidence">None<span class="cell-sub"></span></td><td class="num key">90.1<span class="cell-sub relaxed">93.0 relaxed</span></td><td class="num best">50.5</td><td class="num">15.0</td><td class="num best">75.7</td><td class="num">17.9</td><td class="num best">70.4</td></tr>
+            <tr data-system="piika-qwen"><td class="rank">3</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen 3.5 9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="retriever">Document BM25<span class="cell-sub">k₁ = 0.9, b = 0.4</span></td><td class="evidence">None<span class="cell-sub"></span></td><td class="num key">39.4<span class="cell-sub relaxed">53.5 relaxed</span></td><td class="num">35.3</td><td class="num best">19.8</td><td class="num">72.0</td><td class="num">37.1</td><td class="num">12.7</td></tr>
+            <tr data-system="piika-gemma"><td class="rank">4</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma 4 31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="retriever">Document BM25<span class="cell-sub">k₁ = 0.9, b = 0.4</span></td><td class="evidence">None<span class="cell-sub"></span></td><td class="num key">38.0<span class="cell-sub relaxed">53.5 relaxed</span></td><td class="num">33.2</td><td class="num">17.4</td><td class="num">68.1</td><td class="num">21.5</td><td class="num">23.9</td></tr>
           </tbody>
           <tbody data-set="hotpotqa">
-            <tr class="set-row"><th scope="rowgroup" colspan="9">HotpotQA<span>204 questions &middot; 11,090 qrels</span></th></tr>
-            <tr><td class="rank">1</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1&nbsp;Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span><span class="cell-sub harness-sub">Harness: <a href="https://github.com/castorini/piika">Piika</a></span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="num key best">94.6</td><td class="num best">57.9</td><td class="num">17.2</td><td class="num best">90.2</td><td class="num">6.7</td><td class="num best">89.7</td></tr>
-            <tr><td class="rank">2</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen&nbsp;3.5&nbsp;9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span><span class="cell-sub harness-sub">Harness: <a href="https://github.com/castorini/piika">Piika</a></span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="num key">70.1</td><td class="num">44.4</td><td class="num best">19.7</td><td class="num">83.9</td><td class="num">17.0</td><td class="num">27.5</td></tr>
-            <tr><td class="rank">3</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma&nbsp;4&nbsp;31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span><span class="cell-sub harness-sub">Harness: <a href="https://github.com/castorini/piika">Piika</a></span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="num key">65.7</td><td class="num">44.4</td><td class="num">18.1</td><td class="num">78.4</td><td class="num">10.2</td><td class="num">36.8</td></tr>
+            <tr class="set-row"><th scope="rowgroup" colspan="11">HotpotQA<span>204 questions &middot; 11,090 qrels</span></th></tr>
+            <tr data-system="JevGPT-BM25"><td class="rank">1</td><td class="model"><a href="https://arxiv.org/abs/2610.18272">JevGPT-BM25</a><span class="cell-sub"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1 Sol</a> &middot; high reasoning effort</span></td><td class="harness"><a href="https://github.com/sunyasheng/JevGPT">JevGPT</a></td><td class="retriever">Document BM25<span class="cell-sub">k₁ = 0.9, b = 0.4</span></td><td class="evidence">Jev-1.13.0<span class="cell-sub">System One evidence</span></td><td class="num key best">96.1</td><td class="num">50.3</td><td class="num">12.3</td><td class="num">75.5</td><td class="num"><a class="tool-detail" href="#jev-tool-usage">See tools</a></td><td class="num"><span aria-label="Unavailable" title="Not evaluated for this system">—</span></td></tr>
+            <tr data-system="piika-sol"><td class="rank">2</td><td class="model"><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">GPT-6.1 Sol</a><span class="cell-sub"><span class="tag">API</span> OpenAI &middot; high reasoning effort</span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="retriever">Document BM25<span class="cell-sub">k₁ = 0.9, b = 0.4</span></td><td class="evidence">None<span class="cell-sub"></span></td><td class="num key">94.6</td><td class="num best">57.9</td><td class="num">17.2</td><td class="num best">90.2</td><td class="num">6.7</td><td class="num best">89.7</td></tr>
+            <tr data-system="piika-qwen"><td class="rank">3</td><td class="model"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen 3.5 9B</a><span class="cell-sub"><span class="tag">open weights</span> Qwen &middot; thinking enabled</span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="retriever">Document BM25<span class="cell-sub">k₁ = 0.9, b = 0.4</span></td><td class="evidence">None<span class="cell-sub"></span></td><td class="num key">70.1</td><td class="num">44.4</td><td class="num best">19.7</td><td class="num">83.9</td><td class="num">17.0</td><td class="num">27.5</td></tr>
+            <tr data-system="piika-gemma"><td class="rank">4</td><td class="model"><a href="https://huggingface.co/google/gemma-4-31B-it">Gemma 4 31B</a><span class="cell-sub"><span class="tag">open weights</span> Google DeepMind &middot; IT, thinking enabled</span></td><td class="harness"><a href="https://github.com/castorini/piika">Piika</a></td><td class="retriever">Document BM25<span class="cell-sub">k₁ = 0.9, b = 0.4</span></td><td class="evidence">None<span class="cell-sub"></span></td><td class="num key">65.7</td><td class="num">44.4</td><td class="num">18.1</td><td class="num">78.4</td><td class="num">10.2</td><td class="num">36.8</td></tr>
           </tbody>
           <!-- rows:end -->
       </table>
     </div>
-    <p class="note table-note">Table 3 of the CMASS paper plus P@all, on CMASS v1.0 (release v2026.10.25). All values are percentages except T.C., a mean count. Bold marks the best value per dataset; tool calls are not ranked. One run per model, dataset and condition.</p>
+    <p class="note table-note">CMASS v1.0 (release v2026.10.25), using the same frozen qrels for every system. Piika baselines reproduce Table 3 of the CMASS paper plus P@all; JevGPT-BM25 uses independently graded answers. Values are percentages except T.C. Bold marks the best primary score per dataset. Ranking uses unrounded accuracy. A dash means unavailable; JevGPT tool counts are reported separately below.</p>
+  </div>
+</section>
+
+<section class="section" id="jevgpt">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="kicker">System details</p>
+      <h2>JevGPT with document BM25</h2>
+    </div>
+    <div class="prose">
+      <p><a href="https://arxiv.org/abs/2610.18272">JevGPT</a> combines GPT-6.1 Sol high as System Two with Jev-1.13.0 as System One for parallel source inspection and evidence selection. The harness is based on Pi-Serini. This entry uses whole-document BM25 (k<sub>1</sub> = 0.9, b = 0.4) and a 1,800-second research budget. Jev is an evidence model, rather than a separate ranking stage applied to the displayed BM25 hits.</p>
+      <p>All 423 answers were independently graded with the same GPT-6.1 Sol high prompts used for the Piika results, with tools disabled. Strict accuracy is 396/423 (93.62%); relaxed accuracy is 398/423 (94.09%). The independent judge accepted one additional DSQA answer relative to the sender’s grades; the original and independent aggregate counts are retained in the provenance.</p>
+      <p>P@all, R@all and H.G. count unique parent documents displayed as ranked hits in <code>search</code> and <code>read_search_results</code>. Internal candidate pools, System One inspections and auto-scan evidence notices are separate views. Notices can occur within a search response; including them changes some retrieval scores. The <a href="https://github.com/castorini/cmass/blob/main/evaluation/jevgpt_results.json">aggregate results</a> include that sensitivity analysis. Unjudged documents count as non-relevant, and no qrels were expanded from these runs.</p>
+      <p class="note">Selected outputs and their hashes were verified. The full history of unselected attempts is unavailable, so selection independent of correctness could not be established. <a href="https://arxiv.org/abs/2610.18272">Paper</a> &middot; <a href="https://github.com/sunyasheng/JevGPT">Harness code</a> &middot; <a href="https://huggingface.co/datasets/yashengsun/JevGPT-runs/tree/cb62978c2053d391df6edc6e45d96dfe8ceaaa2e">Pinned runs</a></p>
+    </div>
+    <details class="tool-breakdown" id="jev-tool-usage">
+      <summary>JevGPT tool usage</summary>
+      <p>Counts are totals across every question in each dataset. The final column is their sum divided by the question count. JevGPT has four agent tools; these totals are not directly comparable with Piika’s search-plus-read T.C. Internal System One requests are excluded.</p>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="JevGPT tool counts">
+        <table class="data">
+          <thead><tr><th scope="col">Dataset</th><th scope="col">System</th><th scope="col">search</th><th scope="col">read_search_results</th><th scope="col">jev_find</th><th scope="col">read_document</th><th scope="col">All calls / question</th></tr></thead>
+          <!-- jev-tools:start -->
+          <tbody data-set="bcp">
+            <tr><td>BCP</td><td>JevGPT-BM25</td><td>875</td><td>34</td><td>748</td><td>108</td><td>22.1</td></tr>
+          </tbody>
+          <tbody data-set="trqa">
+            <tr><td>TRQA</td><td>JevGPT-BM25</td><td>204</td><td>8</td><td>202</td><td>32</td><td>6.6</td></tr>
+          </tbody>
+          <tbody data-set="dsqa">
+            <tr><td>DSQA</td><td>JevGPT-BM25</td><td>503</td><td>23</td><td>436</td><td>94</td><td>14.9</td></tr>
+          </tbody>
+          <tbody data-set="hotpotqa">
+            <tr><td>HotpotQA</td><td>JevGPT-BM25</td><td>470</td><td>5</td><td>473</td><td>46</td><td>4.9</td></tr>
+          </tbody>
+          <!-- jev-tools:end -->
+        </table>
+      </div>
+    </details>
   </div>
 </section>
 
@@ -116,7 +161,7 @@
       </div>
       <dl class="defs">
         <dt>Acc.</dt>
-        <dd>Percentage of all questions answered correctly; unanswered questions count as failures. DSQA uses strict exact-set equality: every gold member and no incorrect additions, in any order.</dd>
+        <dd>Percentage of all questions answered correctly; unanswered questions count as failures. DSQA ranks strict exact-set equality: every gold member and no incorrect additions, in any order. The secondary relaxed score accepts a nonempty subset with no incorrect additions.</dd>
         <dt>P@all</dt>
         <dd>Precision@all: the percentage of the distinct documents in a question's search results that are qrels, averaged over questions. Unjudged documents count as non-relevant, so it is a lower bound.</dd>
         <dt>R@all</dt>
@@ -124,9 +169,9 @@
         <dt>H.G.</dt>
         <dd>Hop groundedness: the percentage of a question's hops supported by at least one retrieved document, averaged over questions. It uses hop-level judgments that are not released.</dd>
         <dt>T.C.</dt>
-        <dd>Mean tool calls per question: searches plus document reads.</dd>
+        <dd>Mean Piika tool calls per question: searches plus document reads. JevGPT has additional tools, so its counts appear in the separate tool breakdown.</dd>
         <dt>Closed-book</dt>
-        <dd>Accuracy from the question alone, with all tools disabled at the API level.</dd>
+        <dd>Accuracy from the question alone, with all tools disabled at the API level. JevGPT has no matched closed-book evaluation; its entries are unavailable.</dd>
       </dl>
     </div>
     <div>
@@ -136,11 +181,13 @@
       </div>
       <dl class="defs">
         <dt>Agent harness</dt>
-        <dd><a href="https://github.com/castorini/piika">Piika</a>, a search-agent framework that follows the agent design of Pi-Serini. The agents are the models below.</dd>
+        <dd>The baseline rows use <a href="https://github.com/castorini/piika">Piika</a>, a search-agent framework following the Pi-Serini design. The new document-BM25 entry uses <a href="https://github.com/sunyasheng/JevGPT">JevGPT</a>, also based on Pi-Serini, with Jev-1.13.0 for evidence inspection.</dd>
         <dt>Tools</dt>
-        <dd><code>search</code> returns at most five documents with previews of at most 500 characters; <code>read_document</code> returns the first 200 lines of a document.</dd>
+        <dd>Piika exposes <code>search</code> (at most five previews) and <code>read_document</code> (first 200 lines by default). JevGPT adds <code>read_search_results</code> and <code>jev_find</code>. Its internal evidence inspections are not additional displayed search hits.</dd>
         <dt>Retriever</dt>
-        <dd>BM25 over ClimbMix through the <a href="https://github.com/castorini/pyserini">Pyserini</a> 2.4.0 REST backend (k<sub>1</sub>&nbsp;=&nbsp;0.9, b&nbsp;=&nbsp;0.4).</dd>
+        <dd>All entries shown here use whole-document BM25 over ClimbMix (k<sub>1</sub>&nbsp;=&nbsp;0.9, b&nbsp;=&nbsp;0.4). Piika uses the <a href="https://github.com/castorini/pyserini">Pyserini</a> 2.4.0 REST backend; JevGPT uses its ClimbMix adapter. No dense retriever or passage index is used by this JevGPT entry.</dd>
+        <dt>Budgets</dt>
+        <dd>JevGPT uses 1,800 seconds per question. Piika baselines retain accepted earlier outputs and documented longer continuations; see the <a href="https://github.com/castorini/cmass/blob/main/evaluation/SETTINGS.md#budgets-continuation-and-termination">execution settings</a>.</dd>
         <dt>Models</dt>
         <dd>GPT-6.1 Sol with high reasoning effort; Gemma&nbsp;4 31B IT and Qwen&nbsp;3.5 9B with thinking enabled, served with vLLM.</dd>
         <dt>Version</dt>
@@ -158,8 +205,13 @@
       <h2>Add your system</h2>
     </div>
     <div class="prose">
-      <!-- TODO: submission process (where to send runs, which files, who scores hop groundedness). -->
-      <p>Submission instructions are coming soon.</p>
+      <p>To submit a system, email us at <a href="mailto:sahel.sharifymoghaddam@uwaterloo.ca?subject=CMASS%20leaderboard%20submission">sahel.sharifymoghaddam@uwaterloo.ca</a> with the subject <strong>CMASS leaderboard submission</strong>. Include a link to your paper or project, your code, and the following:</p>
+      <ul>
+        <li><strong>System configuration:</strong> the CMASS release, model and reasoning settings, agent harness, retriever and any reranker or evidence model, time/token budgets, and pinned code and run revisions.</li>
+        <li><strong>Complete run artifacts:</strong> one selected final attempt for every released question, including failed or unanswered questions; final answers; search-returned document IDs; and tool-call trajectories. Distinguish results shown to the agent from internal candidates, opened documents and final citations. For passage retrieval, include the mapping to original ClimbMix document IDs. Describe retries and how the final attempt was selected.</li>
+        <li><strong>Results and publication permission:</strong> per-dataset scores and reproduction commands, with strict DSQA accuracy primary and relaxed accuracy separate. Confirm that we may publish your system name, paper/project link, and aggregate results on this leaderboard.</li>
+      </ul>
+      <p>Use a restricted-access link for artifacts containing decoded benchmark content. We review submissions against the <a href="https://github.com/castorini/cmass/blob/main/REPRODUCING.md">official evaluation protocol</a> and frozen qrels, and compute hop groundedness using the private hop annotations. Questions about preparing a submission are welcome at the same address.</p>
     </div>
   </div>
 </section>

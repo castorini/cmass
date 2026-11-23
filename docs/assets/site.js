@@ -34,3 +34,13 @@ chips.forEach(function (chip) {
     });
   });
 });
+
+// Open the separate JevGPT tool table when following a row's link.
+function openJevTools() {
+  var details = document.getElementById("jev-tool-usage");
+  if (details) details.open = true;
+}
+document.querySelectorAll('a[href="#jev-tool-usage"]').forEach(function (link) {
+  link.addEventListener("click", openJevTools);
+});
+if (window.location.hash === "#jev-tool-usage") openJevTools();

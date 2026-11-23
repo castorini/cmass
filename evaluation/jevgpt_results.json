@@ -1,0 +1,190 @@
+{
+  "status": "leaderboard_accuracy_verified",
+  "dataset_release": "v2026.10.25",
+  "versions": {
+    "runs-source": "cb62978c2053d391df6edc6e45d96dfe8ceaaa2e",
+    "dataset-source": "b45390693461d948d47fdd835f27b46026b5e2a2",
+    "cmass-code": "5461df131d6cbe7c84e4d4fd18849da01310f1bd",
+    "jevgpt-code": "6d7b1a904523fddbfb685fd7f49d7ef2a69a7495"
+  },
+  "model": "gpt-6.1-sol",
+  "reasoning": "high",
+  "system_one": "jev-1.13.0",
+  "research_budget_seconds": 1800,
+  "retrieval_view": "Unique parent document IDs explicitly displayed as ranked hits in search and read_search_results returns. Cached candidates and Jev evidence notices are excluded.",
+  "aggregation": "Question macro averages within each dataset, retaining every released question.",
+  "qrels_limitation": "Frozen qrels; unjudged documents count as non-relevant. No automatic qrel expansion.",
+  "accuracy_status": "Independent GPT-6.1-Sol high grading is complete with the exact published Piika/CMASS prompts; DSQA strict is primary and relaxed is separate. Sender scores are retained for reconciliation.",
+  "accuracy_judge": {
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "tools": [],
+    "store": false,
+    "prompt_source": "Pinned CMASS protocol; Piika scalar renderer exactly matches archived source; DSQA uses the archived separate set judge.",
+    "scalar_source_sha256": "9ede807c70adfb86f0e3555813867e025d6895f748a1c65a538f9b92208aebff",
+    "dsqa_prompt_sha256": "85c097a86b1c3702cedec05dbedd1575259510c9413b1bf9fae8b70b5c31c33f",
+    "disagreement_questions": 1
+  },
+  "overall_accuracy": [
+    {
+      "variant": "bm25",
+      "model": "JevGPT-BM25",
+      "questions": 423,
+      "graded": 423,
+      "independent_correct": 396,
+      "independent_relaxed_correct": 398,
+      "strict_disagreements": 1,
+      "relaxed_disagreements": 1
+    }
+  ],
+  "tool_usage": "search, read_search_results, jev_find and read_document are reported separately; their sum is not directly comparable with Piika search plus read_document.",
+  "selection_history_limitation": "Selected outputs and their hashes are verified. Unselected earlier attempts and the full selection history are unavailable, so independence of selection from correctness is not independently established.",
+  "notice_ambiguity": "Auto-scan evidence notices can be attached to search responses. The primary view counts ranked search hits; including those notices changes some scores and is a separate sensitivity view.",
+  "results": [
+    {
+      "dataset": "bcp",
+      "system": "JevGPT-BM25",
+      "questions": 80,
+      "independent_accuracy_percent": 81.25,
+      "independent_relaxed_accuracy_percent": 81.25,
+      "independent_correct": 65,
+      "independent_relaxed_correct": 65,
+      "sender_correct": 65,
+      "sender_relaxed_correct": 65,
+      "recall_at_all_percent": 8.343195942254987,
+      "precision_at_all_percent": 27.63204389057206,
+      "hop_groundedness_percent": 63.286210317460345,
+      "inclusion_hop_groundedness_percent": 65.67838064713067,
+      "exclusion_hop_groundedness_percent": 36.640625,
+      "exclusion_eligible_questions": 16,
+      "tool_calls": {
+        "jev_find": 748,
+        "read_document": 108,
+        "read_search_results": 34,
+        "search": 875
+      },
+      "mean_tool_calls": 22.0625
+    },
+    {
+      "dataset": "trqa",
+      "system": "JevGPT-BM25",
+      "questions": 68,
+      "independent_accuracy_percent": 97.05882352941177,
+      "independent_relaxed_accuracy_percent": 97.05882352941177,
+      "independent_correct": 66,
+      "independent_relaxed_correct": 66,
+      "sender_correct": 66,
+      "sender_relaxed_correct": 66,
+      "recall_at_all_percent": 8.37332364324546,
+      "precision_at_all_percent": 66.69400825717416,
+      "hop_groundedness_percent": 70.18262268422116,
+      "inclusion_hop_groundedness_percent": 79.12907762172465,
+      "exclusion_hop_groundedness_percent": 48.37217438432014,
+      "exclusion_eligible_questions": 52,
+      "tool_calls": {
+        "jev_find": 202,
+        "read_document": 32,
+        "read_search_results": 8,
+        "search": 204
+      },
+      "mean_tool_calls": 6.5588235294117645
+    },
+    {
+      "dataset": "dsqa",
+      "system": "JevGPT-BM25",
+      "questions": 71,
+      "independent_accuracy_percent": 97.1830985915493,
+      "independent_relaxed_accuracy_percent": 100.0,
+      "independent_correct": 69,
+      "independent_relaxed_correct": 71,
+      "sender_correct": 68,
+      "sender_relaxed_correct": 70,
+      "recall_at_all_percent": 11.284100087429461,
+      "precision_at_all_percent": 39.017586416435584,
+      "hop_groundedness_percent": 69.37718895541684,
+      "inclusion_hop_groundedness_percent": 76.69293539011846,
+      "exclusion_hop_groundedness_percent": 55.29860020931449,
+      "exclusion_eligible_questions": 56,
+      "tool_calls": {
+        "jev_find": 436,
+        "read_document": 94,
+        "read_search_results": 23,
+        "search": 503
+      },
+      "mean_tool_calls": 14.873239436619718
+    },
+    {
+      "dataset": "hotpotqa",
+      "system": "JevGPT-BM25",
+      "questions": 204,
+      "independent_accuracy_percent": 96.07843137254902,
+      "independent_relaxed_accuracy_percent": 96.07843137254902,
+      "independent_correct": 196,
+      "independent_relaxed_correct": 196,
+      "sender_correct": 196,
+      "sender_relaxed_correct": 196,
+      "recall_at_all_percent": 12.252633186372163,
+      "precision_at_all_percent": 50.31069512719191,
+      "hop_groundedness_percent": 75.50056765130293,
+      "inclusion_hop_groundedness_percent": 76.75119542766602,
+      "exclusion_hop_groundedness_percent": 52.84843667196608,
+      "exclusion_eligible_questions": 37,
+      "tool_calls": {
+        "jev_find": 473,
+        "read_document": 46,
+        "read_search_results": 5,
+        "search": 470
+      },
+      "mean_tool_calls": 4.872549019607843
+    }
+  ],
+  "scope": [
+    "cmass_bm25"
+  ],
+  "paper_url": "https://arxiv.org/abs/2610.18272",
+  "code_url": "https://github.com/sunyasheng/JevGPT",
+  "run_url": "https://huggingface.co/datasets/yashengsun/JevGPT-runs/tree/cb62978c2053d391df6edc6e45d96dfe8ceaaa2e",
+  "systems": {
+    "JevGPT-BM25": {
+      "retriever": "Document BM25",
+      "retriever_note": "k\u2081 = 0.9, b = 0.4",
+      "reranker": null,
+      "evidence_model": "Jev-1.13.0",
+      "harness": "JevGPT (Pi-Serini based)"
+    }
+  },
+  "notice_inclusive_sensitivity": [
+    {
+      "variant": "bm25",
+      "dataset": "bcp",
+      "view": "search_response_including_notices",
+      "recall_percent": 8.416112843419173,
+      "precision_percent": 27.662120517115216,
+      "hop_groundedness_percent": 63.53621031746034
+    },
+    {
+      "variant": "bm25",
+      "dataset": "trqa",
+      "view": "search_response_including_notices",
+      "recall_percent": 8.37332364324546,
+      "precision_percent": 66.69400825717416,
+      "hop_groundedness_percent": 70.18262268422116
+    },
+    {
+      "variant": "bm25",
+      "dataset": "dsqa",
+      "view": "search_response_including_notices",
+      "recall_percent": 11.29678883251257,
+      "precision_percent": 38.90989701153026,
+      "hop_groundedness_percent": 69.553245293445
+    },
+    {
+      "variant": "bm25",
+      "dataset": "hotpotqa",
+      "view": "search_response_including_notices",
+      "recall_percent": 12.252633186372163,
+      "precision_percent": 50.31069512719191,
+      "hop_groundedness_percent": 75.50056765130293
+    }
+  ]
+}
